@@ -1,0 +1,508 @@
+{
+  "products": [
+    {
+      "id": 1,
+      "name": "Água sanitária Ibilimp - 5 Litros",
+      "image": "/images/products/aguasaniibilimp.png",
+      "rating": 4,
+      "price": 10.00,
+      "category": "Limpeza Doméstica"
+    },
+    {
+      "id": 2,
+      "name": "Agua Sanitária FC - 5 Litros",
+      "image": "/images/products/aguasanitfc.png",
+      "rating": 5,
+      "price": 10.00,
+      "category": "Limpeza Doméstica"
+    },
+    {
+      "id": 3,
+      "name": "Água Sanitária Samar - 5 Litros",
+      "image": "/images/products/aguasanitSamar.png",
+      "rating": 5,
+      "price": 10.00,
+      "category": "Limpeza Doméstica"
+    },
+    {
+      "id": 4,
+      "name": "Alvejante sem Cloro Pop - 2 Litros",
+      "image": "/images/products/alvejantesemcloropop.png",
+      "rating": 3,
+      "price": 10.00,
+      "category": "Limpeza Doméstica"
+    },
+    {
+      "id": 5,
+      "name": "Amaciante Di Kasa - 5 Litros",
+      "image": "/images/products/amaciantedikasa.png",
+      "rating": 5,
+      "price": 10.00,
+      "category": "Limpeza Doméstica"
+    },
+    {
+      "id": 6,
+      "name": "Aromatizante Samar - 2 Litros",
+      "image": "/images/products/aromatizanteroxoverdeazul2litros.png",
+      "rating": 5,
+      "price": 10.00,
+      "category": "Limpeza Doméstica"
+    },
+    {
+      "id": 7,
+      "name": "Aromatizante Samar - 5 Litros",
+      "image": "/images/products/aromatizanteverderoxosamar.png",
+      "rating": 4,
+      "price": 10.00,
+      "category": "Limpeza Doméstica"
+    },
+    {
+      "id": 8,
+      "name": "Cera Líquida - 2 Litros",
+      "image": "/images/products/ceraliquida2litros.png",
+      "rating": 4,
+      "price": 10.00,
+      "category": "Limpeza Doméstica"
+    },
+    {
+      "id": 9,
+      "name": "Detergente Di Kasa - 5 Litros",
+      "image": "/images/products/detergentedikasa.png",
+      "rating": 5,
+      "price": 10.00,
+      "category": "Limpeza Doméstica"
+    },
+    {
+      "id": 10,
+      "name": "Detergente LimpMax - 2 litros",
+      "image": "/images/products/detergentelimpmax2litros.png",
+      "rating": 5,
+      "price": 10.00,
+      "category": "Limpeza Doméstica"
+    },
+    {
+      "id": 11,
+      "name": "Detergente Samar- 2 Litros",
+      "image": "/images/products/detergentemacalimaoneutro2litros.png",
+      "rating": 5,
+      "price": 54.00,
+      "category": "Limpeza Doméstica"
+    },
+    {
+      "id": 12,
+      "name": "Detergente Samar - 5 Litros",
+      "image": "/images/products/detergneutrosamar.png",
+      "rating": 5,
+      "price": 4.00,
+      "category": "Limpeza Doméstica"
+    },
+    {
+      "id": 13,
+      "name": "Limpador de bancos de couro - Agius Prime - 500ml",
+      "image": "/images/products/imglimpauto/agilylipacouroagiusprime.png",
+      "rating": 5,
+      "price": 15.00,
+      "category": "Limpeza Automotiva"
+    },
+    {
+      "id": 14,
+      "name": "Desengraxante Limpador de Chassis Concentrado - DSX - 5 Litros",
+      "image": "/images/products/imglimpauto/agiusprimedsxdesengraxantelipchassis.png",
+      "rating": 4,
+      "price": 25.00,
+      "category": "Limpeza Automotiva"
+    },
+    {
+      "id": 15,
+      "name": "Revitalizador de Plásticos Externos - Agius Prime - 400g",
+      "image": "/images/products/imglimpauto/agiusprimereviplast.png",
+      "rating": 5,
+      "price": 10.00,
+      "category": "Limpeza Automotiva"
+    },
+    {
+      "id": 16,
+      "name": "Limpador de Alumínio Concentrado ALUMAGI - Agius Prime - 20 Litros",
+      "image": "/images/products/imglimpauto/alumagi20l.png",
+      "rating": 5,
+      "price": 10.00,
+      "category": "Limpeza Automotiva"
+    },
+    {
+      "id": 17,
+      "name": "Aromatizante Automotivo - Agius Prime - 1 Litro",
+      "image": "/images/products/imglimpauto/aromatizanteautoagiusroxoverdeamarelo.png",
+      "rating": 5,
+      "price": 10.00,
+      "category": "Limpeza Automotiva"
+    },
+
+    {
+      "id": 18,
+      "name": "Hidratante de Bancos de Couro - Agius Prime - 500ml",
+      "image": "/images/products/imglimpauto/couroprimeagiushidratentebanco.png",
+      "rating": 5,
+      "price": 10.00,
+      "category": "Limpeza Automotiva"
+    },
+
+    {
+      "id": 19,
+      "name": "Desengraxante Limpador de Chassis Concentrado - DSX - 20 Litros",
+      "image": "/images/products/imglimpauto/dsxagius20l.png",
+      "rating": 5,
+      "price": 10.00,
+      "category": "Limpeza Automotiva"
+    },
+
+    {
+      "id": 20,
+      "name": "Lava autos - Agius Prime - 5 Litros",
+      "image": "/images/products/imglimpauto/lavaautosagiusprimeamarelo.png",
+      "rating": 5,
+      "price": 10.00,
+      "category": "Limpeza Automotiva"
+    },
+
+    {
+      "id": 21,
+      "name": "Lava autos - Agius Prime - 20 Litros",
+      "image": "/images/products/imglimpauto/lavaautoslavaautos20l.png",
+      "rating": 5,
+      "price": 10.00,
+      "category": "Limpeza Automotiva"
+    },
+
+    {
+      "id": 22,
+      "name": "Desengraxate Concentrado GRAXY-X - 5 Litros - Lavyx",
+      "image": "/images/products/imglimpauto/lavyx-xdeterconcentrado.png",
+      "rating": 5,
+      "price": 10.00,
+      "category": "Limpeza Automotiva"
+    },
+
+    {
+      "id": 23,
+      "name": "Shampoo Automotivo 5 Litros LAVY-X - 5 Litros - Lavyx ",
+      "image": "/images/products/imglimpauto/lavyx-xshampooautolaranja.png",
+      "rating": 5,
+      "price": 10.00,
+      "category": "Limpeza Automotiva"
+    },
+
+    {
+      "id": 24,
+      "name": "Limpador de Aluminio Concentrado 5 Litros LUMY-X - 5 Litros - Lavyx ",
+      "image": "/images/products/imglimpauto/limpadordealuconcLUMY-XLAVYX.png",
+      "rating": 5,
+      "price": 10.00,
+      "category": "Limpeza Automotiva"
+    },
+
+    {
+      "id": 25,
+      "name": "Limpador Multiuso Auto - Agius Prime - 1 Litro ",
+      "image": "/images/products/imglimpauto/limpadormultiagiusauto.png",
+      "rating": 5,
+      "price": 10.00,
+      "category": "Limpeza Automotiva"
+    },
+
+    {
+      "id": 26,
+      "name": "Limpa Estofados a seco - Agius Prime - 1 Litro ",
+      "image": "/images/products/imglimpauto/limpaestofadosagiusprime1litro.png",
+      "rating": 5,
+      "price": 10.00,
+      "category": "Limpeza Automotiva"
+    },
+
+    {
+      "id": 27,
+      "name": "Lume Prime - Restaurador de Plásticos e Pneus - Agius Prime - 200ml",
+      "image": "/images/products/imglimpauto/lumeprimeagiusprime.png",
+      "rating": 5,
+      "price": 10.00,
+      "category": "Limpeza Automotiva"
+    },
+
+    {
+      "id": 28,
+      "name": "Mega Cera de Carnaúba - Agius Prime - 3 Litros",
+      "image": "/images/products/imglimpauto/megaceracarnaubaagiusprime.png",
+      "rating": 5,
+      "price": 10.00,
+      "category": "Limpeza Automotiva"
+    },
+
+    {
+      "id": 29,
+      "name": "Pneu Preto - Revitalizador de Pneus - Agius Prime - 1 Litro",
+      "image": "/images/products/imglimpauto/pneupretoagiusprime.png",
+      "rating": 5,
+      "price": 10.00,
+      "category": "Limpeza Automotiva"
+    },
+
+    {
+      "id": 30,
+      "name": "Pneu Preto - Revitalizador de Pneus - Agius Prime - 20 Litros",
+      "image": "/images/products/imglimpauto/pneupretoagiusrevitalizadordepneus20l (1).png",
+      "rating": 5,
+      "price": 10.00,
+      "category": "Limpeza Automotiva"
+    },
+
+    {
+      "id": 31,
+      "name": "Pulvi Prime - Proteror de chassis e caixas de rodas antiferrugem - Agius Prime - 1 Litro",
+      "image": "/images/products/imglimpauto/pulviprimeagiusantiferrugem.png",
+      "rating": 5,
+      "price": 10.00,
+      "category": "Limpeza Automotiva"
+    },
+
+    {
+      "id": 32,
+      "name": "Remov Prime - Removedor de Piche e Cola- Agius Prime - 500ml",
+      "image": "/images/products/imglimpauto/removprimeagiusprime.png",
+      "rating": 5,
+      "price": 10.00,
+      "category": "Limpeza Automotiva"
+    },
+    {
+      "id": 33,
+      "name": "Remov Prime - Removedor de Piche e Cola- Agius Prime - 500ml",
+      "image": "/images/products/imglimpauto/restauraprimeagiusprime.png",
+      "rating": 5,
+      "price": 10.00,
+      "category": "Limpeza Automotiva"
+    },
+
+    {
+      "id": 34,
+      "name": "Remov Prime - Removedor de Piche e Cola- Agius Prime - 500ml",
+      "image": "/images/products/imglimpauto/strongprimeagius.png",
+      "rating": 5,
+      "price": 10.00,
+      "category": "Limpeza Automotiva"
+    },
+
+    {
+      "id": 35,
+      "name": "Remov Prime - Removedor de Piche e Cola- Agius Prime - 500ml",
+      "image": "/images/products/imglimpauto/tornadoagiusprime1litro.png",
+      "rating": 5,
+      "price": 10.00,
+      "category": "Limpeza Automotiva"
+    },
+    {
+      "id": 36,
+      "name": "Cabo Extensor de Mopa",
+      "image": "/images/products/equilimp/caboextensordemopa.jpg",
+      "rating": 4,
+      "price": 10.00,
+      "category": "Equipamentos de Limpeza"
+    },
+    {
+      "id": 37,
+      "name": "Vassoura Casa Mia - Limpeza pesada",
+      "image": "/images/products/equilimp/casamialimpezapesada.png",
+      "rating": 4,
+      "price": 8.00,
+      "category": "Equipamentos de Limpeza"
+    },
+    
+    {
+      "id": 38,
+      "name": "Vassoura Casa Mia - Multiuso - Com Pega.",
+      "image": "/images/products/equilimp/casamiamultiusocompega.png",
+      "rating": 4,
+      "price": 8.00,
+      "category": "Equipamentos de Limpeza"
+    },
+    
+    {
+      "id": 39,
+      "name": "Vassoura Casa Mia Absoluta",
+      "image": "/images/products/equilimp/casamiavassouraabsoluta.png",
+      "rating": 4,
+      "price": 8.00,
+      "category": "Equipamentos de Limpeza"
+    },
+
+    {
+      "id": 40,
+      "name": "Vassoura Casa Mia Absoluta",
+      "image": "/images/products/equilimp/casamiavassouraabsoluta1.png",
+      "rating": 4,
+      "price": 8.00,
+      "category": "Equipamentos de Limpeza"
+    },
+
+    {
+      "id": 41,
+      "name": "Vassoura Casa Mia Espertinha",
+      "image": "/images/products/equilimp/casamiavassouraespertinha.png",
+      "rating": 4,
+      "price": 8.00,
+      "category": "Equipamentos de Limpeza"
+    },
+    {
+      "id": 42,
+      "name": "Vassoura Casa Mia Parceira",
+      "image": "/images/products/equilimp/casamiavassouraparceira.png",
+      "rating": 4,
+      "price": 8.00,
+      "category": "Equipamentos de Limpeza"
+    },
+
+    {
+      "id": 43,
+      "name": "Vassoura Cristal Kanto",
+      "image": "/images/products/equilimp/vassourascristalkanto.png",
+      "rating": 4,
+      "price": 8.00,
+      "category": "Equipamentos de Limpeza"
+    },
+
+    {
+      "id": 44,
+      "name": "Vassoura Cristal Tradicional",
+      "image": "/images/products/equilimp/vassourascristaltradicional.png",
+      "rating": 4,
+      "price": 8.00,
+      "category": "Equipamentos de Limpeza"
+    },
+
+    {
+      "id": 45,
+      "name": "Esponja Brilhus - Não Risca",
+      "image": "/images/products/equilimp/esponjanaoriscabrilhus.jpg",
+      "rating": 4,
+      "price": 8.00,
+      "category": "Equipamentos de Limpeza"
+    },
+
+  
+
+    {
+      "id": 47,
+      "name": "Esponja Flash Limp - Poliéster",
+      "image": "/images/products/equilimp/esponjapoliesternaorisca.png",
+      "rating": 4,
+      "price": 8.00,
+      "category": "Equipamentos de Limpeza"
+    },
+
+    {
+      "id": 48,
+      "name": "Fibra de Limpeza",
+      "image": "/images/products/equilimp/fibradelimpeza.png",
+      "rating": 4,
+      "price": 8.00,
+      "category": "Equipamentos de Limpeza"
+    },
+
+    {
+      "id": 49,
+      "name": "Luva de Látex - Tamanho G",
+      "image": "/images/products/equilimp/luvalatexgamarela.png",
+      "rating": 4,
+      "price": 8.00,
+      "category": "Equipamentos de Limpeza"
+    }, 
+
+    {
+      "id": 50,
+      "name": "Pano de Chão Xadrez",
+      "image": "/images/products/equilimp/panodechaoxadrez.png",
+      "rating": 4,
+      "price": 8.00,
+      "category": "Equipamentos de Limpeza"
+    },
+
+    {
+      "id": 51,
+      "name": "Pano Esfregão Leve 3 Pague 2 - Brilhex",
+      "image": "/images/products/equilimp/panoesfregao.png",
+      "rating": 4,
+      "price": 8.00,
+      "category": "Equipamentos de Limpeza"
+    },
+
+    {
+      "id": 52,
+      "name": "Rodo 30cm",
+      "image": "/images/products/equilimp/rodo30cm.jpg",
+      "rating": 4,
+      "price": 8.00,
+      "category": "Equipamentos de Limpeza"
+    },
+
+    {
+      "id": 53,
+      "name": "Rodo 30cm",
+      "image": "/images/products/equilimp/rodo30cm2.jpg",
+      "rating": 4,
+      "price": 8.00,
+      "category": "Equipamentos de Limpeza"
+    },
+
+    {
+      "id": 54,
+      "name": "Rodo 40cm",
+      "image": "/images/products/equilimp/rodo40cm.jpg",
+      "rating": 4,
+      "price": 8.00,
+      "category": "Equipamentos de Limpeza"
+    },
+
+    {
+      "id": 55,
+      "name": "Rodo 40cm",
+      "image": "/images/products/equilimp/rodo30cm2.jpg",
+      "rating": 4,
+      "price": 8.00,
+      "category": "Equipamentos de Limpeza"
+    },
+
+    {
+      "id": 56,
+      "name": "Rodo 60cm",
+      "image": "/images/products/equilimp/rodo60cm.jpg",
+      "rating": 4,
+      "price": 8.00,
+      "category": "Equipamentos de Limpeza"
+    },
+
+    {
+      "id": 57,
+      "name": "Rodo Cristal 30cm",
+      "image": "/images/products/equilimp/rodocristal30cm.jpg",
+      "rating": 4,
+      "price": 8.00,
+      "category": "Equipamentos de Limpeza"
+    },
+
+    {
+      "id": 58,
+      "name": "Rodo Cristal 40cm",
+      "image": "/images/products/equilimp/rodocristal40cm.jpg",
+      "rating": 4,
+      "price": 8.00,
+      "category": "Equipamentos de Limpeza"
+    },
+
+    {
+      "id": 59,
+      "name": "Suporte Limpa Tudo",
+      "image": "/images/products/equilimp/suportelimpatudo.jpg",
+      "rating": 4,
+      "price": 8.00,
+      "category": "Equipamentos de Limpeza"
+    }
+  ]
+}
+
