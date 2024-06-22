@@ -1,39 +1,27 @@
 import { faCartShopping } from "@fortawesome/free-solid-svg-icons";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import React, { useState } from "react";
-import { useNavigate } from "react-router-dom";
 
 export default function Product({
   id,
   image,
   additional_images = [],
   name,
-  rate,
   price,
   addProductToCart,
 }) {
-  // Formata o preço com duas casas decimais
   const formattedPrice = price.toFixed(2);
-  const navigate = useNavigate();
 
-  const handleBuyNow = () => {
-    addProductToCart(id);
-    navigate("/cart/checkout");
-  };
-
-  // Estado para controlar a exibição do popup e a imagem atual
   const [isPopupOpen, setIsPopupOpen] = useState(false);
   const [currentImage, setCurrentImage] = useState(image);
 
-  // Função para abrir o popup
   const openPopup = () => {
     setIsPopupOpen(true);
   };
 
-  // Função para fechar o popup e redefinir a imagem principal
   const closePopup = () => {
     setIsPopupOpen(false);
-    setCurrentImage(image); // Redefine para a imagem principal
+    setCurrentImage(image);
   };
 
   return (

@@ -1,7 +1,7 @@
 import React from "react";
 import { Link } from "react-router-dom";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import { faInstagram, faLinkedin } from "@fortawesome/free-brands-svg-icons";
+import { faLinkedin } from "@fortawesome/free-brands-svg-icons";
 
 export default function Footer() {
   return (
@@ -20,7 +20,7 @@ export default function Footer() {
         <div className="developer">
           <p>Desenvolvido por: Suzy Soares</p>
           <a
-            href="https://www.linkedin.com/in/"
+            href="https://www.linkedin.com/in/suzy"
             target="_blank"
             rel="noopener noreferrer"
           >
