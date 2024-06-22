@@ -1,6 +1,5 @@
 import React from "react";
 import Header from "../Header";
-import SidebarCart from "../SidebarCart";
 import ProductsList from "../ProductsList";
 
 export default function HomePage({ products, addProductToCart }) {
