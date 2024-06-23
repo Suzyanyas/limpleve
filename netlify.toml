@@ -2,7 +2,7 @@
 [build]
   command = "npm run build"
   functions = "netlify/functions"
-  publish = "cd C:\Users\Suzyany\Desktop\ecommerce\ecommerce"
+  publish = "build"  # ou "dist" ou outro, dependendo do seu framework
 
   ## Uncomment to use this redirect for Single Page Applications like create-react-app.
   ## Not needed for static site generators.
