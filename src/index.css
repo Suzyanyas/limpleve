@@ -343,7 +343,9 @@ nav ul li:hover {
   }
 
   
-  
+  .nav img{
+    width:120px ;
+  }
 }
 
 
