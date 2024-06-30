@@ -323,7 +323,7 @@ nav ul li:hover {
   header .inner-content {
     padding: 1rem; /* Ajustando o padding geral */
     grid-template-columns: 1fr 1fr; /* Definindo duas colunas */
-    gap: 1rem; /* Espaçamento entre as colunas */
+    gap: 0.5rem; /* Espaçamento entre as colunas */
     padding-top: 0rem;
     padding-left: 0rem;
     padding-right: 0rem;
