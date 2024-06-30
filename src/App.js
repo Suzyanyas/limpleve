@@ -1,51 +1,79 @@
-import React from 'react';
-import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
-import Navbar from "./components/Navbar";
-import { useEffect, useState } from "react";
-import HomePage from "./components/pages/HomePage";
-import ProductsPage from "./components/pages/ProductsPage";
-import SidebarCart from "./components/SidebarCart";
-import Footer from "./components/Footer";
-import ScrollToTopButton from "./components/ScrollToTopButton";
+import React, { useEffect, useState } from 'react';
+import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
+import Navbar from './components/Navbar';
+import HomePage from './components/pages/HomePage';
+import ProductsPage from './components/pages/ProductsPage';
+import SidebarCart from './components/SidebarCart';
+import Footer from './components/Footer';
+import ScrollToTopButton from './components/ScrollToTopButton';
 
 function App() {
   const [products, setProducts] = useState([]);
   const [showSidebarCart, setShowSidebarCart] = useState(false);
   const [selectedProducts, setSelectedProducts] = useState([]);
   const [cartTotal, setCartTotal] = useState(0);
-  const [searchQuery, setSearchQuery] = useState("");
+  const [searchQuery, setSearchQuery] = useState('');
 
   useEffect(() => {
-    fetch("/db.json")
+    fetch('/db.json')
       .then((res) => res.json())
-      .then((data) => setProducts(data.products));
+      .then((data) => {
+        console.log(data.products); // Verifique se os produtos estão sendo carregados corretamente
+        setProducts(data.products);
+      });
   }, []);
 
-  const addProductToCart = (id) => {
+  const addProductToCart = (id, fragrance) => {
     const productToAdd = products.find((product) => product.id === id);
-    if (selectedProducts.some((product) => product.id === id)) return;
-    setSelectedProducts([...selectedProducts, { ...productToAdd, quantity: 1 }]);
+    const productInCart = selectedProducts.find(
+      (product) => product.id === id && product.fragrance === fragrance
+    );
+
+    if (productInCart) {
+      const updatedProducts = selectedProducts.map((product) =>
+        product.id === id && product.fragrance === fragrance
+          ? { ...product, quantity: product.quantity + 1 }
+          : product
+      );
+      setSelectedProducts(updatedProducts);
+    } else {
+      setSelectedProducts([
+        ...selectedProducts,
+        { ...productToAdd, quantity: 1, fragrance: fragrance || '' },
+      ]);
+    }
     setCartTotal((prevTotal) => prevTotal + productToAdd.price);
   };
 
-  const removeProductFromCart = (id) => {
-    const productToRemove = selectedProducts.find((product) => product.id === id);
+  const removeProductFromCart = (id, fragrance) => {
+    const productToRemove = selectedProducts.find(
+      (product) => product.id === id && product.fragrance === fragrance
+    );
     const newSelectedProducts = selectedProducts.filter(
-      (product) => product.id !== id
+      (product) => !(product.id === id && product.fragrance === fragrance)
     );
 
     setSelectedProducts(newSelectedProducts);
-    setCartTotal((prevTotal) => prevTotal - productToRemove.price * productToRemove.quantity);
+    setCartTotal(
+      (prevTotal) =>
+        prevTotal - productToRemove.price * productToRemove.quantity
+    );
   };
 
-  const updateProductQuantity = (id, quantity) => {
+  const updateProductQuantity = (id, fragrance, quantity) => {
     const updatedProducts = selectedProducts.map((product) =>
-      product.id === id ? { ...product, quantity } : product
+      product.id === id && product.fragrance === fragrance
+        ? { ...product, quantity }
+        : product
     );
 
     setSelectedProducts(updatedProducts);
     const productToUpdate = products.find((product) => product.id === id);
-    const priceDifference = productToUpdate.price * (quantity - productToUpdate.quantity);
+    const productInCart = selectedProducts.find(
+      (product) => product.id === id && product.fragrance === fragrance
+    );
+    const priceDifference =
+      productToUpdate.price * (quantity - productInCart.quantity);
     setCartTotal((prevTotal) => prevTotal + priceDifference);
   };
 
@@ -60,7 +88,7 @@ function App() {
 
   return (
     <Router>
-      <div className="App">
+      <div className='App'>
         <Navbar
           selectedProducts={selectedProducts}
           setShowSidebarCart={setShowSidebarCart}
@@ -79,7 +107,7 @@ function App() {
         <main>
           <Routes>
             <Route
-              path="/"
+              path='/'
               element={
                 <HomePage
                   addProductToCart={addProductToCart}
@@ -89,7 +117,7 @@ function App() {
               }
             />
             <Route
-              path="/products"
+              path='/products'
               element={
                 <ProductsPage
                   products={products}
@@ -99,7 +127,7 @@ function App() {
               }
             />
             <Route
-              path="/products/:category"
+              path='/products/:category'
               element={
                 <ProductsPage
                   products={products}

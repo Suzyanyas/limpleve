@@ -1,28 +1,47 @@
-import { faChevronRight } from "@fortawesome/free-solid-svg-icons";
-import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import React from 'react';
 import { Link } from "react-router-dom";
+import Slider from 'react-slick';
+import "slick-carousel/slick/slick.css"; 
+import "slick-carousel/slick/slick-theme.css";
+
+const sliderData = [
+  {
+    title: 'Ibilimp',
+    description: 'Economia e Roupa Limpa, para o tamanho da sua necessidade.',
+    imageUrl: '/images/products/limpbanner2.png',
+    link: '/products'
+  },
+  {
+    title: 'Ibilimp 2',
+    description: 'Mais uma descrição para o segundo slide.',
+    imageUrl: '/images/products/limpbanner.png',
+    link: '/products2'
+  },
+  // Adicione mais slides conforme necessário
+];
 
 export default function Header() {
+  const settings = {
+    dots: true,
+    infinite: true,
+    speed: 1600,
+    slidesToShow: 1,
+    slidesToScroll: 1,
+    autoplay: true,
+    autoplaySpeed: 3000,
+  };
+
   return (
     <header>
-    <div className="inner-content">
-      <div className="left-side">
-        <h2>Ibilimp</h2>
-        <p>
-         Economia e Roupa Limpa, para o tamanho da sua necessidade.
-        </p>
-        <Link to="/products" className="see-more-btn">
-          <span>Ver Agora</span>
-          <FontAwesomeIcon icon={faChevronRight} />
-        </Link>
-      </div>
-      <div className="right-side">
-        <img src="/images/products/ibilimp.png" alt="Products" className="ibilimp" />
-      </div>
-    </div>
-  </header>
+      <Slider {...settings}>
+        {sliderData.map((slide, index) => (
+          <div key={index} className="inner-content">
+            <Link to={slide.link}>
+              <img src={slide.imageUrl} alt="Products" className="ibilimp" />
+            </Link>
+          </div>
+        ))}
+      </Slider>
+    </header>
   );
-    
-  
 }

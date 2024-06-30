@@ -46,7 +46,8 @@
       "image": "/images/products/aromatizanteroxoverdeazul2litros.png",
       "rating": 5,
       "price": 10.00,
-      "category": "Limpeza Doméstica"
+      "category": "Limpeza Doméstica",
+      "fragrances": ["Lavanda", "Jasmim", "Rosa"]
     },
     {
       "id": 7,
@@ -54,7 +55,8 @@
       "image": "/images/products/aromatizanteverderoxosamar.png",
       "rating": 4,
       "price": 10.00,
-      "category": "Limpeza Doméstica"
+      "category": "Limpeza Doméstica",
+      "fragrances": ["Lavanda", "Jasmim", "Rosa"]
     },
     {
       "id": 8,

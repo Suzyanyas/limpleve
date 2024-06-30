@@ -1,21 +1,21 @@
-import React from "react";
-import ProductsList from "../ProductsList";
-import { useParams } from "react-router-dom";
+import React from 'react';
+import Product from '../Product';
 
-export default function ProductsPage({ products, addProductToCart }) {
-  const { category } = useParams();
-  const filteredProducts = products.filter(product => product.category === category);
-
+export default function ProductsPage({ products, addProductToCart, searchQuery }) {
   return (
-    <div className="page-inner-content">
-      <div className="section-title">
-        <h3>{category}</h3>
-        <div className="underline"></div>
-      </div>
-
-      <div className="main-content">
-        <ProductsList products={filteredProducts} addProductToCart={addProductToCart} />
-      </div>
+    <div className="products-page">
+      {products.map((product) => (
+        <Product
+          key={product.id}
+          id={product.id}
+          image={product.image}
+          additional_images={product.additional_images}
+          name={product.name}
+          price={product.price}
+          fragrances={product.fragrances} // Passando as fragrâncias para o componente Product
+          addProductToCart={addProductToCart}
+        />
+      ))}
     </div>
   );
 }

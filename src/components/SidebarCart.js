@@ -1,6 +1,6 @@
 import React from "react";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import { faTrash } from "@fortawesome/free-solid-svg-icons";
+import { faTimes, faTrash } from "@fortawesome/free-solid-svg-icons"; // Importa os ícones de 'X' e lixeira
 import SidebarProduct from "./SidebarProduct";
 import whatsappIcon from "../images/iconwhatsapp.png";
 
@@ -15,17 +15,21 @@ export default function SidebarCart({
 }) {
   const whatsappNumber = "+5588992702014";
 
+  // Função para calcular o total do carrinho
+  const calculateTotal = (products) => {
+    return products.reduce((total, product) => {
+      return total + product.price * product.quantity;
+    }, 0);
+  };
+
   const handleCheckout = () => {
     const whatsappMessage = encodeURIComponent(
       `Olá, gostaria de fazer o pedido dos seguintes itens:\n\n${selectedProducts
         .map(
           (product) =>
-            `- ${product.name} - ${product.price.toLocaleString("pt-BR", { style: "currency", currency: "BRL" })}, Quantidade: ${product.quantity}, Total: ${(product.quantity * product.price).toLocaleString("pt-BR", { style: "currency", currency: "BRL" })}`
+            `- ${product.name} - R$ ${product.price.toFixed(2)}, Quantidade: ${product.quantity}, Total: R$ ${(product.quantity * product.price).toFixed(2)}, Fragrância: ${product.fragrance}`
         )
-        .join("\n")}\n\nValor total do pedido: ${calculateTotal(selectedProducts).toLocaleString("pt-BR", {
-        style: "currency",
-        currency: "BRL",
-      })}`
+        .join("\n")}\n\nValor total do pedido: R$ ${calculateTotal(selectedProducts).toFixed(2)}`
     );
 
     const whatsappLink = `https://wa.me/${whatsappNumber}?text=${whatsappMessage}`;
@@ -36,26 +40,19 @@ export default function SidebarCart({
     clearCart();
   };
 
-  // Função para calcular o total do carrinho
-  const calculateTotal = (products) => {
-    return products.reduce((total, product) => {
-      return total + (product.price * product.quantity);
-    }, 0);
-  };
-
   return (
     <aside className={`sidebar-cart ${showSidebarCart && "show"}`}>
       <div className="top">
         <h3>Seu carrinho</h3>
         <button onClick={() => setShowSidebarCart(false)}>
-          <FontAwesomeIcon icon={faTrash} />
+          <FontAwesomeIcon icon={faTimes} /> {/* Substitui o ícone de lixeira pelo ícone de 'X' */}
         </button>
       </div>
 
       <div className="sidebar-products-list">
         {selectedProducts.map((product) => (
           <SidebarProduct
-            key={product.id}
+            key={`${product.id}-${product.fragrance}`}
             {...product}
             removeProductFromCart={removeProductFromCart}
             updateProductQuantity={updateProductQuantity}
@@ -68,7 +65,7 @@ export default function SidebarCart({
       ) : (
         <>
           <div className="total-container">
-            <b>Total: </b> {calculateTotal(selectedProducts).toLocaleString("pt-BR", { style: "currency", currency: "BRL" })}
+            <b>Total: </b> R$ {calculateTotal(selectedProducts).toFixed(2)}
           </div>
 
           <button onClick={handleCheckout} className="btn-icon">
@@ -78,7 +75,7 @@ export default function SidebarCart({
 
           <button onClick={handleClearCart} className="btn-icon clear-cart-btn">
             <span>Esvaziar Carrinho</span>
-            <FontAwesomeIcon icon={faTrash} />
+            <FontAwesomeIcon icon={faTrash} /> {/* Mantém o ícone de lixeira */}
           </button>
         </>
       )}

@@ -1,18 +1,17 @@
-import { faXmark, faPlus, faMinus } from "@fortawesome/free-solid-svg-icons";
-import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect } from 'react';
+import { faXmark, faPlus, faMinus } from '@fortawesome/free-solid-svg-icons';
+import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 
 export default function SidebarProduct({
   id,
   image,
   name,
-  rate,
   price,
+  fragrance,
   removeProductFromCart,
   updateProductQuantity,
   quantity,
-}) 
-{
+}) {
   const [localQuantity, setLocalQuantity] = useState(quantity);
   const [priceSum, setPriceSum] = useState(price * quantity);
 
@@ -22,55 +21,47 @@ export default function SidebarProduct({
 
   const handleQuantityChange = (newQuantity) => {
     setLocalQuantity(newQuantity);
-    updateProductQuantity(id, newQuantity);
+    updateProductQuantity(id, fragrance, newQuantity);
   };
 
   return (
-    <div className="sidebar-product">
-      <div className="left-side">
+    <div className='sidebar-product'>
+      <div className='left-side'>
         <button
-          className="remove-product-btn"
+          className='remove-product-btn'
           onClick={() => {
-            removeProductFromCart(id);
+            removeProductFromCart(id, fragrance);
           }}
         >
           <FontAwesomeIcon icon={faXmark} />
         </button>
-        <div className="details">
+        <div className='details'>
           <h4>{name}</h4>
-          <p>Valor: {price.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' })}</p>
-          <div className="quantity-control">
+          <p>
+            Valor: R$ {price.toFixed(2)} <br />
+            {fragrance && (
+              <>
+                Fragrância: {fragrance} <br />
+              </>
+            )}
+          </p>
+          <div className='quantity-control'>
             <button
-              className="quantity-btn"
-              onClick={() => handleQuantityChange(Math.max(localQuantity - 1, 1))}
+              onClick={() => handleQuantityChange(localQuantity - 1)}
+              disabled={localQuantity <= 1}
             >
               <FontAwesomeIcon icon={faMinus} />
             </button>
-            <input
-              type="number"
-              min={1}
-              max={100}
-              value={localQuantity}
-              onChange={(e) => handleQuantityChange(parseInt(e.target.value, 10))}
-            />
-            <button
-              className="quantity-btn"
-              onClick={() => handleQuantityChange(localQuantity + 1)}
-            >
+            <span>{localQuantity}</span>
+            <button onClick={() => handleQuantityChange(localQuantity + 1)}>
               <FontAwesomeIcon icon={faPlus} />
             </button>
           </div>
-          {priceSum > price && (
-            <p className="price-sum">
-              <b>Soma:</b>
-              {priceSum.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' })}
-            </p>
-          )}
         </div>
       </div>
-
-      <div className="right-side">
+      <div className='right-side'>
         <img src={image} alt={name} />
+        <div className='price-sum'>Soma: R$ {priceSum.toFixed(2)}</div>
       </div>
     </div>
   );
