@@ -317,7 +317,7 @@ nav ul li:hover {
 
 @media (max-width: 380px) {
   .search-input-container input {
-    width: 10px; /* Reduzindo a largura do input */
+    width: 25px; /* Reduzindo a largura do input */
   }
 
   header .inner-content {
