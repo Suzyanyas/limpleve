@@ -315,7 +315,7 @@ nav ul li:hover {
   
 }
 
-@media (max-width: 480px) {
+@media (max-width: 380px) {
   .search-input-container input {
     width: 48px; /* Reduzindo a largura do input */
   }
