@@ -317,7 +317,7 @@ nav ul li:hover {
 
 @media (max-width: 380px) {
   .search-input-container input {
-    width: 20px; /* Reduzindo a largura do input */
+    width: 15px; /* Reduzindo a largura do input */
   }
 
   header .inner-content {
@@ -342,12 +342,7 @@ nav ul li:hover {
     text-align: left; /* Alinhamento do texto */
   }
 
-  .product-list {
-    display: grid;
-    grid-template-columns: 1fr 1fr;
-    gap: 0.3rem;
-    padding-bottom: 0.5rem;
-  }
+  
   
 }
 
@@ -362,7 +357,7 @@ nav ul li:hover {
 
 .product-list {
   display: grid;
-  grid-template-columns: repeat(auto-fit, 150px);
+  grid-template-columns: repeat(auto-fit, 155px);
   place-content: center;
   gap: 1rem;
   padding-bottom: 2rem;
