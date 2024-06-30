@@ -294,7 +294,7 @@ nav ul li:hover {
 
   header .inner-content {
     padding-top: 0rem;
-    padding-left: 2rem;
+    padding-left: 0rem;
     padding-right: 0rem;
     padding-bottom: 0rem;
     grid-template-columns: 1fr fr;
@@ -324,6 +324,10 @@ nav ul li:hover {
     padding: 1rem; /* Ajustando o padding geral */
     grid-template-columns: 1fr 1fr; /* Definindo duas colunas */
     gap: 1rem; /* Espaçamento entre as colunas */
+    padding-top: 0rem;
+    padding-left: 0rem;
+    padding-right: 0rem;
+    padding-bottom: 0rem;
   }
 
   header .left-side h2 {
