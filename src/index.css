@@ -323,7 +323,7 @@ nav ul li:hover {
   header .inner-content {
     padding: 1rem; /* Ajustando o padding geral */
     grid-template-columns: 1fr 1fr; /* Definindo duas colunas */
-    gap: 0.5rem; /* Espaçamento entre as colunas */
+    gap: 0.3rem; /* Espaçamento entre as colunas */
     padding-top: 0rem;
     padding-left: 0rem;
     padding-right: 0rem;
@@ -341,6 +341,14 @@ nav ul li:hover {
     padding-bottom: 0.5rem; /* Espaçamento inferior */
     text-align: left; /* Alinhamento do texto */
   }
+
+  .product-list {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 0.3rem;
+    padding-bottom: 0.5rem;
+  }
+  
 }
 
 
@@ -354,7 +362,7 @@ nav ul li:hover {
 
 .product-list {
   display: grid;
-  grid-template-columns: repeat(auto-fit, 180px);
+  grid-template-columns: repeat(auto-fit, 150px);
   place-content: center;
   gap: 1rem;
   padding-bottom: 2rem;
