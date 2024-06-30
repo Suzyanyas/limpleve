@@ -721,7 +721,7 @@ p{
 .sidebar-cart .left-side .details p {
   font-size: 0.8rem;
   text-transform: uppercase; /* Transformar texto em maiúsculas */
-  background-color: rgb(201, 199, 199);
+  background-color: rgb(220, 220, 220);
   border-radius: 3px;
   padding: 3px;
 }
@@ -787,9 +787,9 @@ p{
   display: block;
 }
 
-.price-sum{
+.price-sum {
   text-align: center;
-  background-color: #c4c4c4;
+  background-color: rgb(220, 220, 220);
   padding: 5px;
   border-radius: 5px;
 }
