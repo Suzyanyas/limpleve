@@ -7,10 +7,10 @@ import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 export default function Navbar({ setShowSidebarCart, selectedProducts, setSearchQuery }) {
   const [show, setShow] = useState(false);
 
-  // Garantir que selectedProducts seja um array
+  // Garante que selectedProducts seja um array
   const products = selectedProducts || [];
 
-  // Função para lidar com cliques nos links do menu
+  // Função que lida com cliques nos links do menu
   const handleLinkClick = () => {
     setShow(false);
   };
