@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faArrowUp } from '@fortawesome/free-solid-svg-icons';
-import './ScrollToTopButton.css'; // Certifique-se de criar este arquivo CSS para estilos
+import './ScrollToTopButton.css'; 
 
 export default function ScrollToTopButton() {
   const [isVisible, setIsVisible] = useState(false);

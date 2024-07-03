@@ -8,11 +8,11 @@
 * {
   margin: 0;
   padding: 0;
-  box-sizing: border-box; /* Certifica-se de que padding e borda são incluídos na largura total do elemento */
+  box-sizing: border-box; /* Padding e borda são incluídos na largura total do elemento */
 }
 
 body, html {
-  overflow-x: hidden; /* Remove qualquer barra de rolagem horizontal no body e html */
+  overflow-x: hidden; /* Remove a barra de rolagem horizontal */
 }
 
 :root {
@@ -151,49 +151,48 @@ nav ul li:hover {
 /* END NAVBAR */
 
 /* START HEADER */
-/* Header.css */
 .header-slider {
-  max-height: 250px; /* Ajuste esta altura conforme necessário */
+  max-height: 250px; /* Altura */
   overflow: hidden;
   box-sizing: border-box;
-  width: 100vw; /* Assegure que a largura ocupe toda a viewport */
+  width: 100vw; /* largura toda vw */
 }
 
 .slider-item {
   display: flex;
   align-items: center;
-  justify-content: center; /* Centraliza os itens do slide horizontalmente */
-  height: 100%; /* Certifique-se de que os itens do slider ocupem a altura total */
+  justify-content: center; 
+  height: 100%; 
   box-sizing: border-box;
 }
 
 .inner-content {
   display: flex;
   align-items: center;
-  justify-content: center; /* Centraliza o conteúdo interno horizontalmente */
+  justify-content: center; 
   height: 100%;
-  width: 100%; /* Adicione largura 100% */
+  width: 100%; /* largura */
   box-sizing: border-box;
   
 }
 
 .left-side, .right-side {
-  padding: 20px; /* Ajuste o padding conforme necessário */
+  padding: 20px; 
   
 }
 
 .left-side h2 {
   margin: 0;
-  font-size: 1.5rem; /* Ajuste o tamanho da fonte conforme necessário */
+  font-size: 1.5rem; 
 }
 
 .left-side p {
   margin: 10px 0;
-  font-size: 1rem; /* Ajuste o tamanho da fonte conforme necessário */
+  font-size: 1rem; 
 }
 
 .ibilimp {
-  max-height: 350px; /* Ajuste esta altura conforme necessário */
+  max-height: 350px; 
   width: auto;
   width: 100%;
 }
@@ -317,12 +316,12 @@ nav ul li:hover {
 
 @media (max-width: 380px) {
   .search-input-container input {
-    width: 25px; /* Reduzindo a largura do input */
+    width: 45px; /* Reduz a largura do input */
   }
 
   header .inner-content {
-    padding: 1rem; /* Ajustando o padding geral */
-    grid-template-columns: 1fr 1fr; /* Definindo duas colunas */
+    padding: 1rem; /* Ajusta o padding geral */
+    grid-template-columns: 1fr 1fr; /* Defe duas colunas */
     gap: 0.3rem; /* Espaçamento entre as colunas */
     padding-top: 0rem;
     padding-left: 0rem;
@@ -342,9 +341,10 @@ nav ul li:hover {
     text-align: left; /* Alinhamento do texto */
   }
 
-  
   .nav img{
-    width:120px ;
+    width:110px ;
+    margin-top: 5px;
+    margin-bottom: 5px;
   }
 }
 
@@ -365,7 +365,6 @@ nav ul li:hover {
   padding-bottom: 2rem;
 }
 
-/* Exemplo de CSS para o seletor de fragrâncias */
 .fragrance-selector {
   margin-top: 10px;
   text-align: center;
@@ -425,7 +424,7 @@ nav ul li:hover {
 }
 
 .product-image:hover {
-  transform: scale(1.5); /* Aumenta o tamanho em 10% */
+  transform: scale(1.5); /* Aumenta em 10% */
 }
 
 .additional-images {
@@ -436,7 +435,7 @@ nav ul li:hover {
 }
 
 .price-container {
-  background-color: #f0f0f0; /* Cor de fundo padrão */
+  background-color: #f0f0f0; 
   padding: 10px;
   border-radius: 5px;
   text-align: center;
@@ -445,7 +444,7 @@ nav ul li:hover {
   
 }
 
-/* CSS para os controles de quantidade */
+/* Controles de quantidade */
 
 .quantity-controls {
   display: flex;
@@ -467,7 +466,7 @@ nav ul li:hover {
 }
 
 
-/* CSS para o popup */
+/* popup */
 
 .popup-overlay {
   position: fixed;
@@ -496,8 +495,8 @@ nav ul li:hover {
 
 .expanded-image {
   max-width: 100%;
-  max-height: 80vh; /* Use viewport height para limitar a altura */
-  object-fit: contain; /* Garante que a imagem mantenha suas proporções */
+  max-height: 80vh; 
+  object-fit: contain; 
 }
 
 .close-button {
@@ -517,7 +516,7 @@ nav ul li:hover {
 }
 
 
-/*End CSS para o popup */
+/*End popup */
 
 .btn-icon {
   display: flex;
@@ -525,7 +524,7 @@ nav ul li:hover {
   align-items: center;
   gap: 0.25rem;
   padding: 0.8rem;
-  background-color: var(--primary-color); /* Utilize a variável de cor primária do seu projeto */
+  background-color: var(--primary-color); 
   color: #fff;
   border-radius: 8px;
   font-size: 1rem;
@@ -535,16 +534,15 @@ nav ul li:hover {
 }
 
 .btn-icon:hover {
-  background-color: #007bff; /* Cor de hover desejada */
+  background-color: #007bff; 
 }
 
-.whatsapp-icon {
-  width: 24px; /* Ajuste o tamanho conforme necessário */
-  height: 24px; /* Ajuste o tamanho conforme necessário */
+whatsapp-icon {
+  height: 24px; 
 }
 
 .btn-icon span {
-  margin-left: auto; /* Empurra o texto para a direita */
+  margin-left: auto; 
 }
 
 
@@ -566,19 +564,19 @@ nav ul li:hover {
   align-items: center;
   gap: 0.25rem;
   padding: 0.8rem;
-  background-color: var(--primary-color); /* Utilize a variável de cor primária do seu projeto */
+  background-color: var(--primary-color); 
   color: #fff;
   border-radius: 8px;
   font-size: 1rem;
   transition: all 0.2s;
   border: none;
   cursor: pointer;
-  margin-top: 1rem; /* Ajuste conforme necessário */
+  margin-top: 1rem;
 }
 
 .clear-cart-btn:hover {
   background-color:  #e07800;
-   /* Cor mais escura para efeito hover */
+
 }
 
 
@@ -697,7 +695,7 @@ p{
 }
 
 .sidebar-cart .sidebar-product img:hover {
-  transform: scale(1.1); /* Aumenta o tamanho em 10% */
+  transform: scale(1.1); 
 }
 
 .sidebar-cart .total-container {
@@ -725,7 +723,7 @@ p{
 
 .sidebar-cart .left-side .details p {
   font-size: 0.8rem;
-  text-transform: uppercase; /* Transformar texto em maiúsculas */
+  text-transform: uppercase; 
   background-color: rgb(220, 220, 220);
   border-radius: 3px;
   padding: 3px;

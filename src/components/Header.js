@@ -17,7 +17,7 @@ const sliderData = [
     imageUrl: '/images/products/limpbanner.png',
     link: '/products2'
   },
-  // Adicione mais slides conforme necessário
+
 ];
 
 export default function Header() {

@@ -15,7 +15,7 @@ export default function SidebarCart({
 }) {
   const whatsappNumber = "+5588992702014";
 
-  // Função para calcular o total do carrinho
+  // Calcula o total do carrinho
   const calculateTotal = (products) => {
     return products.reduce((total, product) => {
       return total + product.price * product.quantity;
@@ -75,7 +75,7 @@ export default function SidebarCart({
 
           <button onClick={handleClearCart} className="btn-icon clear-cart-btn">
             <span>Esvaziar Carrinho</span>
-            <FontAwesomeIcon icon={faTrash} /> {/* Mantém o ícone de lixeira */}
+            <FontAwesomeIcon icon={faTrash} /> 
           </button>
         </>
       )}

@@ -12,7 +12,7 @@ export default function ProductsPage({ products, addProductToCart, searchQuery }
           additional_images={product.additional_images}
           name={product.name}
           price={product.price}
-          fragrances={product.fragrances} // Passando as fragrâncias para o componente Product
+          fragrances={product.fragrances} // Passa as fragrâncias para o componente Product
           addProductToCart={addProductToCart}
         />
       ))}
