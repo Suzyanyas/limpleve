@@ -1,0 +1,143 @@
+[33mcommit 2d4320c3fc29f61784f1b975f615f2574975f283[m[33m ([m[1;36mHEAD[m[33m)[m
+Author: Suzyanyas <suzyalvessoares@gmail.com>
+Date:   Wed Jul 3 21:33:26 2024 +0100
+
+    Atualização 03/07/2024
+
+[33mcommit 7152b693e5750014e9f2baa91e0d31e209d83465[m
+Author: Suzyanyas <suzyalvessoares@gmail.com>
+Date:   Sun Jun 30 21:43:16 2024 +0100
+
+    Ultima atualização
+
+[33mcommit d763e9fb5e7082bc2608dec5e65009be43af5e70[m
+Author: Suzyanyas <suzyalvessoares@gmail.com>
+Date:   Sun Jun 30 21:39:16 2024 +0100
+
+    Ultima atualização
+
+[33mcommit b1b0ea78604a5f1aa72e0ab195de7ab8453f61e0[m
+Author: Suzyanyas <suzyalvessoares@gmail.com>
+Date:   Sun Jun 30 21:31:09 2024 +0100
+
+    Ultima atualização
+
+[33mcommit 7ac120858f7f2b2ce23d8f1d4eaad3e4208148e8[m
+Author: Suzyanyas <suzyalvessoares@gmail.com>
+Date:   Sun Jun 30 21:27:43 2024 +0100
+
+    Ultima atualização
+
+[33mcommit 3771915b515e86f69cb37ccbeef315b20b3b3772[m
+Author: Suzyanyas <suzyalvessoares@gmail.com>
+Date:   Sun Jun 30 21:18:49 2024 +0100
+
+    Ultima atualização
+
+[33mcommit 13d82542d9b075f5d2161518fc4c4f457f9abbe3[m
+Author: Suzyanyas <suzyalvessoares@gmail.com>
+Date:   Sun Jun 30 21:01:31 2024 +0100
+
+    Ultima atualização
+
+[33mcommit cc39a0c3e9fdd668ca7e8d59d2740089b9791989[m
+Author: Suzyanyas <suzyalvessoares@gmail.com>
+Date:   Sun Jun 30 20:36:56 2024 +0100
+
+    Ultima atualização
+
+[33mcommit 7cff420711d4e876b2501eba6c144d8596d96d38[m
+Author: Suzyanyas <suzyalvessoares@gmail.com>
+Date:   Sun Jun 30 20:32:16 2024 +0100
+
+    Ultima atualização
+
+[33mcommit 8a123262a6610affdc5d19048c9b699350e72cb9[m
+Author: Suzyanyas <suzyalvessoares@gmail.com>
+Date:   Sun Jun 30 20:09:37 2024 +0100
+
+    Ultima alteração 30/06/2024
+
+[33mcommit a95f3f30576cef68fe1bf1ede8b9a1a34533f8fb[m
+Author: Suzyanyas <suzyalvessoares@gmail.com>
+Date:   Sun Jun 30 19:56:31 2024 +0100
+
+    Ultima alteração, 30/06/2024
+
+[33mcommit c432c68d3f34f99b01a2a56e71ced8baf85cdd9f[m
+Author: Suzyanyas <suzyalvessoares@gmail.com>
+Date:   Sun Jun 30 19:33:12 2024 +0100
+
+    Ultimas alterações 30/06/2024
+
+[33mcommit 8ef557edb77da800340fb90b6d07507194a9eb7a[m
+Author: Suzyanyas <suzyalvessoares@gmail.com>
+Date:   Sun Jun 23 13:00:11 2024 +0100
+
+    Remove NODE_OPTIONS from build script
+
+[33mcommit 55aafdf5c819c0cb187ab5db872832460bbd8e21[m
+Author: Suzyanyas <suzyalvessoares@gmail.com>
+Date:   Sun Jun 23 12:44:47 2024 +0100
+
+    Especifica versão do Node.js e ajusta flags de ambiente para compatibilidade de build
+
+[33mcommit 1401380c46a591b93f9c6ea016e477469d3fc740[m
+Author: Suzyanyas <suzyalvessoares@gmail.com>
+Date:   Sun Jun 23 12:36:50 2024 +0100
+
+    Corrige caminho no netlify.toml
+
+[33mcommit dc4f614d1602b43b54983d05a0c3e239a389eac6[m
+Author: Suzyanyas <suzyalvessoares@gmail.com>
+Date:   Sun Jun 23 11:34:55 2024 +0100
+
+    Sua mensagem de commit aqui
+
+[33mcommit c49fe65bc1ccfd7c016323c8aec85522051c8b07[m
+Author: Suzyanyas <suzyalvessoares@gmail.com>
+Date:   Sun Jun 23 01:41:51 2024 +0100
+
+    Corrigir erros de JSX e configurar NODE_OPTIONS
+
+[33mcommit 804d78dd9e44ab460c1da32dbc23f2981a9ef5c3[m
+Author: Suzyanyas <suzyalvessoares@gmail.com>
+Date:   Sun Jun 23 00:23:08 2024 +0100
+
+    Corrigir vulnerabilidades de segurança
+
+[33mcommit eff27c392725ca07b4d1381b7a7142b6bd7ac395[m
+Author: Suzyanyas <suzyalvessoares@gmail.com>
+Date:   Sat Jun 22 23:32:44 2024 +0100
+
+    Atualização para o novo nome do repositório
+
+[33mcommit fc5a2077e1cfb9a069959c312702959ef3795122[m
+Author: Suzyanyas <suzyalvessoares@gmail.com>
+Date:   Sat Jun 22 23:03:11 2024 +0100
+
+    Mensagem descritiva do commit aqui
+
+[33mcommit 4fb60d5603acdbadafb9743d5d2626296d7100fb[m
+Author: Suzyanyas <suzyalvessoares@gmail.com>
+Date:   Sat Jun 8 18:28:05 2024 +0100
+
+    first commit
+
+[33mcommit 1a6947e36ab4ba19d0093b49b239e9b5a7db47dc[m
+Author: Suzyanyas <suzyalvessoares@gmail.com>
+Date:   Sat Jun 8 18:17:48 2024 +0100
+
+    primeiro commit
+
+[33mcommit 0402b4ca43cda00ea95638a5420bb0f452508f27[m
+Author: Suzyanyas <suzyalvessoares@gmail.com>
+Date:   Sat Jun 8 17:20:33 2024 +0100
+
+    first commit
+
+[33mcommit 077331cb09a51c3b5e9229ecd904078d029cb6ab[m
+Author: Suzyanyas <suzyalvessoares@gmail.com>
+Date:   Sat Jun 8 16:41:53 2024 +0100
+
+    first commit
