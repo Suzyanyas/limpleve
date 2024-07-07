@@ -18,9 +18,9 @@ export default function Footer() {
         
         <p>&copy; 2024 Limp Leve.</p>
         <div className="developer">
-          <p>Desenvolvido por: Suzy Soares</p>
+          <p></p>
           <a
-            href="https://www.linkedin.com/in/suzy"
+            href="https://www.linkedin.com/"
             target="_blank"
             rel="noopener noreferrer"
           >

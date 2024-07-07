@@ -13,7 +13,7 @@
       "name": "Agua Sanitária FC - 5 Litros",
       "image": "/images/products/aguasanitfc.png",
       "rating": 5,
-      "price": 10.00,
+      "price": 9.90,
       "category": "Limpeza Doméstica"
     },
     {
@@ -21,7 +21,7 @@
       "name": "Água Sanitária Samar - 5 Litros",
       "image": "/images/products/aguasanitSamar.png",
       "rating": 5,
-      "price": 10.00,
+      "price": 8.50,
       "category": "Limpeza Doméstica"
     },
     {
@@ -37,8 +37,9 @@
       "name": "Amaciante Di Kasa - 5 Litros",
       "image": "/images/products/amaciantedikasa.png",
       "rating": 5,
-      "price": 10.00,
-      "category": "Limpeza Doméstica"
+      "price": 16.00,
+      "category": "Limpeza Doméstica",
+      "fragrances": ["Meu sonho - Branco", "Confort - Azul", "Yellow Soft Amarelo"]
     },
     {
       "id": 6,

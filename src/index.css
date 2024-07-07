@@ -25,7 +25,7 @@ body, html {
 }
 
 body {
-  font-family: "Roboto", sans-serif;
+  font-family:"Roboto", sans-serif;
   font-weight: 400;
   color: var(--dark-color);
 }
@@ -279,7 +279,7 @@ nav ul li:hover {
 
   header .inner-content {
     padding-top: 0rem;
-    padding-left: 2rem;
+    padding-left: 0rem;
     padding-right: 0rem;
     padding-bottom: 0rem;
   }
@@ -331,6 +331,8 @@ nav ul li:hover {
   margin-inline: auto;
   padding-inline: 1rem;
 }
+
+
 
 .product-list {
   display: grid;

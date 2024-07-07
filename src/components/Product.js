@@ -50,13 +50,13 @@ export default function Product({
 
       {fragrances.length > 0 && (
         <div className="fragrance-selector">
-          <label htmlFor={`fragrance-${id}`}>Escolha uma fragrância:</label>
+          <label htmlFor={`fragrance-${id}`}>Escolha uma Fragrância:</label>
           <select
             id={`fragrance-${id}`}
             value={selectedFragrance}
             onChange={handleFragranceChange}
           >
-            <option value="">Selecione uma fragrância</option>
+            <option value="">Selecione uma Fragrância</option>
             {fragrances.map((fragrance, index) => (
               <option key={index} value={fragrance}>
                 {fragrance}
