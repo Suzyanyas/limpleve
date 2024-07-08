@@ -262,6 +262,13 @@ nav ul li:hover {
   .menu-button {
     display: inline;
   }
+
+  .nav img {
+    width: 150px;
+  }
+  .search-input-container input{
+    width: 80px;
+  }
 }
 
 @media (max-width: 780px) {
