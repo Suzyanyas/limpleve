@@ -238,7 +238,7 @@ nav ul li:hover {
 
   nav {
     position: absolute;
-    top: 60px;
+    top: 90px;
     left: 0;
     background-color: #fff;
     width: 100%;
@@ -318,6 +318,9 @@ nav ul li:hover {
 
   }
 
+  nav{
+    top: 60px;
+  }
   .nav img{
     width: 110px;
     padding: 5px;
