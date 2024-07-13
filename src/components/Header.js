@@ -8,7 +8,7 @@ const sliderData = [
   {
     title: 'Ibilimp',
     description: 'Economia e Roupa Limpa, para o tamanho da sua necessidade.',
-    imageUrl: '/images/products/limpbanner2.png',
+    imageUrl: '/images/products/outrasimg/bannerlimpleve.png',
     link: '/products'
   },
   {

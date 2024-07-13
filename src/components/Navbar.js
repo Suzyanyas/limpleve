@@ -33,25 +33,25 @@ export default function Navbar({ setShowSidebarCart, selectedProducts, setSearch
         <nav className={`${show ? "show" : ""}`}>
           <ul>
             <li>
-              <Link to="/" onClick={handleLinkClick}>HOME</Link>
+              <Link to="/" onClick={handleLinkClick}>Home</Link>
             </li>
             <li>
               <Link to="/products/Limpeza Doméstica" onClick={handleLinkClick}>
-                LIMPEZA <br /> DOMÉSTICA
+                Limpeza <br /> Doméstica
               </Link>
             </li>
             <li>
               <Link to="/products/Limpeza Automotiva" onClick={handleLinkClick}>
-                LIMPEZA <br /> AUTOMOTIVA
+                Limpeza <br /> Automotiva
               </Link>
             </li>
             <li>
               <Link to="/products/Equipamentos de Limpeza" onClick={handleLinkClick}>
-                EQUIPAMENTOS <br /> PARA <br /> LIMPEZA
+                Equipamentos <br /> Para <br /> Limpeza
               </Link>
             </li>
             <li>
-              <Link to="/products/Descartáveis" onClick={handleLinkClick}>DESCARTÁVEIS</Link>
+              <Link to="/products/Descartáveis" onClick={handleLinkClick}>Descartáveis</Link>
             </li>
           </ul>
         </nav>

@@ -28,6 +28,7 @@ body {
   font-family:"Roboto", sans-serif;
   font-weight: 400;
   color: var(--dark-color);
+  font-style: normal;
 }
 
 a {
