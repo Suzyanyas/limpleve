@@ -50,9 +50,18 @@
     "category": "Limpeza Doméstica",
     "fragrances": ["Conforlageno - Rosa", "Confornew - Branco", "Dawny Azul"]
 },
+{
+  "id": 6,
+  "name": "Cera Líquida - 2 Litros",
+  "image": "/images/products/ceraliquida2litros.png",
+  "rating": 4,
+  "price": 6.50,
+  "category": "Limpeza Doméstica",
+  "fragrances": ["Incolor", "Vermelha"]
+},
   {
-      "id": 6,
-      "name": "Aromatizante Samar - 2 Litros",
+      "id": 7,
+      "name": "Desinfetante Samar - 2 Litros",
       "image": "/images/products/aromatizanteroxoverdeazul2litros.png",
       "rating": 5,
       "price": 5.00,
@@ -60,8 +69,8 @@
       "fragrances": ["Flor do Campo - Lilás", "Stilus - Azul escuro", "Natura - Azul Claro"]
   },
   {
-      "id": 7,
-      "name": "Aromatizante Samar - 5 Litros",
+      "id": 8,
+      "name": "Desinfetante Samar - 5 Litros",
       "image": "/images/products/aromatizanteverderoxosamar.png",
       "rating": 4,
       "price": 10.00,
@@ -69,14 +78,23 @@
       "fragrances": ["Flor do Campo - Lilás", "Floral Briza - Verde", "Stilus - Azul escuro", "Natura - Azul Claro", "Lux - Roxo"]
   },
   {
-      "id": 8,
-      "name": "Cera Líquida - 2 Litros",
-      "image": "/images/products/ceraliquida2litros.png",
-      "rating": 4,
-      "price": 6.50,
-      "category": "Limpeza Doméstica",
-      "fragrances": ["Incolor", "Vermelha"]
+    "id": 8.1, 
+    "name": "Desinfetante Di Kasa - Lavanda - 5 Litros",
+    "image": "/images/products/outrasimg/lipadorperfumadolavanda.png",
+    "rating": 4,
+    "price": 7.90,
+    "category": "Limpeza Doméstica"
   },
+  {
+    "id": 8.2,
+    "name": "Desinfetante Econômico - 1 litro",
+    "image": "/images/products/outrasimg/desinfetanteeconomico1litrocitrusefloral.png",
+    "rating": 4,
+    "price": 7.90,
+    "category": "Limpeza Doméstica",
+    "fragrances": ["Citrus", "Floral"]
+},
+
   {
       "id": 9,
       "name": "Detergente Di Kasa - 5 Litros",
@@ -86,14 +104,7 @@
       "category": "Limpeza Doméstica",
       "fragrances": ["Côco", "Limão", "Maçã", "Neutro", "Clean"]
   },
-  {
-    "id": 9.1, 
-    "name": "Desinfetante Di Kasa - Lavanda - 5 Litros",
-    "image": "/images/products/outrasimg/lipadorperfumadolavanda.png",
-    "rating": 4,
-    "price": 7.90,
-    "category": "Limpeza Doméstica"
-  },
+
 
   {
       "id": 10,
@@ -115,7 +126,7 @@
   },
   {
       "id": 12,
-      "name": "Gel de Limpeza Limpemax - 2 litros",
+      "name": "Detergente de uso Geral - Gel de Limpeza Limpemax - 2 litros",
       "image": "/images/products/detergentelimpmax2litros.png",
       "rating": 5,
       "price": 12.50,
@@ -531,17 +542,8 @@
       "category": "Equipamentos de Limpeza"
     },
   {
-      "id": 61,
-      "name": "Desinfetante Econômico - 1 litro",
-      "image": "/images/products/outrasimg/desinfetanteeconomico1litrocitrusefloral.png",
-      "rating": 4,
-      "price": 7.90,
-      "category": "Limpeza Doméstica",
-      "fragrances": ["Citrus", "Floral"]
-  },
-  {
       "id": 62,
-      "name": "Detergente de uso Geral - Limpemax - 5 Litros",
+      "name": "Detergente de uso Geral - Gel de Limpeza Limpemax - 5 Litros",
       "image": "/images/products/outrasimg/detergusogeralpinhoelavanda.png",
       "rating": 4,
       "price": 7.90,
