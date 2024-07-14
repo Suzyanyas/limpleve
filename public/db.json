@@ -2,37 +2,37 @@
   "products": [
     {
       "id": 1,
-      "name": "Água sanitária Ibilimp - 5 Litros",
-      "image": "/images/products/aguasaniibilimp.png",
-      "rating": 4,
-      "price": 7.90,
-      "category": "Limpeza Doméstica"
-    },
-    {
-      "id": 2,
       "name": "Água Sanitária FC - 5 Litros - INDISPONÍVEL",
       "image": "/images/products/aguasanitfc.png",
       "rating": 5,
       "price": 9.90,
       "category": "Limpeza Doméstica"
-    },
-    {
+  },
+  {
+      "id": 2,
+      "name": "Água sanitária Ibilimp - 5 Litros",
+      "image": "/images/products/aguasaniibilimp.png",
+      "rating": 4,
+      "price": 7.90,
+      "category": "Limpeza Doméstica"
+  },
+  {
       "id": 3,
       "name": "Água Sanitária Samar - 5 Litros",
       "image": "/images/products/aguasanitSamar.png",
       "rating": 5,
       "price": 8.50,
       "category": "Limpeza Doméstica"
-    },
-    {
+  },
+  {
       "id": 4,
       "name": "Alvejante sem Cloro Pop - 2 Litros",
       "image": "/images/products/alvejantesemcloropop.png",
       "rating": 3,
       "price": 6.90,
       "category": "Limpeza Doméstica"
-    },
-    {
+  },
+  {
       "id": 5,
       "name": "Amaciante Di Kasa - 5 Litros",
       "image": "/images/products/amaciantedikasa.png",
@@ -40,8 +40,17 @@
       "price": 16.00,
       "category": "Limpeza Doméstica",
       "fragrances": ["Meu sonho - Branco", "Confort - Azul", "Yellow Soft Amarelo"]
-    },
-    {
+  },
+  {
+    "id": 5.1,
+    "name": "Amaciante Samar 5 Litros",
+    "image": "/images/products/outrasimg/amaciantesamar5litros.png",
+    "rating": 4,
+    "price": 7.90,
+    "category": "Limpeza Doméstica",
+    "fragrances": ["Conforlageno - Rosa", "Confornew - Branco", "Dawny Azul"]
+},
+  {
       "id": 6,
       "name": "Aromatizante Samar - 2 Litros",
       "image": "/images/products/aromatizanteroxoverdeazul2litros.png",
@@ -49,8 +58,8 @@
       "price": 5.00,
       "category": "Limpeza Doméstica",
       "fragrances": ["Flor do Campo - Lilás", "Stilus - Azul escuro", "Natura - Azul Claro"]
-    },
-    {
+  },
+  {
       "id": 7,
       "name": "Aromatizante Samar - 5 Litros",
       "image": "/images/products/aromatizanteverderoxosamar.png",
@@ -58,8 +67,8 @@
       "price": 10.00,
       "category": "Limpeza Doméstica",
       "fragrances": ["Flor do Campo - Lilás", "Floral Briza - Verde", "Stilus - Azul escuro", "Natura - Azul Claro", "Lux - Roxo"]
-    },
-    {
+  },
+  {
       "id": 8,
       "name": "Cera Líquida - 2 Litros",
       "image": "/images/products/ceraliquida2litros.png",
@@ -67,43 +76,53 @@
       "price": 6.50,
       "category": "Limpeza Doméstica",
       "fragrances": ["Incolor", "Vermelha"]
-    },
-    {
+  },
+  {
       "id": 9,
       "name": "Detergente Di Kasa - 5 Litros",
       "image": "/images/products/detergentedikasa.png",
       "rating": 5,
       "price": 9.90,
       "category": "Limpeza Doméstica",
-      "fragrances": ["Neutro", "Maçã","Limão","Côco","Clean"]
-    },
-    {
+      "fragrances": ["Côco", "Limão", "Maçã", "Neutro", "Clean"]
+  },
+  {
+    "id": 9.1, 
+    "name": "Desinfetante Di Kasa - Lavanda - 5 Litros",
+    "image": "/images/products/outrasimg/lipadorperfumadolavanda.png",
+    "rating": 4,
+    "price": 7.90,
+    "category": "Limpeza Doméstica"
+  },
+
+  {
       "id": 10,
-      "name": "Gel de Limpeza Limpemax - 2 litros",
-      "image": "/images/products/detergentelimpmax2litros.png",
-      "rating": 5,
-      "price": 12.50,
-      "category": "Limpeza Doméstica",
-      "fragrances": ["Pinho", "Lavanda"]
-    },
-    {
-      "id": 11,
-      "name": "Detergente Samar- 2 Litros",
+      "name": "Detergente Samar - 2 Litros",
       "image": "/images/products/detergentemacalimaoneutro2litros.png",
       "rating": 5,
       "price": 6.75,
       "category": "Limpeza Doméstica",
-      "fragrances": ["Neutro", "Limão", "Maçã"]
-    },
-    {
-      "id": 12,
+      "fragrances": ["Limão", "Maçã", "Neutro"]
+  },
+  {
+      "id": 11,
       "name": "Detergente Samar - 5 Litros",
       "image": "/images/products/detergneutrosamar.png",
       "rating": 5,
       "price": 12.00,
       "category": "Limpeza Doméstica",
-      "fragrances": ["Neutro", "Limão", "Maçã"]
-    },
+      "fragrances": ["Limão", "Maçã", "Neutro"]
+  },
+  {
+      "id": 12,
+      "name": "Gel de Limpeza Limpemax - 2 litros",
+      "image": "/images/products/detergentelimpmax2litros.png",
+      "rating": 5,
+      "price": 12.50,
+      "category": "Limpeza Doméstica",
+      "fragrances": ["Lavanda", "Pinho"]
+  },
+
     {
       "id": 13,
       "name": "Limpador de bancos de couro - Agius Prime - 500ml",
@@ -511,223 +530,224 @@
       "price": 8.00,
       "category": "Equipamentos de Limpeza"
     },
-    {
-      "id": 60,
-      "name": "Amaciante Samar 5 Litros",
-      "image": "/images/products/outrasimg/amaciantesamar5litros.png",
-      "rating": 4,
-      "price": 7.90,
-      "category": "Limpeza Doméstica"
-    },
-    {
+  {
       "id": 61,
-      "name": "Limpa pisos Azulim - Porcelanato - 750ml",
-      "image": "/images/products/outrasimg/azulimporcelanato.png",
-      "rating": 4,
-      "price": 7.90,
-      "category": "Limpeza Doméstica"
-    },
-    {
-      "id": 62,
       "name": "Desinfetante Econômico - 1 litro",
       "image": "/images/products/outrasimg/desinfetanteeconomico1litrocitrusefloral.png",
       "rating": 4,
       "price": 7.90,
       "category": "Limpeza Doméstica",
-      "fragrances": ["Citrus","Floral"]
-    },
-    {
-      "id": 63, 
+      "fragrances": ["Citrus", "Floral"]
+  },
+  {
+      "id": 62,
       "name": "Detergente de uso Geral - Limpemax - 5 Litros",
       "image": "/images/products/outrasimg/detergusogeralpinhoelavanda.png",
       "rating": 4,
       "price": 7.90,
       "category": "Limpeza Doméstica",
-      "fragrances": ["Pinho","Lavanda"]
-    },
-    {
-      "id": 64, 
-      "name": "Lava Roupas - Ibilimp - 5 Litros",
-      "image": "/images/products/outrasimg/ibilimp5litros1.png",
+      "fragrances": ["Lavanda", "Pinho"]
+  },
+  {
+      "id": 63,
+      "name": "Limpa pisos Azulim - Porcelanato - 750ml",
+      "image": "/images/products/outrasimg/azulimporcelanato.png",
       "rating": 4,
       "price": 7.90,
-      "category": "Limpeza Doméstica",
-      "fragrances": ["Jeri(Azul)","Canoa(Verde)"]
-    },
-    {
-      "id": 65, 
+      "category": "Limpeza Doméstica"
+  },
+  {
+      "id": 64,
       "name": "Lava Roupas - Ibilimp - 2 Litros",
-      "image": "/images/products/outrasimg/lavaroupaibilimp.png",
+      "image": "/images/products/outrasimg/ibilimp2litros.png",
       "rating": 4,
       "price": 7.90,
       "category": "Limpeza Doméstica",
-      "fragrances": ["Jeri(Azul)","Canoa(Verde)"]
-    },
-    {
-      "id": 66, 
-      "name": "Lava Roupas - Econômico -  400g",
-      "image": "/images/products/outrasimg/lavaroupaseconomico400g.png",
+      "fragrances": ["Canoa(Verde)", "Jeri(Azul)"]
+  },
+  {
+      "id": 65,
+      "name": "Lava Roupas - Ibilimp - 5 Litros",
+      "image": "/images/products/outrasimg/ibilimp5litros.png",
       "rating": 4,
       "price": 7.90,
-      "category": "Limpeza Doméstica"
-    },
-    {
-      "id": 67, 
-      "name": "Lava Roupas - Dikas - Homo - 2 Litros",
-      "image": "/images/products/outrasimg/lavaroupashomoazuldikasa.png",
-      "rating": 4,
-      "price": 7.90,
-      "category": "Limpeza Doméstica"
-    },
-    {
-      "id": 68, 
+      "category": "Limpeza Doméstica",
+      "fragrances": ["Canoa(Verde)", "Jeri(Azul)"]
+  },
+  {
+    "id": 65.1, 
+    "name": "Lava Roupas - Dikasa - Homo - 5 Litros",
+    "image": "/images/products/outrasimg/lavaroupashomoazuldikasa.png",
+    "rating": 4,
+    "price": 7.90,
+    "category": "Limpeza Doméstica"
+  },
+
+  {
+      "id": 66,
       "name": "Limpa Cerâmica Samar -Pinho Gel - 5 Litros",
       "image": "/images/products/outrasimg/limpaceramicapinhogel5litros.png",
       "rating": 4,
       "price": 7.90,
       "category": "Limpeza Doméstica"
-    },
-    {
-      "id": 69, 
+  },
+  {
+      "id": 67,
       "name": "Limpa Pisos UAU - 750ml",
       "image": "/images/products/outrasimg/limpapisosneutralizaodores.png",
       "rating": 4,
       "price": 7.90,
       "category": "Limpeza Doméstica"
-    },
-    {
-      "id": 70, 
+  },
+  {
+      "id": 68,
       "name": "Limpa Vidros Limpemax - 5 Litros",
       "image": "/images/products/outrasimg/limpmaxlimpavidros5litros.png",
       "rating": 4,
       "price": 7.90,
       "category": "Limpeza Doméstica"
-    },
-    {
-      "id": 71, 
-      "name": "Desinfetante Di Kasa - Lavanda - 5 Litros",
-      "image": "/images/products/outrasimg/lipadorperfumadolavanda.png",
-      "rating": 4,
-      "price": 7.90,
-      "category": "Limpeza Doméstica"
-    },
-    {
-      "id": 72, 
+  },
+  {
+      "id": 69,
       "name": "Lustra Móveis UAU",
       "image": "/images/products/outrasimg/lustramoveisuauperfumesfloresefolhaserosaeseducao.png",
       "rating": 4,
       "price": 7.90,
       "category": "Limpeza Doméstica",
-      "fragrances": ["Flores e Folhas(Roxo)","Rosas e Sedução(Vermelho)"]
-    },
-    {
-      "id": 73, 
+      "fragrances": ["Flores e Folhas(Roxo)", "Rosas e Sedução(Vermelho)"]
+  },
+  {
+      "id": 70,
       "name": "Lustra Móveis Ypê - 200ml",
       "image": "/images/products/outrasimg/lustramoveisypebrilho200ml.png",
       "rating": 4,
       "price": 7.90,
       "category": "Limpeza Doméstica"
-    },
-    {
-      "id": 74, 
-      "name": "Sabão em Pó Tradicional Marilux - 5kg",
-      "image": "/images/products/outrasimg/marilux5kgbrancogarantido.png",
-      "rating": 4,
-      "price": 7.90,
-      "category": "Limpeza Doméstica"
-    },
-    {
-      "id": 75, 
-      "name": "Sabão em Pó Tixan Ypê - 800g",
-      "image": "/images/products/outrasimg/tixanype800g.png",
-      "rating": 4,
-      "price": 7.90,
-      "category": "Limpeza Doméstica"
-    },
-    {
-      "id": 76, 
+  },
+  {
+      "id": 71,
       "name": "Multiuso Azulim - 500ml",
-      "image": "/images/products/outrasimg/multiusoazulimcuidadoeperfume500ml.png",
+      "image": "/images/products/outrasimg/multiusoazulim500ml.png",
       "rating": 4,
       "price": 7.90,
       "category": "Limpeza Doméstica"
-    },
-    {
-      "id": 77, 
-      "name": "Multiuso Azulim - 500ml JUNTAR OS 3",
-      "image": "/images/products/outrasimg/azulim3.png",
-      "rating": 4,
-      "price": 7.90,
-      "category": "Limpeza Doméstica"
-    },
-    {
-      "id": 79, 
-      "name": "Multiuso UAU Limão Siciliano - 500ml",
-      "image": "/images/products/outrasimg/multiusodesenuaulimaosiciliano500ml.png",
-      "rating": 4,
-      "price": 7.90,
-      "category": "Limpeza Doméstica"
-    },
-    {
-      "id": 80, 
+  },
+  {
+      "id": 72,
       "name": "Multiuso Econômico - 500ml",
       "image": "/images/products/outrasimg/multiusoeconomico500ml.png",
       "rating": 4,
       "price": 7.90,
       "category": "Limpeza Doméstica"
-    },
-   {
-      "id": 81, 
+  },
+  {
+      "id": 73,
+      "name": "Multiuso UAU Limão Siciliano - 500ml",
+      "image": "/images/products/outrasimg/multiusodesenuaulimaosiciliano500ml.png",
+      "rating": 4,
+      "price": 7.90,
+      "category": "Limpeza Doméstica"
+  },
+  {
+      "id": 74,
+      "name": "Pastilha Adesiva Higie Plus -Lavanda - 3 Pastilhas",
+      "image": "/images/products/outrasimg/higiepluspastilhaadesivalavanda3x.png",
+      "rating": 4,
+      "price": 7.90,
+      "category": "Limpeza Doméstica"
+  },
+  {
+      "id": 75,
       "name": "Pastilha Adesiva Pato Lavanda - 3 Pastilhas",
       "image": "/images/products/outrasimg/pastilhapatolavanda3pastilhas.png",
       "rating": 4,
       "price": 7.90,
       "category": "Limpeza Doméstica"
-    },
-    {
-      "id": 82, 
-      "name": "Pastilha Adesiva Higie Plus -Lavanda - 3 Pastilhas",
-      "image": "/images/products/outrasimg/pastilhjaadesivalavandahigiepluscontem3past.png",
+  },
+  {
+      "id": 76,
+      "name": "Pedra Sanitária Pratik -Lavanda",
+      "image": "/images/products/outrasimg/pratikpedrasanitaria.png",
       "rating": 4,
       "price": 7.90,
       "category": "Limpeza Doméstica"
-    },
-    {
-      "id": 83, 
-      "name": "Pedra Sanitária Pratik -Lavanda0",
-      "image": "/images/products/outrasimg/pedrasanitarialavandapratik.png",
+  },
+  {
+      "id": 79,
+      "name": "Sabão em Pó Ala Lavanda - 500g",
+      "image": "/images/products/outrasimg/sabaoala500g.png",
       "rating": 4,
       "price": 7.90,
       "category": "Limpeza Doméstica"
-    },
-    {
-      "id": 84, 
-      "name": "Sabão Limpmax 5 Litros",
-      "image": "/images/products/outrasimg/sabao5litroslimpemax.png",
+  },
+  {
+      "id": 80,
+      "name": "Sabão em Pó Brilhante - 400g",
+      "image": "/images/products/outrasimg/sabaoempobrilhante400g.png",
       "rating": 4,
       "price": 7.90,
-      "category": "Limpeza Doméstica",
-      "fragrances": ["Gel Pinho(Amarelo)","Gel Lavanda(Roxo)"]
-    },
-    {
-      "id": 85, 
+      "category": "Limpeza Doméstica"
+  },
+  {
+      "id": 81,
+      "name": "Sabão em Pó Tradicional Marilux - 5kg",
+      "image": "/images/products/outrasimg/marilux5kgbrancogarantido.png",
+      "rating": 4,
+      "price": 7.90,
+      "category": "Limpeza Doméstica"
+  },
+  {
+      "id": 82,
+      "name": "Sabão em Pó Tixan Ypê - 800g",
+      "image": "/images/products/outrasimg/tixanype800g.png",
+      "rating": 4,
+      "price": 7.90,
+      "category": "Limpeza Doméstica"
+  },
+  {
+    "id": 83, 
+    "name": "Sabão em Pó - Econômico -  400g",
+    "image": "/images/products/outrasimg/lavaroupaseconomico400g.png",
+    "rating": 4,
+    "price": 7.90,
+    "category": "Limpeza Doméstica"
+  },
+
+  {
+      "id": 84,
       "name": "Sabão Samar 5 Litros",
       "image": "/images/products/outrasimg/sabaoliquidosamar5litros.png",
       "rating": 4,
       "price": 7.90,
       "category": "Limpeza Doméstica",
-      "fragrances": ["Ommo Caribe(Azul)","Côco(Branco)","Ariel(Verde)"]
-    },
-    {
-      "id": 86, 
+      "fragrances": ["Ariel(Verde)", "Côco(Branco)", "Ommo Caribe(Azul)"]
+  },
+  {
+      "id": 85,
+      "name": "Sabão em Pó Urca - 400g",
+      "image": "/images/products/outrasimg/sabaourca400g.png",
+      "rating": 4,
+      "price": 7.90,
+      "category": "Limpeza Doméstica"
+  },
+  {
+      "id": 86,
+      "name": "Sabão em Pó Urca - 4kg",
+      "image": "/images/products/outrasimg/sabaourca4kg.png",
+      "rating": 4,
+      "price": 7.90,
+      "category": "Limpeza Doméstica"
+  },
+  {
+      "id": 87,
       "name": "Veja Cozinha Desengordurante - Refil",
       "image": "/images/products/outrasimg/vejarefileco400mlcozinhadesen.jpg",
       "rating": 4,
       "price": 7.90,
       "category": "Limpeza Doméstica",
-      "fragrances": ["Ommo Caribe(Azul)","Côco(Branco)","Ariel(Verde)"]
-    }
-    
+      "fragrances": ["Ariel(Verde)", "Côco(Branco)", "Ommo Caribe(Azul)"]
+  }
+
   ]
 }
 
