@@ -19,5 +19,9 @@ jobs:
         username: ${{ secrets.FTP_USERNAME }}
         password: ${{ secrets.FTP_PASSWORD }}
         protocol: 'ftp'
-        local-dir: ./  # Diretório local a ser enviado (ajuste conforme necessário)
-        server-dir: '/home/u202633271/domains/limpleve.com.br/public_html'  # Diretório de destino no servidor
+        local-dir: |
+          ./public  # Diretório local 1
+          ./src     # Diretório local 2
+        server-dir: |
+          /public_html  # Diretório de destino para public
+          /src          # Diretório de destino para src
