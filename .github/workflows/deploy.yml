@@ -20,4 +20,4 @@ jobs:
         password: ${{ secrets.FTP_PASSWORD }}
         protocol: 'ftp'
         local-dir: ./  # Diretório local a ser enviado (ajuste conforme necessário)
-        server-dir: /home/u202633271/domains/limpleve.com.br/public_html  # Diretório de destino no servidor
+        server-dir: '/home/u202633271/domains/limpleve.com.br/public_html'  # Diretório de destino no servidor
