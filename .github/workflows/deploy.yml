@@ -19,9 +19,5 @@ jobs:
         username: ${{ secrets.FTP_USERNAME }}
         password: ${{ secrets.FTP_PASSWORD }}
         protocol: 'ftp'
-        local-dir: |
-          ./public  # Diretório local 1
-          ./src     # Diretório local 2
-        server-dir: |
-          /public_html  # Diretório de destino para public
-          /src          # Diretório de destino para src
+        local-dir: ./public  # Diretório local a ser enviado (ajuste conforme necessário)
+        server-dir: ${{ secrets.FTP_PATH }}
