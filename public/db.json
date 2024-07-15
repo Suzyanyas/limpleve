@@ -2,7 +2,7 @@
   "products": [
     {
       "id": 1,
-      "name": "Água Sanitária FC - 5 Litros - INDISPONÍVEL",
+      "name": "Água Sanitária FC - 5 Litros",
       "image": "/images/products/aguasanitfc.png",
       "rating": 5,
       "price": 9.90,
@@ -46,13 +46,13 @@
     "name": "Amaciante Samar 5 Litros",
     "image": "/images/products/outrasimg/amaciantesamar5litros.png",
     "rating": 4,
-    "price": 7.90,
+    "price": 16.00,
     "category": "Limpeza Doméstica",
     "fragrances": ["Conforlageno - Rosa", "Confornew - Branco", "Dawny Azul"]
 },
 {
   "id": 6,
-  "name": "Cera Líquida - 2 Litros",
+  "name": "Cera Líquida Samar - 2 Litros",
   "image": "/images/products/ceraliquida2litros.png",
   "rating": 4,
   "price": 6.50,
@@ -73,7 +73,7 @@
       "name": "Desinfetante Samar - 5 Litros",
       "image": "/images/products/aromatizanteverderoxosamar.png",
       "rating": 4,
-      "price": 10.00,
+      "price": 9.50,
       "category": "Limpeza Doméstica",
       "fragrances": ["Flor do Campo - Lilás", "Floral Briza - Verde", "Stilus - Azul escuro", "Natura - Azul Claro", "Lux - Roxo"]
   },
@@ -82,7 +82,7 @@
     "name": "Desinfetante Di Kasa - Lavanda - 5 Litros",
     "image": "/images/products/outrasimg/lipadorperfumadolavanda.png",
     "rating": 4,
-    "price": 7.90,
+    "price": 8.90,
     "category": "Limpeza Doméstica"
   },
   {
@@ -340,7 +340,7 @@
       "name": "Cabo Extensor de Mopa",
       "image": "/images/products/equilimp/caboextensordemopa.jpg",
       "rating": 4,
-      "price": 10.00,
+      "price": 19.50,
       "category": "Equipamentos de Limpeza"
     },
     {
@@ -348,7 +348,7 @@
       "name": "Vassoura Casa Mia - Limpeza pesada",
       "image": "/images/products/equilimp/casamialimpezapesada.png",
       "rating": 4,
-      "price": 8.00,
+      "price": 15.90,
       "category": "Equipamentos de Limpeza"
     },
     
@@ -357,7 +357,7 @@
       "name": "Vassoura Casa Mia - Multiuso - Com Pega.",
       "image": "/images/products/equilimp/casamiamultiusocompega.png",
       "rating": 4,
-      "price": 8.00,
+      "price": 21.90,
       "category": "Equipamentos de Limpeza"
     },
     
@@ -366,7 +366,7 @@
       "name": "Vassoura Casa Mia Absoluta",
       "image": "/images/products/equilimp/casamiavassouraabsoluta.png",
       "rating": 4,
-      "price": 8.00,
+      "price": 14.74,
       "category": "Equipamentos de Limpeza"
     },
 
@@ -375,7 +375,7 @@
       "name": "Vassoura Casa Mia Absoluta",
       "image": "/images/products/equilimp/casamiavassouraabsoluta1.png",
       "rating": 4,
-      "price": 8.00,
+      "price": 14.74,
       "category": "Equipamentos de Limpeza"
     },
 
@@ -384,7 +384,7 @@
       "name": "Vassoura Casa Mia Espertinha",
       "image": "/images/products/equilimp/casamiavassouraespertinha.png",
       "rating": 4,
-      "price": 8.00,
+      "price": 9.90,
       "category": "Equipamentos de Limpeza"
     },
     {
@@ -392,7 +392,7 @@
       "name": "Vassoura Casa Mia Parceira",
       "image": "/images/products/equilimp/casamiavassouraparceira.png",
       "rating": 4,
-      "price": 8.00,
+      "price": 9.90,
       "category": "Equipamentos de Limpeza"
     },
 
@@ -419,7 +419,7 @@
       "name": "Esponja Brilhus - Não Risca",
       "image": "/images/products/equilimp/esponjanaoriscabrilhus.jpg",
       "rating": 4,
-      "price": 8.00,
+      "price": 1.49,
       "category": "Equipamentos de Limpeza"
     },
 
@@ -430,7 +430,7 @@
       "name": "Esponja Flash Limp - Poliéster",
       "image": "/images/products/equilimp/esponjapoliesternaorisca.png",
       "rating": 4,
-      "price": 8.00,
+      "price": 3.89,
       "category": "Equipamentos de Limpeza"
     },
 
@@ -439,7 +439,7 @@
       "name": "Fibra de Limpeza",
       "image": "/images/products/equilimp/fibradelimpeza.png",
       "rating": 4,
-      "price": 8.00,
+      "price": 3.49,
       "category": "Equipamentos de Limpeza"
     },
 
@@ -448,16 +448,16 @@
       "name": "Luva de Látex - Tamanho G",
       "image": "/images/products/equilimp/luvalatexgamarela.png",
       "rating": 4,
-      "price": 8.00,
+      "price": 5.50,
       "category": "Equipamentos de Limpeza"
     }, 
 
     {
       "id": 50,
-      "name": "Pano de Chão Xadrez",
+      "name": "Pano de Chão Xadrez - ESGOTADO",
       "image": "/images/products/equilimp/panodechaoxadrez.png",
       "rating": 4,
-      "price": 8.00,
+      "price":0 ,
       "category": "Equipamentos de Limpeza"
     },
 
@@ -475,7 +475,7 @@
       "name": "Rodo 30cm",
       "image": "/images/products/equilimp/rodo30cm.jpg",
       "rating": 4,
-      "price": 8.00,
+      "price": 6.50,
       "category": "Equipamentos de Limpeza"
     },
 
@@ -484,7 +484,7 @@
       "name": "Rodo 30cm",
       "image": "/images/products/equilimp/rodo30cm2.jpg",
       "rating": 4,
-      "price": 8.00,
+      "price": 7.50,
       "category": "Equipamentos de Limpeza"
     },
 
@@ -493,25 +493,18 @@
       "name": "Rodo 40cm",
       "image": "/images/products/equilimp/rodo40cm.jpg",
       "rating": 4,
-      "price": 8.00,
+      "price": 15.50,
       "category": "Equipamentos de Limpeza"
     },
 
-    {
-      "id": 55,
-      "name": "Rodo 40cm",
-      "image": "/images/products/equilimp/rodo30cm2.jpg",
-      "rating": 4,
-      "price": 8.00,
-      "category": "Equipamentos de Limpeza"
-    },
+    
 
     {
       "id": 56,
       "name": "Rodo 60cm",
       "image": "/images/products/equilimp/rodo60cm.jpg",
       "rating": 4,
-      "price": 8.00,
+      "price": 15.50,
       "category": "Equipamentos de Limpeza"
     },
 
@@ -546,7 +539,7 @@
       "name": "Detergente de uso Geral - Gel de Limpeza Limpemax - 5 Litros",
       "image": "/images/products/outrasimg/detergusogeralpinhoelavanda.png",
       "rating": 4,
-      "price": 7.90,
+      "price": 25.50,
       "category": "Limpeza Doméstica",
       "fragrances": ["Lavanda", "Pinho"]
   },
@@ -555,7 +548,7 @@
       "name": "Limpa pisos Azulim - Porcelanato - 750ml",
       "image": "/images/products/outrasimg/azulimporcelanato.png",
       "rating": 4,
-      "price": 7.90,
+      "price": 9.90,
       "category": "Limpeza Doméstica"
   },
   {
@@ -563,7 +556,7 @@
       "name": "Lava Roupas - Ibilimp - 2 Litros",
       "image": "/images/products/outrasimg/ibilimp2litros.png",
       "rating": 4,
-      "price": 7.90,
+      "price": 6.50,
       "category": "Limpeza Doméstica",
       "fragrances": ["Canoa(Verde)", "Jeri(Azul)"]
   },
@@ -572,7 +565,7 @@
       "name": "Lava Roupas - Ibilimp - 5 Litros",
       "image": "/images/products/outrasimg/ibilimp5litros.png",
       "rating": 4,
-      "price": 7.90,
+      "price": 16.00,
       "category": "Limpeza Doméstica",
       "fragrances": ["Canoa(Verde)", "Jeri(Azul)"]
   },
@@ -581,16 +574,16 @@
     "name": "Lava Roupas - Dikasa - Homo - 5 Litros",
     "image": "/images/products/outrasimg/lavaroupashomoazuldikasa.png",
     "rating": 4,
-    "price": 7.90,
+    "price": 16.00,
     "category": "Limpeza Doméstica"
   },
 
   {
       "id": 66,
-      "name": "Limpa Cerâmica Samar -Pinho Gel - 5 Litros",
+      "name": "Limpa Cerâmica Samar - Pinho Gel - 5 Litros",
       "image": "/images/products/outrasimg/limpaceramicapinhogel5litros.png",
       "rating": 4,
-      "price": 7.90,
+      "price": 16.50,
       "category": "Limpeza Doméstica"
   },
   {
@@ -598,7 +591,7 @@
       "name": "Limpa Pisos UAU - 750ml",
       "image": "/images/products/outrasimg/limpapisosneutralizaodores.png",
       "rating": 4,
-      "price": 7.90,
+      "price": 10.50,
       "category": "Limpeza Doméstica"
   },
   {
@@ -606,7 +599,7 @@
       "name": "Limpa Vidros Limpemax - 5 Litros",
       "image": "/images/products/outrasimg/limpmaxlimpavidros5litros.png",
       "rating": 4,
-      "price": 7.90,
+      "price": 18.50,
       "category": "Limpeza Doméstica"
   },
   {
@@ -623,7 +616,7 @@
       "name": "Lustra Móveis Ypê - 200ml",
       "image": "/images/products/outrasimg/lustramoveisypebrilho200ml.png",
       "rating": 4,
-      "price": 7.90,
+      "price": 6.99,
       "category": "Limpeza Doméstica"
   },
   {
@@ -631,7 +624,7 @@
       "name": "Multiuso Azulim - 500ml",
       "image": "/images/products/outrasimg/multiusoazulim500ml.png",
       "rating": 4,
-      "price": 7.90,
+      "price": 4.50,
       "category": "Limpeza Doméstica"
   },
   {
@@ -639,7 +632,7 @@
       "name": "Multiuso Econômico - 500ml",
       "image": "/images/products/outrasimg/multiusoeconomico500ml.png",
       "rating": 4,
-      "price": 7.90,
+      "price": 2.99,
       "category": "Limpeza Doméstica"
   },
   {
@@ -647,7 +640,7 @@
       "name": "Multiuso UAU Limão Siciliano - 500ml",
       "image": "/images/products/outrasimg/multiusodesenuaulimaosiciliano500ml.png",
       "rating": 4,
-      "price": 7.90,
+      "price": 5.50,
       "category": "Limpeza Doméstica"
   },
   {
@@ -655,7 +648,7 @@
       "name": "Pastilha Adesiva Higie Plus -Lavanda - 3 Pastilhas",
       "image": "/images/products/outrasimg/higiepluspastilhaadesivalavanda3x.png",
       "rating": 4,
-      "price": 7.90,
+      "price": 4.75,
       "category": "Limpeza Doméstica"
   },
   {
@@ -663,7 +656,7 @@
       "name": "Pastilha Adesiva Pato Lavanda - 3 Pastilhas",
       "image": "/images/products/outrasimg/pastilhapatolavanda3pastilhas.png",
       "rating": 4,
-      "price": 7.90,
+      "price": 8.50,
       "category": "Limpeza Doméstica"
   },
   {
@@ -671,15 +664,15 @@
       "name": "Pedra Sanitária Pratik -Lavanda",
       "image": "/images/products/outrasimg/pratikpedrasanitaria.png",
       "rating": 4,
-      "price": 7.90,
+      "price": 2.49,
       "category": "Limpeza Doméstica"
   },
   {
       "id": 79,
-      "name": "Sabão em Pó Ala Lavanda - 500g",
+      "name": "Sabão em Pó Ala - Lavanda - 500g",
       "image": "/images/products/outrasimg/sabaoala500g.png",
       "rating": 4,
-      "price": 7.90,
+      "price": 3.49,
       "category": "Limpeza Doméstica"
   },
   {
@@ -687,7 +680,7 @@
       "name": "Sabão em Pó Brilhante - 400g",
       "image": "/images/products/outrasimg/sabaoempobrilhante400g.png",
       "rating": 4,
-      "price": 7.90,
+      "price": 5.49,
       "category": "Limpeza Doméstica"
   },
   {
@@ -695,7 +688,7 @@
       "name": "Sabão em Pó Tradicional Marilux - 5kg",
       "image": "/images/products/outrasimg/marilux5kgbrancogarantido.png",
       "rating": 4,
-      "price": 7.90,
+      "price": 16.90,
       "category": "Limpeza Doméstica"
   },
   {
@@ -703,7 +696,7 @@
       "name": "Sabão em Pó Tixan Ypê - 800g",
       "image": "/images/products/outrasimg/tixanype800g.png",
       "rating": 4,
-      "price": 7.90,
+      "price": 9.90,
       "category": "Limpeza Doméstica"
   },
   {
@@ -711,7 +704,7 @@
     "name": "Sabão em Pó - Econômico -  400g",
     "image": "/images/products/outrasimg/lavaroupaseconomico400g.png",
     "rating": 4,
-    "price": 7.90,
+    "price": 3.59,
     "category": "Limpeza Doméstica"
   },
 
@@ -720,7 +713,7 @@
       "name": "Sabão Samar 5 Litros",
       "image": "/images/products/outrasimg/sabaoliquidosamar5litros.png",
       "rating": 4,
-      "price": 7.90,
+      "price": 13.90,
       "category": "Limpeza Doméstica",
       "fragrances": ["Ariel(Verde)", "Côco(Branco)", "Ommo Caribe(Azul)"]
   },
@@ -729,7 +722,7 @@
       "name": "Sabão em Pó Urca - 400g",
       "image": "/images/products/outrasimg/sabaourca400g.png",
       "rating": 4,
-      "price": 7.90,
+      "price": 1.99,
       "category": "Limpeza Doméstica"
   },
   {
@@ -737,7 +730,7 @@
       "name": "Sabão em Pó Urca - 4kg",
       "image": "/images/products/outrasimg/sabaourca4kg.png",
       "rating": 4,
-      "price": 7.90,
+      "price": 17.90,
       "category": "Limpeza Doméstica"
   },
   {
@@ -745,7 +738,7 @@
       "name": "Veja Cozinha Desengordurante - Refil",
       "image": "/images/products/outrasimg/vejarefileco400mlcozinhadesen.jpg",
       "rating": 4,
-      "price": 7.90,
+      "price": 17.50,
       "category": "Limpeza Doméstica",
       "fragrances": ["Ariel(Verde)", "Côco(Branco)", "Ommo Caribe(Azul)"]
   }
