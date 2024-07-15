@@ -20,14 +20,4 @@ jobs:
         password: ${{ secrets.FTP_PASSWORD }}
         protocol: 'ftp'
         local-dir: ./public/  # Diretório local onde estão os arquivos da pasta 'public'
-        server-dir: ${{ secrets.FTP_PATH }}/public_html  # Diretório de destino para 'public'
-
-    - name: Deploy to Hostinger via FTP (src)
-      uses: SamKirkland/FTP-Deploy-Action@4.3.0
-      with:
-        server: ${{ secrets.FTP_SERVER }}
-        username: ${{ secrets.FTP_USERNAME }}
-        password: ${{ secrets.FTP_PASSWORD }}
-        protocol: 'ftp'
-        local-dir: ./src/  # Diretório local onde estão os arquivos da pasta 'src'
-        server-dir: ${{ secrets.FTP_PATH }}/src  # Diretório de destino para 'src'
+        server-dir: ${{ secrets.FTP_PATH }}/public_html/  # Corrigido para terminar com '/'
