@@ -6,27 +6,32 @@ on:
       - main
 
 jobs:
-  build-and-deploy:
+  deploy:
     runs-on: ubuntu-latest
+
     steps:
       - name: Checkout code
-        uses: actions/checkout@v2
+        uses: actions/checkout@v3
 
       - name: Set up Node.js
-        uses: actions/setup-node@v2
+        uses: actions/setup-node@v3
         with:
-          node-version: '20'
+          node-version: '16'
 
       - name: Install dependencies
         run: npm install
 
-      - name: Build project
-        env:
-          NODE_OPTIONS: '--openssl-legacy-provider'
+      - name: Build the project
         run: npm run build
+
+      - name: Clean up APT cache
+        run: sudo rm -rf /var/lib/apt/lists/* /var/cache/apt/*
+
+      - name: Install lftp
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y lftp
 
       - name: Deploy to Hostinger
         run: |
-          apt-get update
-          apt-get install -y lftp
-          lftp -u ${{ secrets.FTP_USERNAME }},${{ secrets.FTP_PASSWORD }} -e "mirror -R build /public_html; quit" ${{ secrets.FTP_SERVER }}
+          lftp -u ${{ secrets.HOSTINGER_FTP_USERNAME }},${{ secrets.HOSTINGER_FTP_PASSWORD }} -e "mirror -R build/ /path/on/hostinger; quit" ${{ secrets.HOSTINGER_FTP_SERVER }}
