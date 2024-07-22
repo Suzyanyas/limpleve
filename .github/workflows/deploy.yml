@@ -32,7 +32,6 @@ jobs:
           sudo apt-get update
           sudo apt-get install -y lftp
 
-          - name: Deploy to Hostinger
-          run: |
-            lftp -u ${{ secrets.HOSTINGER_FTP_USERNAME }},${{ secrets.HOSTINGER_FTP_PASSWORD }} -e "mirror -R build/ /path/on/hostinger; quit" ${{ secrets.HOSTINGER_FTP_SERVER }}
-        
+      - name: Deploy to Hostinger
+        run: |
+          lftp -u ${{ secrets.HOSTINGER_FTP_USERNAME }},${{ secrets.HOSTINGER_FTP_PASSWORD }} -e "mirror -R build/ /path/on/hostinger; quit" ${{ secrets.HOSTINGER_FTP_SERVER }}
