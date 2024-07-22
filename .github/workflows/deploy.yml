@@ -16,7 +16,10 @@ jobs:
       - name: Setup Node.js
         uses: actions/setup-node@v3
         with:
-          node-version: '16'  # Usar a versão 16
+          node-version: '20'  # Usar a versão 20
+
+      - name: Set Node.js options
+        run: echo "NODE_OPTIONS=--openssl-legacy-provider" >> $GITHUB_ENV
 
       - name: Install dependencies
         run: npm install
@@ -30,10 +33,12 @@ jobs:
           FTP_USERNAME: ${{ secrets.FTP_USERNAME }}
           FTP_PASSWORD: ${{ secrets.FTP_PASSWORD }}
         run: |
-          apt-get update && apt-get install -y lftp
-          lftp -c "
-          open $FTP_SERVER
-          user $FTP_USERNAME $FTP_PASSWORD
-          mirror -R ./build /public_html
-          bye
-          "
+          # Instalar curl
+          sudo apt-get update
+          sudo apt-get install -y curl
+
+          # Compactar arquivos para upload
+          tar -czf build.tar.gz -C ./build .
+
+          # Enviar arquivos via curl
+          curl -T build.tar.gz -u $FTP_USERNAME:$FTP_PASSWORD ftp://$FTP_SERVER/public_html/
