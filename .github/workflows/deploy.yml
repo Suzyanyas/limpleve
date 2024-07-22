@@ -25,7 +25,7 @@ jobs:
         run: npm install
 
       - name: Build project
-        run: npm run build  # ou outro comando para build
+        run: npm run build
 
       - name: Deploy to Hostinger
         env:
@@ -33,4 +33,12 @@ jobs:
           FTP_USERNAME: ${{ secrets.FTP_USERNAME }}
           FTP_PASSWORD: ${{ secrets.FTP_PASSWORD }}
         run: |
-          curl -T ./build/* -u $FTP_USERNAME:$FTP_PASSWORD ftp://$FTP_SERVER/public_html/
+          # Instalar curl
+          sudo apt-get update
+          sudo apt-get install -y curl
+
+          # Compactar arquivos para upload
+          tar -czf build.tar.gz -C ./build .
+
+          # Enviar arquivos via curl
+          curl -T build.tar.gz -u $FTP_USERNAME:$FTP_PASSWORD ftp://$FTP_SERVER/public_html/
