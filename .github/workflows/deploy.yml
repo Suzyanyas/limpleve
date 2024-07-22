@@ -1,0 +1,39 @@
+name: Deploy to Hostinger
+
+on:
+  push:
+    branches:
+      - main  # ou a branch que você deseja monitorar
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v2
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v2
+        with:
+          node-version: '16'  # Altere para a versão que você usa
+
+      - name: Install dependencies
+        run: npm install
+
+      - name: Build project
+        run: npm run build  # ou outro comando para build
+
+      - name: Deploy to Hostinger
+        env:
+          FTP_SERVER: ${{ secrets.FTP_SERVER }}
+          FTP_USERNAME: ${{ secrets.FTP_USERNAME }}
+          FTP_PASSWORD: ${{ secrets.FTP_PASSWORD }}
+        run: |
+          apt-get update && apt-get install -y lftp
+          lftp -c "
+          open $FTP_SERVER
+          user $FTP_USERNAME $FTP_PASSWORD
+          mirror -R ./build /public_html
+          bye
+          "
