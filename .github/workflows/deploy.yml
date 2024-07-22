@@ -16,7 +16,7 @@ jobs:
       - name: Set up Node.js
         uses: actions/setup-node@v3
         with:
-          node-version: '16'
+          node-version: '16' # ou a versão que você está usando
 
       - name: Install dependencies
         run: npm install
@@ -24,14 +24,12 @@ jobs:
       - name: Build the project
         run: npm run build
 
-      - name: Clean up APT cache
-        run: sudo rm -rf /var/lib/apt/lists/* /var/cache/apt/*
-
-      - name: Install lftp
+      - name: Deploy to Hostinger
         run: |
+          # Comando para atualizar pacotes e instalar ferramentas necessárias
           sudo apt-get update
           sudo apt-get install -y lftp
 
-      - name: Deploy to Hostinger
-        run: |
+          # Comando de deploy
           lftp -u ${{ secrets.HOSTINGER_FTP_USERNAME }},${{ secrets.HOSTINGER_FTP_PASSWORD }} -e "mirror -R build/ /path/on/hostinger; quit" ${{ secrets.HOSTINGER_FTP_SERVER }}
+    
