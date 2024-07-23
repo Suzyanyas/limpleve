@@ -25,11 +25,11 @@ jobs:
         run: npm run build
 
       - name: Deploy to Hostinger
+        env:
+          FTP_USERNAME: ${{ secrets.HOSTINGER_FTP_USERNAME }}
+          FTP_PASSWORD: ${{ secrets.HOSTINGER_FTP_PASSWORD }}
+          FTP_SERVER: ${{ secrets.HOSTINGER_FTP_SERVER }}
         run: |
-          # Comando para atualizar pacotes e instalar ferramentas necessárias
           sudo apt-get update
           sudo apt-get install -y lftp
-
-          # Comando de deploy
-          lftp -u ${{ secrets.HOSTINGER_FTP_USERNAME }},${{ secrets.HOSTINGER_FTP_PASSWORD }} -e "mirror -R build/ /path/on/hostinger; quit" ${{ secrets.HOSTINGER_FTP_SERVER }}
-    
+          lftp -u $FTP_USERNAME,$FTP_PASSWORD -e "mirror -R build/ /path/on/hostinger; quit" $FTP_SERVER
