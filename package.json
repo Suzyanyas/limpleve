@@ -27,7 +27,8 @@
     "start": "react-scripts start",
     "build": "react-scripts build",
     "eject": "react-scripts eject",
-    "start-legacy": "set NODE_OPTIONS=--openssl-legacy-provider && react-scripts start"
+    "start-legacy": "set NODE_OPTIONS=--openssl-legacy-provider && react-scripts start",
+    "generate-sitemap": "node generate-sitemap.js"
   },
   "eslintConfig": {
     "extends": [
@@ -49,13 +50,6 @@
   },
   "devDependencies": {
     "@babel/plugin-proposal-private-property-in-object": "^7.21.11"
-  },
-
-  "scripts": {
-  "start": "react-scripts start",
-  "build": "react-scripts build",
-  "eject": "react-scripts eject",
-  "generate-sitemap": "node generate-sitemap.js"
-}
+  }
 
 }
