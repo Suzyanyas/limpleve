@@ -480,15 +480,6 @@
     },
 
     {
-      "id": 53,
-      "name": "Rodo 30cm",
-      "image": "/images/products/equilimp/rodo30cm2.jpg",
-      "rating": 4,
-      "price": 7.50,
-      "category": "Equipamentos de Limpeza"
-    },
-
-    {
       "id": 54,
       "name": "Rodo 40cm",
       "image": "/images/products/equilimp/rodo40cm.jpg",
@@ -531,7 +522,7 @@
       "name": "Suporte Limpa Tudo",
       "image": "/images/products/equilimp/suportelimpatudo.jpg",
       "rating": 4,
-      "price": 8.00,
+      "price": 20.00,
       "category": "Equipamentos de Limpeza"
     },
   {
