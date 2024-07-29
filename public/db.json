@@ -90,7 +90,7 @@
     "name": "Desinfetante Econômico - 1 litro",
     "image": "/images/products/outrasimg/desinfetanteeconomico1litrocitrusefloral.png",
     "rating": 4,
-    "price": 7.90,
+    "price": 3.59,
     "category": "Limpeza Doméstica",
     "fragrances": ["Citrus", "Floral"]
 },
@@ -738,7 +738,7 @@
       "name": "Veja Cozinha Desengordurante - Refil",
       "image": "/images/products/outrasimg/vejarefileco400mlcozinhadesen.jpg",
       "rating": 4,
-      "price": 17.50,
+      "price": 11.50,
       "category": "Limpeza Doméstica",
       "fragrances": ["Ariel(Verde)", "Côco(Branco)", "Ommo Caribe(Azul)"]
   }

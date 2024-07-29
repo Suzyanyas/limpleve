@@ -1,6 +1,6 @@
 import React from "react";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import { faTimes, faTrash } from "@fortawesome/free-solid-svg-icons"; // Importa os ícones de 'X' e lixeira
+import { faTimes, faTrash } from "@fortawesome/free-solid-svg-icons";
 import SidebarProduct from "./SidebarProduct";
 import whatsappIcon from "../images/iconwhatsapp.png";
 
@@ -25,9 +25,10 @@ export default function SidebarCart({
   const handleCheckout = () => {
     const whatsappMessage = encodeURIComponent(
       `Olá, gostaria de fazer o pedido dos seguintes itens:\n\n${selectedProducts
-        .map(
-          (product) =>
-            `- ${product.name} - R$ ${product.price.toFixed(2)}, Quantidade: ${product.quantity}, Total: R$ ${(product.quantity * product.price).toFixed(2)}, Fragrância: ${product.fragrance}`
+        .map((product) =>
+          `- ${product.name} - R$ ${product.price.toFixed(2)}, Quantidade: ${product.quantity}, Total: R$ ${(product.quantity * product.price).toFixed(2)}${
+            product.fragrance ? `, Fragrância: ${product.fragrance}` : ""
+          }`
         )
         .join("\n")}\n\nValor total do pedido: R$ ${calculateTotal(selectedProducts).toFixed(2)}`
     );
@@ -45,7 +46,7 @@ export default function SidebarCart({
       <div className="top">
         <h3>Seu carrinho</h3>
         <button onClick={() => setShowSidebarCart(false)}>
-          <FontAwesomeIcon icon={faTimes} /> {/* Substitui o ícone de lixeira pelo ícone de 'X' */}
+          <FontAwesomeIcon icon={faTimes} />
         </button>
       </div>
 
@@ -75,7 +76,7 @@ export default function SidebarCart({
 
           <button onClick={handleClearCart} className="btn-icon clear-cart-btn">
             <span>Esvaziar Carrinho</span>
-            <FontAwesomeIcon icon={faTrash} /> 
+            <FontAwesomeIcon icon={faTrash} />
           </button>
         </>
       )}
