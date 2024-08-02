@@ -388,6 +388,7 @@ nav ul li:hover {
 
 .unavailable-overlay {
   position: absolute;
+  border-radius: 8px;
   top: 0;
   left: 0;
   right: 0;
