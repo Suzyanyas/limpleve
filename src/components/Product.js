@@ -9,13 +9,14 @@ export default function Product({
   name,
   price,
   fragrances = [],
+  isAvailable,
   addProductToCart,
 }) {
   const formattedPrice = price.toFixed(2);
 
   const [isPopupOpen, setIsPopupOpen] = useState(false);
   const [currentImage, setCurrentImage] = useState(image);
-  const [selectedFragrance, setSelectedFragrance] = useState(""); // Estado para armazenar a fragrância selecionada
+  const [selectedFragrance, setSelectedFragrance] = useState("");
 
   const openPopup = () => {
     setIsPopupOpen(true);
@@ -31,18 +32,16 @@ export default function Product({
   };
 
   const addToCart = () => {
-    // Se o produto não tiver fragrâncias ou se uma fragrância foi selecionada, adicione ao carrinho
     if (fragrances.length === 0 || selectedFragrance !== "") {
-      addProductToCart(id, selectedFragrance); // Passar o ID do produto e a fragrância selecionada (se houver) para a função addProductToCart
+      addProductToCart(id, selectedFragrance);
     } else {
-      // Lógica para lidar com nenhum fragrância selecionada (opcional)
       console.log("Selecione uma fragrância antes de adicionar ao carrinho.");
     }
   };
 
   return (
     <div className="product">
-      <img src={currentImage} alt={name} onClick={openPopup} />
+      <img src={currentImage} alt={name} onClick={openPopup} className={!isAvailable ? "unavailable" : ""} />
       <p className="name">{name}</p>
       <div className={price > 50 ? "price-container expensive" : "price-container"}>
         <span>R$</span> {formattedPrice}
@@ -55,6 +54,7 @@ export default function Product({
             id={`fragrance-${id}`}
             value={selectedFragrance}
             onChange={handleFragranceChange}
+            disabled={!isAvailable}
           >
             <option value="">Selecione uma Fragrância</option>
             {fragrances.map((fragrance, index) => (
@@ -67,11 +67,17 @@ export default function Product({
       )}
 
       <div className="buttons">
-        <button onClick={addToCart} className="btn-icon add-to-cart-btn">
+        <button onClick={addToCart} className="btn-icon add-to-cart-btn" disabled={!isAvailable}>
           <span>Adicionar ao carrinho</span>
           <FontAwesomeIcon icon={faCartShopping} />
         </button>
       </div>
+
+      {!isAvailable && (
+        <div className="unavailable-overlay">
+          <span>Produto Indisponível</span>
+        </div>
+      )}
 
       {isPopupOpen && (
         <div className="popup-overlay" onClick={closePopup}>
