@@ -17,17 +17,9 @@ export default function Footer() {
           </Link>
         
         <p>&copy; 2024 Limp Leve.</p>
-        <div className="developer">
-          <p></p>
-          <a
-            href="https://www.linkedin.com/"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            <FontAwesomeIcon icon={faLinkedin} />
-          </a>
-        </div>
+      
       </div>
     </footer>
   );
 }
+

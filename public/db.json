@@ -79,11 +79,12 @@
   },
   {
     "id": 8.1, 
-    "name": "Desinfetante Di Kasa - Lavanda - 5 Litros",
+    "name": "Desinfetante Di Kasa - 5 Litros",
     "image": "/images/products/outrasimg/lipadorperfumadolavanda.png",
     "rating": 4,
     "price": 8.90,
-    "category": "Limpeza Doméstica"
+    "category": "Limpeza Doméstica",
+    "fragrances": ["Lavanda - Roxo", "Stileto - Azul", "Palmolive - Laranja ", "Kaiak - Rosa", "Natura - Verde"]
   },
   {
     "id": 8.2,
@@ -484,7 +485,7 @@
       "name": "Rodo 40cm",
       "image": "/images/products/equilimp/rodo40cm.jpg",
       "rating": 4,
-      "price": 15.50,
+      "price": 7.50,
       "category": "Equipamentos de Limpeza"
     },
 
@@ -496,24 +497,6 @@
       "image": "/images/products/equilimp/rodo60cm.jpg",
       "rating": 4,
       "price": 15.50,
-      "category": "Equipamentos de Limpeza"
-    },
-
-    {
-      "id": 57,
-      "name": "Rodo Cristal 30cm",
-      "image": "/images/products/equilimp/rodocristal30cm.jpg",
-      "rating": 4,
-      "price": 8.00,
-      "category": "Equipamentos de Limpeza"
-    },
-
-    {
-      "id": 58,
-      "name": "Rodo Cristal 40cm",
-      "image": "/images/products/equilimp/rodocristal40cm.jpg",
-      "rating": 4,
-      "price": 8.00,
       "category": "Equipamentos de Limpeza"
     },
 
