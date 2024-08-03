@@ -1,11 +1,32 @@
 import React, { useEffect, useState } from 'react';
-import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
+import { BrowserRouter as Router, Routes, Route, useParams } from 'react-router-dom';
 import Navbar from './components/Navbar';
 import HomePage from './components/pages/HomePage';
 import ProductsPage from './components/pages/ProductsPage';
 import SidebarCart from './components/SidebarCart';
 import Footer from './components/Footer';
 import ScrollToTopButton from './components/ScrollToTopButton';
+
+const CategoryProductsPage = ({ addProductToCart }) => {
+  const { category } = useParams();
+  const [categoryProducts, setCategoryProducts] = useState([]);
+
+  useEffect(() => {
+    fetch('/db.json')
+      .then((res) => res.json())
+      .then((data) => {
+        const filteredProducts = data.products.filter((product) => product.category.toLowerCase() === category.toLowerCase() && product.isAvailable);
+        setCategoryProducts(filteredProducts);
+      });
+  }, [category]);
+
+  return (
+    <ProductsPage
+      products={categoryProducts}
+      addProductToCart={addProductToCart}
+    />
+  );
+};
 
 function App() {
   const [products, setProducts] = useState([]);
@@ -18,7 +39,6 @@ function App() {
     fetch('/db.json')
       .then((res) => res.json())
       .then((data) => {
-        console.log(data.products); // Verifique se os produtos estão sendo carregados corretamente
         setProducts(data.products);
       });
   }, []);
@@ -111,7 +131,7 @@ function App() {
               element={
                 <HomePage
                   addProductToCart={addProductToCart}
-                  products={filteredProducts}
+                  products={filteredProducts.filter(product => product.isAvailable)}
                   setShowSidebarCart={setShowSidebarCart}
                 />
               }
@@ -120,7 +140,7 @@ function App() {
               path='/products'
               element={
                 <ProductsPage
-                  products={products}
+                  products={filteredProducts.filter(product => product.isAvailable)}
                   addProductToCart={addProductToCart}
                   searchQuery={searchQuery}
                 />
@@ -128,13 +148,7 @@ function App() {
             />
             <Route
               path='/products/:category'
-              element={
-                <ProductsPage
-                  products={products}
-                  addProductToCart={addProductToCart}
-                  searchQuery={searchQuery}
-                />
-              }
+              element={<CategoryProductsPage addProductToCart={addProductToCart} />}
             />
           </Routes>
         </main>

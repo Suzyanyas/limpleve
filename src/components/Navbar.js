@@ -3,7 +3,6 @@ import { Link } from "react-router-dom";
 import { faBars, faSearch, faShoppingCart } from "@fortawesome/free-solid-svg-icons";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 
-
 export default function Navbar({ setShowSidebarCart, selectedProducts, setSearchQuery }) {
   const [show, setShow] = useState(false);
 
@@ -15,22 +14,22 @@ export default function Navbar({ setShowSidebarCart, selectedProducts, setSearch
     setShow(false);
   };
 
+  // Função que lida com a mudança de busca
   const handleSearchChange = (e) => {
-  setSearchQuery(e.target.value);
-};
-
+    setSearchQuery(e.target.value);
+  };
 
   return (
     <div className="nav">
       <div className="inner-content">
-      <Link to="/" onClick={handleLinkClick}>
-        <img
-          src="/images/logo-limpleve.png"
-          className="logo"
-          alt="logo da empresa"
-        />
-</Link>
-        <nav className={`${show ? "show" : ""}`}>
+        <Link to="/" onClick={handleLinkClick}>
+          <img
+            src="/images/logo-limpleve.png"
+            className="logo"
+            alt="logo da empresa"
+          />
+        </Link>
+        <nav className={`nav-menu ${show ? "show" : ""}`}>
           <ul>
             <li>
               <Link to="/" onClick={handleLinkClick}>Home</Link>
@@ -62,17 +61,23 @@ export default function Navbar({ setShowSidebarCart, selectedProducts, setSearch
               type="search" 
               placeholder="Procurar" 
               onChange={handleSearchChange}
+              aria-label="Buscar produtos"
             />
             <FontAwesomeIcon icon={faSearch} />
           </div>
           <button
             className="shopping-cart"
             onClick={() => setShowSidebarCart(true)}
+            aria-label="Abrir carrinho de compras"
           >
             <FontAwesomeIcon icon={faShoppingCart} />
             <div className="products-count">{products.length}</div>
           </button>
-          <button className="menu-button" onClick={() => setShow(!show)}>
+          <button 
+            className="menu-button" 
+            onClick={() => setShow(!show)}
+            aria-label={show ? "Fechar menu" : "Abrir menu"}
+          >
             <FontAwesomeIcon icon={faBars} />
           </button>
         </div>

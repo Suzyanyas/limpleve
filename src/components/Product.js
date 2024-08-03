@@ -40,10 +40,15 @@ export default function Product({
   };
 
   return (
-    <div className="product">
-      <img src={currentImage} alt={name} onClick={openPopup} className={!isAvailable ? "unavailable" : ""} />
+    <div className={`product ${!isAvailable ? "unavailable" : ""}`}>
+      <img 
+        src={currentImage} 
+        alt={name} 
+        onClick={openPopup} 
+        className={!isAvailable ? "unavailable" : ""} 
+      />
       <p className="name">{name}</p>
-      <div className={price > 50 ? "price-container expensive" : "price-container"}>
+      <div className={`price-container ${price > 50 ? "expensive" : ""}`}>
         <span>R$</span> {formattedPrice}
       </div>
 
@@ -67,7 +72,11 @@ export default function Product({
       )}
 
       <div className="buttons">
-        <button onClick={addToCart} className="btn-icon add-to-cart-btn" disabled={!isAvailable}>
+        <button 
+          onClick={addToCart} 
+          className="btn-icon add-to-cart-btn" 
+          disabled={!isAvailable}
+        >
           <span>Adicionar ao carrinho</span>
           <FontAwesomeIcon icon={faCartShopping} />
         </button>
