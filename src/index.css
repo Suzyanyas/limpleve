@@ -379,17 +379,21 @@ nav ul li:hover {
   display: flex;
   flex-direction: column;
   position: relative;
+
 }
 
-.product.unavailable {
-  opacity: 0.6;
-}
 
 .product.unavailable img {
   cursor: not-allowed !important;
-  opacity: 0.6; /* Torna a imagem mais transparente */
 }
 
+.unavailable-overlay span {
+  background-color:var(--secondary-color);
+  border-radius: 4px;
+  text-align: center;
+  padding: 5px;
+  margin: 5px;
+}
 
 .product .unavailable-overlay {
   position: absolute;
@@ -401,10 +405,12 @@ nav ul li:hover {
   justify-content: center;
   align-items: center;
   background: rgba(255, 255, 255, 0.8);
-  color: red;
-  font-size: 1.5rem;
+  color: rgb(255, 255, 255);
+  font-size: 1.2rem;
   font-weight: bold;
   z-index: 1;
+  text-align: center;
+  border-radius: 8px;
   pointer-events: none; /* Certifique-se de que a sobreposição não interfira nos cliques */
 }
 

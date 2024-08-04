@@ -15,7 +15,7 @@ const CategoryProductsPage = ({ addProductToCart }) => {
     fetch('/db.json')
       .then((res) => res.json())
       .then((data) => {
-        const filteredProducts = data.products.filter((product) => product.category.toLowerCase() === category.toLowerCase() && product.isAvailable);
+        const filteredProducts = data.products.filter((product) => product.category.toLowerCase() === category.toLowerCase());
         setCategoryProducts(filteredProducts);
       });
   }, [category]);
@@ -131,7 +131,7 @@ function App() {
               element={
                 <HomePage
                   addProductToCart={addProductToCart}
-                  products={filteredProducts.filter(product => product.isAvailable)}
+                  products={filteredProducts}
                   setShowSidebarCart={setShowSidebarCart}
                 />
               }
@@ -140,7 +140,7 @@ function App() {
               path='/products'
               element={
                 <ProductsPage
-                  products={filteredProducts.filter(product => product.isAvailable)}
+                  products={filteredProducts}
                   addProductToCart={addProductToCart}
                   searchQuery={searchQuery}
                 />
