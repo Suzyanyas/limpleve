@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useState } from "react";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faTimes, faTrash } from "@fortawesome/free-solid-svg-icons";
 import SidebarProduct from "./SidebarProduct";
@@ -14,6 +14,10 @@ export default function SidebarCart({
   clearCart,
 }) {
   const whatsappNumber = "+5588992702014";
+  const [paymentMethod, setPaymentMethod] = useState("cartao");
+  const [changeNeeded, setChangeNeeded] = useState(false);
+  const [changeAmount, setChangeAmount] = useState("");
+  const [deliveryAddress, setDeliveryAddress] = useState("");
 
   // Calcula o total do carrinho
   const calculateTotal = (products) => {
@@ -23,6 +27,10 @@ export default function SidebarCart({
   };
 
   const handleCheckout = () => {
+    const paymentDetails = paymentMethod === "dinheiro" && changeNeeded
+      ? `\n\nPagamento em Dinheiro. Precisa de troco para: R$ ${changeAmount}`
+      : `\n\nMétodo de pagamento: ${paymentMethod.charAt(0).toUpperCase() + paymentMethod.slice(1)}`;
+
     const whatsappMessage = encodeURIComponent(
       `Olá, gostaria de fazer o pedido dos seguintes itens:\n\n${selectedProducts
         .map((product) =>
@@ -30,7 +38,7 @@ export default function SidebarCart({
             product.fragrance ? `, Fragrância: ${product.fragrance}` : ""
           }`
         )
-        .join("\n")}\n\nValor total do pedido: R$ ${calculateTotal(selectedProducts).toFixed(2)}`
+        .join("\n")}\n\nValor total do pedido: R$ ${calculateTotal(selectedProducts).toFixed(2)}${paymentDetails}\n\nEndereço de entrega: ${deliveryAddress}`
     );
 
     const whatsappLink = `https://wa.me/${whatsappNumber}?text=${whatsappMessage}`;
@@ -68,6 +76,73 @@ export default function SidebarCart({
           <div className="total-container">
             <b>Total: </b> R$ {calculateTotal(selectedProducts).toFixed(2)}
           </div>
+
+          <div className="delivery-address">
+            <label>Endereço de entrega:</label>
+            <input
+              type="text"
+              placeholder="Digite seu endereço"
+              value={deliveryAddress}
+              onChange={(e) => setDeliveryAddress(e.target.value)}
+              className="delivery-input"
+            />
+          </div>
+
+          <div className="payment-method">
+            <label className="payment-option">
+              <input
+                type="radio"
+                value="cartao"
+                checked={paymentMethod === "cartao"}
+                onChange={(e) => setPaymentMethod(e.target.value)}
+                className="payment-input"
+              />
+              <span className="payment-label">Cartão</span>
+            </label>
+            <label className="payment-option">
+              <input
+                type="radio"
+                value="pix"
+                checked={paymentMethod === "pix"}
+                onChange={(e) => setPaymentMethod(e.target.value)}
+                className="payment-input"
+              />
+              <span className="payment-label">Pix</span>
+            </label>
+            <label className="payment-option">
+              <input
+                type="radio"
+                value="dinheiro"
+                checked={paymentMethod === "dinheiro"}
+                onChange={(e) => setPaymentMethod(e.target.value)}
+                className="payment-input"
+              />
+              <span className="payment-label">Dinheiro</span>
+            </label>
+          </div>
+
+          {paymentMethod === "dinheiro" && (
+            <div className="change-needed">
+              <label>
+                <input
+                  type="checkbox"
+                  checked={changeNeeded}
+                  onChange={(e) => setChangeNeeded(e.target.checked)}
+                  className="change-checkbox"
+                />
+                Precisa de troco?
+              </label>
+              {changeNeeded && (
+                <input
+                  type="text"
+                  placeholder="Troco para quanto?"
+                  value={changeAmount}
+                  onChange={(e) => setChangeAmount(e.target.value)}
+                  className="change-input"
+                />
+              )}
+            </div>
+          )}
 
           <button onClick={handleCheckout} className="btn-icon">
             <img src={whatsappIcon} alt="WhatsApp" className="whatsapp-icon" />

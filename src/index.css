@@ -677,7 +677,7 @@ p{
   box-shadow: 5px 5px 50px var(--dark-color);
   height: 100%;
   overflow-y: auto;
-  scrollbar-width: none;
+  scrollbar-width: thin;
   display: none;
 }
 
@@ -821,6 +821,73 @@ p{
   padding: 5px;
   border-radius: 5px;
 }
+
+.total-container{
+  text-align: center;
+  background-color: #c4c4c4;
+  padding: 5px;
+  border-radius: 5px;
+}
+
+.payment-method {
+  margin: 10px 0;
+}
+
+.payment-method label {
+  display: block;
+  margin: 5px;
+
+  padding: 5px;
+}
+
+.payment-option {
+  display: block;
+  margin-bottom: 5px;
+}
+
+.payment-input {
+  margin-right: 5px; /* Espaço lateral entre o input de rádio e o texto */
+}
+
+
+.delivery-address {
+  margin: 10px 0;
+  padding: 10px;
+  border-radius: 3px;
+  border: 1px solid #ccc;
+}
+
+.delivery-address label {
+  display: block;
+  margin-bottom: 5px;
+}
+
+.delivery-input {
+  width: 100%;
+  padding: 8px;
+  border-radius: 3px;
+  border: 1px solid #ccc;
+  box-sizing: border-box;
+}
+
+.change-needed {
+  margin: 10px 0;
+}
+
+.change-checkbox{
+  margin-right: 5px;
+}
+
+
+.change-needed input[type="text"] {
+  width: 100%;
+  padding: 5px;
+  margin-top: 5px;
+  border-radius: 3px;
+  border: 1px solid #ccc;
+}
+
+
 
 /* END SIDEBAR */
 
