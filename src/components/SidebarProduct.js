@@ -15,13 +15,16 @@ export default function SidebarProduct({
   const [localQuantity, setLocalQuantity] = useState(quantity);
   const [priceSum, setPriceSum] = useState(price * quantity);
 
+  // Atualiza a soma do preço sempre que a quantidade ou o preço mudar
   useEffect(() => {
     setPriceSum(price * localQuantity);
   }, [localQuantity, price]);
 
   const handleQuantityChange = (newQuantity) => {
-    setLocalQuantity(newQuantity);
-    updateProductQuantity(id, fragrance, newQuantity);
+    if (newQuantity > 0) {
+      setLocalQuantity(newQuantity);
+      updateProductQuantity(id, fragrance, newQuantity);
+    }
   };
 
   return (
@@ -29,9 +32,7 @@ export default function SidebarProduct({
       <div className='left-side'>
         <button
           className='remove-product-btn'
-          onClick={() => {
-            removeProductFromCart(id, fragrance);
-          }}
+          onClick={() => removeProductFromCart(id, fragrance)}
         >
           <FontAwesomeIcon icon={faXmark} />
         </button>

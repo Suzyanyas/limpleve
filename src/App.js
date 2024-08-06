@@ -34,6 +34,10 @@ function App() {
   const [selectedProducts, setSelectedProducts] = useState([]);
   const [cartTotal, setCartTotal] = useState(0);
   const [searchQuery, setSearchQuery] = useState('');
+  const [paymentMethod, setPaymentMethod] = useState('cartao');
+  const [changeNeeded, setChangeNeeded] = useState(false);
+  const [changeAmount, setChangeAmount] = useState('');
+  const [deliveryAddress, setDeliveryAddress] = useState('');
 
   useEffect(() => {
     fetch('/db.json')
@@ -42,6 +46,11 @@ function App() {
         setProducts(data.products);
       });
   }, []);
+
+  useEffect(() => {
+    const total = selectedProducts.reduce((sum, product) => sum + product.price * product.quantity, 0);
+    setCartTotal(total);
+  }, [selectedProducts]);
 
   const addProductToCart = (id, fragrance) => {
     const productToAdd = products.find((product) => product.id === id);
@@ -62,22 +71,14 @@ function App() {
         { ...productToAdd, quantity: 1, fragrance: fragrance || '' },
       ]);
     }
-    setCartTotal((prevTotal) => prevTotal + productToAdd.price);
   };
 
   const removeProductFromCart = (id, fragrance) => {
-    const productToRemove = selectedProducts.find(
-      (product) => product.id === id && product.fragrance === fragrance
-    );
     const newSelectedProducts = selectedProducts.filter(
       (product) => !(product.id === id && product.fragrance === fragrance)
     );
 
     setSelectedProducts(newSelectedProducts);
-    setCartTotal(
-      (prevTotal) =>
-        prevTotal - productToRemove.price * productToRemove.quantity
-    );
   };
 
   const updateProductQuantity = (id, fragrance, quantity) => {
@@ -88,18 +89,10 @@ function App() {
     );
 
     setSelectedProducts(updatedProducts);
-    const productToUpdate = products.find((product) => product.id === id);
-    const productInCart = selectedProducts.find(
-      (product) => product.id === id && product.fragrance === fragrance
-    );
-    const priceDifference =
-      productToUpdate.price * (quantity - productInCart.quantity);
-    setCartTotal((prevTotal) => prevTotal + priceDifference);
   };
 
   const clearCart = () => {
     setSelectedProducts([]);
-    setCartTotal(0);
   };
 
   const filteredProducts = products.filter((product) =>
@@ -122,6 +115,14 @@ function App() {
           selectedProducts={selectedProducts}
           setShowSidebarCart={setShowSidebarCart}
           showSidebarCart={showSidebarCart}
+          paymentMethod={paymentMethod}
+          setPaymentMethod={setPaymentMethod}
+          changeNeeded={changeNeeded}
+          setChangeNeeded={setChangeNeeded}
+          changeAmount={changeAmount}
+          setChangeAmount={setChangeAmount}
+          deliveryAddress={deliveryAddress}
+          setDeliveryAddress={setDeliveryAddress}
         />
 
         <main>
