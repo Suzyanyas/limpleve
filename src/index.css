@@ -831,24 +831,46 @@ p{
 
 .payment-method {
   margin: 10px 0;
+  padding: 10px;
+  border-radius: 3px;
+  border: 1px solid #ccc;
 }
 
-.payment-method label {
+.payment-method .payment-title {
   display: block;
-  margin: 5px;
-
-  padding: 5px;
+  margin-bottom: 10px;
+  font-weight: bold;
 }
 
-.payment-option {
+.payment-method .payment-option {
   display: block;
   margin-bottom: 5px;
 }
 
-.payment-input {
-  margin-right: 5px; /* Espaço lateral entre o input de rádio e o texto */
+.payment-method .payment-input {
+  margin-right: 5px;
 }
 
+.payment-method .payment-label {
+  margin-left: 5px;
+}
+
+.payment-method .change-needed {
+  margin: 10px 0;
+}
+
+.payment-method .change-checkbox {
+  margin-right: 5px;
+}
+
+.payment-method .change-input {
+  width: 100%;
+  padding: 8px;
+  margin-top: 5px;
+  border-radius: 3px;
+  border: 1px solid #ccc;
+  box-sizing: border-box;
+}
 
 .delivery-address {
   margin: 10px 0;
@@ -859,8 +881,10 @@ p{
 
 .delivery-address label {
   display: block;
-  margin-bottom: 5px;
+  margin-bottom: 10px;
+  font-weight: bold;
 }
+
 
 .delivery-input {
   width: 100%;
@@ -886,6 +910,7 @@ p{
   border-radius: 3px;
   border: 1px solid #ccc;
 }
+
 
 
 

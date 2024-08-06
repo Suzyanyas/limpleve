@@ -89,6 +89,7 @@ export default function SidebarCart({
           </div>
 
           <div className="payment-method">
+            <label className="payment-title">Forma de pagamento:</label>
             <label className="payment-option">
               <input
                 type="radio"
@@ -119,30 +120,33 @@ export default function SidebarCart({
               />
               <span className="payment-label">Dinheiro</span>
             </label>
+
+            {paymentMethod === "dinheiro" && (
+              <div className="change-needed">
+                <label>
+                  <input
+                    type="checkbox"
+                    checked={changeNeeded}
+                    onChange={(e) => setChangeNeeded(e.target.checked)}
+                    className="change-checkbox"
+                  />
+                  Precisa de troco?
+                </label>
+                {changeNeeded && (
+                  <input
+                    type="number"
+                    placeholder="Troco para quanto?"
+                    value={changeAmount}
+                    onChange={(e) => setChangeAmount(e.target.value)}
+                    className="change-input"
+                  />
+                )}
+              </div>
+            )}
           </div>
 
-          {paymentMethod === "dinheiro" && (
-            <div className="change-needed">
-              <label>
-                <input
-                  type="checkbox"
-                  checked={changeNeeded}
-                  onChange={(e) => setChangeNeeded(e.target.checked)}
-                  className="change-checkbox"
-                />
-                Precisa de troco?
-              </label>
-              {changeNeeded && (
-                <input
-                  type="text"
-                  placeholder="Troco para quanto?"
-                  value={changeAmount}
-                  onChange={(e) => setChangeAmount(e.target.value)}
-                  className="change-input"
-                />
-              )}
-            </div>
-          )}
+
+
 
           <button onClick={handleCheckout} className="btn-icon">
             <img src={whatsappIcon} alt="WhatsApp" className="whatsapp-icon" />
