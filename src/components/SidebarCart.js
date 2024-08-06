@@ -19,7 +19,6 @@ export default function SidebarCart({
   const [changeAmount, setChangeAmount] = useState("");
   const [deliveryAddress, setDeliveryAddress] = useState("");
 
-  // Calcula o total do carrinho
   const calculateTotal = (products) => {
     return products.reduce((total, product) => {
       return total + product.price * product.quantity;
@@ -27,18 +26,32 @@ export default function SidebarCart({
   };
 
   const handleCheckout = () => {
-    const paymentDetails = paymentMethod === "dinheiro" && changeNeeded
-      ? `\n\nPagamento em Dinheiro. Precisa de troco para: R$ ${changeAmount}`
-      : `\n\nMétodo de pagamento: ${paymentMethod.charAt(0).toUpperCase() + paymentMethod.slice(1)}`;
+    const formattedChangeAmount = changeAmount.startsWith("R$")
+      ? changeAmount
+      : `R$ ${changeAmount}`;
+
+    const paymentDetails =
+      paymentMethod === "dinheiro" && changeNeeded
+        ? `\n\nPagamento em Dinheiro. Precisa de troco para: ${formattedChangeAmount}`
+        : `\n\nMétodo de pagamento: ${
+            paymentMethod.charAt(0).toUpperCase() + paymentMethod.slice(1)
+          }`;
 
     const whatsappMessage = encodeURIComponent(
       `Olá, gostaria de fazer o pedido dos seguintes itens:\n\n${selectedProducts
-        .map((product) =>
-          `- ${product.name} - R$ ${product.price.toFixed(2)}, Quantidade: ${product.quantity}, Total: R$ ${(product.quantity * product.price).toFixed(2)}${
-            product.fragrance ? `, Fragrância: ${product.fragrance}` : ""
-          }`
+        .map(
+          (product) =>
+            `- ${product.name} - R$ ${product.price.toFixed(
+              2
+            )}, Quantidade: ${product.quantity}, Total: R$ ${(
+              product.quantity * product.price
+            ).toFixed(2)}${
+              product.fragrance ? `, Fragrância: ${product.fragrance}` : ""
+            }`
         )
-        .join("\n")}\n\nValor total do pedido: R$ ${calculateTotal(selectedProducts).toFixed(2)}${paymentDetails}\n\nEndereço de entrega: ${deliveryAddress}`
+        .join("\n")}\n\nValor total do pedido: R$ ${calculateTotal(
+        selectedProducts
+      ).toFixed(2)}${paymentDetails}\n\nEndereço de entrega: ${deliveryAddress}`
     );
 
     const whatsappLink = `https://wa.me/${whatsappNumber}?text=${whatsappMessage}`;
@@ -47,6 +60,18 @@ export default function SidebarCart({
 
   const handleClearCart = () => {
     clearCart();
+  };
+
+  const handleFocus = () => {
+    if (!changeAmount.startsWith("R$")) {
+      setChangeAmount("R$ " + changeAmount);
+    }
+  };
+
+  const handleBlur = () => {
+    if (changeAmount === "R$ " || changeAmount === "R$") {
+      setChangeAmount("");
+    }
   };
 
   return (
@@ -134,19 +159,18 @@ export default function SidebarCart({
                 </label>
                 {changeNeeded && (
                   <input
-                    type="number"
+                    type="text"
                     placeholder="Troco para quanto?"
                     value={changeAmount}
                     onChange={(e) => setChangeAmount(e.target.value)}
                     className="change-input"
+                    onFocus={handleFocus}
+                    onBlur={handleBlur}
                   />
                 )}
               </div>
             )}
           </div>
-
-
-
 
           <button onClick={handleCheckout} className="btn-icon">
             <img src={whatsappIcon} alt="WhatsApp" className="whatsapp-icon" />
