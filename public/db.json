@@ -100,12 +100,12 @@
   },
   {
     "id": 8.2,
-    "name": "Desinfetante Econômico - 1 litro",
-    "image": "/images/products/outrasimg/desinfetanteeconomico1litrocitrusefloral.png",
+    "name": "Desinfetante Uau - ANTIBAC - 2 litros",
+    "image": "/images/products/DesinfetanteUauANTIBAC2litros.png",
     "rating": 4,
-    "price": 3.59,
+    "price": 10.50,
     "category": "Limpeza Doméstica",
-    "fragrances": ["Citrus", "Floral"],
+    "fragrances": ["Lavanda - Roxo","Flores e Frescor - Azul","Flores e Frutas - Vermelho","Flores da Primavera - Rosa"],
     "isAvailable": true
 },
 
@@ -392,7 +392,7 @@
       "rating": 4,
       "price": 15.90,
       "category": "Equipamentos de Limpeza",
-      "isAvailable": true
+      "isAvailable": false
     },
     
     {
@@ -402,7 +402,7 @@
       "rating": 4,
       "price": 21.90,
       "category": "Equipamentos de Limpeza",
-      "isAvailable": true
+      "isAvailable": false
     },
     
     {
@@ -545,9 +545,6 @@
       "category": "Equipamentos de Limpeza",
       "isAvailable": true
     },
-
-    
-
     {
       "id": 56,
       "name": "Rodo 60cm",
@@ -555,7 +552,7 @@
       "rating": 4,
       "price": 15.50,
       "category": "Equipamentos de Limpeza",
-      "isAvailable": true
+      "isAvailable": false
     },
 
     {
@@ -618,6 +615,16 @@
       "isAvailable": true
   },
   {
+    "id": 66,
+    "name": "Limpa Cerâmicas - Azulim - 1 Litro",
+    "image": "/images/products/LimpaCeramicasAzulim1litro.png",
+    "rating": 4,
+    "price": 7.50,
+    "category": "Limpeza Doméstica",
+    "isAvailable": true
+},
+
+  {
       "id": 67,
       "name": "Limpa Pisos UAU - 750ml",
       "image": "/images/products/outrasimg/limpapisosneutralizaodores.png",
@@ -644,6 +651,25 @@
       "category": "Limpeza Doméstica",
       "isAvailable": true
   },
+  {
+    "id": 68.1,
+    "name": "Limpa Vidros - 500ml - Azulim",
+    "image": "/images/products/LimpaVidros500mlAzulim.png",
+    "rating": 4,
+    "price": 4.50,
+    "category": "Limpeza Doméstica",
+    "isAvailable": true
+},
+{
+  "id": 68.2,
+  "name": "Limpa Pedras 1 litro Econômico",
+  "image": "/images/products/LimpaPedras1litroEconomico.png",
+  "rating": 4,
+  "price": 7.50,
+  "category": "Limpeza Doméstica",
+  "isAvailable": true
+},
+
   {
       "id": 69,
       "name": "Lustra Móveis UAU",
@@ -793,6 +819,37 @@
       "isAvailable": true
   },
   {
+    "id": 86.2,
+    "name": "Sabão em barra Urca 1kg - Neutro, Limão e Original",
+    "image": "/images/products/SabaoembarraUrca1kgNeutroLimãoOriginal.png",
+    "rating": 4,
+    "price": 8.59,
+    "category": "Limpeza Doméstica",
+    "fragrances": ["Neutro", "Limão", "Original"],
+    "isAvailable": true
+},
+
+{
+  "id": 86.3,
+  "name": "Sabão em barra Coco 900g - FC",
+  "image": "/images/products/SabaoembarraCoco900g-FC.png",
+  "rating": 4,
+  "price": 9.49,
+  "category": "Limpeza Doméstica",
+  "isAvailable": true
+},
+
+{
+  "id": 86.4,
+  "name": "Sabão Marmorizado Econômico - 450g",
+  "image": "/images/products/SabaoMarmorizadoEconomico450g.png",
+  "rating": 4,
+  "price": 3.99,
+  "category": "Limpeza Doméstica",
+  "isAvailable": true
+},
+
+  {
       "id": 87,
       "name": "Veja Cozinha Desengordurante - Refil",
       "image": "/images/products/outrasimg/vejarefileco400mlcozinhadesen.jpg",
@@ -801,8 +858,137 @@
       "category": "Limpeza Doméstica",
       "fragrances": ["Ariel(Verde)", "Côco(Branco)", "Ommo Caribe(Azul)"],
       "isAvailable": true
-  }
+  },
+  {
+    "id": 88,
+    "name": "Papel Higiênico 4 rolos Folha Simples",
+    "image": "/images/products/PapelHigienico4rolosFolhaSimples.png",
+    "rating": 4,
+    "price": 2.79,
+    "category": "Descartáveis",
+    "isAvailable": true
+  },
+  {
+    "id": 89,
+    "name": "Papel Higiênico 4 rolos Pimpo Folha Simples",
+    "image": "/images/products/PapelHigiênico4rolosPimpoFolhaSimples.png",
+    "rating": 4,
+    "price": 1.99,
+    "category": "Descartáveis",
+    "isAvailable": true
+  },
+  {
+    "id": 90,
+    "name": "Papel Higiênico Rolo 300 metros - 8 rolos por Pacote",
+    "image": "/images/products/PapelHigiênicoRolo300metros.png",
+    "rating": 4,
+    "price": 34.50,
+    "category": "Descartáveis",
+    "isAvailable": true
+  },
+  {
+    "id": 91,
+    "name": "Papel Higiênico Rolo 300 metros Premium - 8 rolos por Pacote",
+    "image": "/images/products/PapelHigiênicoRolo300metrosPremium.png",
+    "rating": 4,
+    "price": 56.00,
+    "category": "Descartáveis",
+    "isAvailable": true
+  },
+  {
+    "id": 92,
+    "name": "Papel Toalha Interfolhado Premium 2400 folhas - 100% Celulose",
+    "image": "/images/products/PapelToalhaInterfolhadoPremium2400folhas-100Celulose.png",
+    "rating": 4,
+    "price": 35.50,
+    "category": "Descartáveis",
+    "isAvailable": true
+  },
 
+  {
+    "id": 92.1,
+    "name": "Papel Toalha Interfolhado 2400 folhas - 100% Fibras Naturais",
+    "image": "/images/products/PapelToalhaInterfolhado2400folhas-100FibrasNaturais.png",
+    "rating": 4,
+    "price": 27.50,
+    "category": "Descartáveis",
+    "isAvailable": true
+  },
+  {
+    "id": 93,
+    "name": "Papel toalha Interfolhado 1000 folhas - Pimpo",
+    "image": "/images/products/PapeltoalhaInterfolhado1000folhasPimpo.png",
+    "rating": 4,
+    "price": 11.60,
+    "category": "Descartáveis",
+    "isAvailable": true
+  },
+  
+  {
+    "id": 94,
+    "name": "Papel Toalha 1000 folhas Higipel - 100% Celulose ",
+    "image": "/images/products/PapelToalha1000folhasHigipel-100Celulose.png",
+    "rating": 4,
+    "price": 17.50,
+    "category": "Descartáveis",
+    "isAvailable": true
+  },
+
+  {
+    "id": 95,
+    "name": "Lençol Hospitalar - 50cm x 50 metros - Fardo com 10 und",
+    "image": "/images/products/LencolHospitalar-50cmx50metros-Fardocom10und.png",
+    "rating": 4,
+    "price": 110.00,
+    "category": "Descartáveis",
+    "isAvailable": true
+  },
+  {
+    "id": 96,
+    "name": "Propé Descartável - pacote com 100und",
+    "image": "/images/products/PropeDescartavel-pacotecom100und.png",
+    "rating": 4,
+    "price": 22.50,
+    "category": "Descartáveis",
+    "isAvailable": true
+  },
+  {
+    "id": 96.1,
+    "name": "Touca descartável pacote com 100un",
+    "image": "/images/products/Toucadescartavelpacotecom100und.png",
+    "rating": 4,
+    "price": 16.00,
+    "category": "Descartáveis",
+    "isAvailable": true
+  },
+
+  {
+    "id": 97,
+    "name": "Copo Descartável - 150ml - 100un",
+    "image": "/images/products/copodescartavel.png",
+    "rating": 4,
+    "price": 4.60,
+    "category": "Descartáveis",
+    "isAvailable": true
+  },
+  {
+    "id": 98,
+    "name": "Copo Descartável - 180ml - 100un",
+    "image": "/images/products/copodescartavel.png",
+    "rating": 4,
+    "price": 4.85,
+    "category": "Descartáveis",
+    "isAvailable": true
+  },
+  {
+    "id": 99,
+    "name": "Copo Descartável 50ml - 100un",
+    "image": "/images/products/CopoDescartavel50ml.png",
+    "rating": 4,
+    "price": 2.99,
+    "category": "Descartáveis",
+    "isAvailable": true
+  }
   ]
 }
 
