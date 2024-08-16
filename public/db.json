@@ -640,7 +640,7 @@
     "rating": 4,
     "price": 9.90,
     "category": "Limpeza Doméstica",
-    "isAvailable": false
+    "isAvailable": true
   },
   {
       "id": 68,
