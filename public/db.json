@@ -5,7 +5,7 @@
       "name": "Água Sanitária FC - 5 Litros",
       "image": "/images/products/aguasanitfc.png",
       "rating": 5,
-      "price": 9.90,
+      "price": 10.90,
       "category": "Limpeza Doméstica",
       "isAvailable": true
   },
@@ -24,7 +24,7 @@
       "name": "Água Sanitária Samar - 5 Litros",
       "image": "/images/products/aguasanitSamar.png",
       "rating": 5,
-      "price": 8.50,
+      "price": 9.50,
       "category": "Limpeza Doméstica",
       "isAvailable": true
   },
@@ -33,7 +33,7 @@
       "name": "Alvejante sem Cloro Pop - 2 Litros",
       "image": "/images/products/alvejantesemcloropop.png",
       "rating": 3,
-      "price": 6.90,
+      "price": 7.50,
       "category": "Limpeza Doméstica",
       "isAvailable": true
   },
@@ -136,7 +136,7 @@
       "name": "Detergente Samar - 5 Litros",
       "image": "/images/products/detergneutrosamar.png",
       "rating": 5,
-      "price": 12.00,
+      "price": 13.50,
       "category": "Limpeza Doméstica",
       "fragrances": ["Limão", "Maçã", "Neutro"],
       "isAvailable": true
@@ -260,10 +260,10 @@
 
     {
       "id": 24,
-      "name": "Limpador de Aluminio Concentrado 5 Litros LUMY-X - 5 Litros - Lavyx ",
+      "name": "Limpador de Aluminio Concentrado LUMY-X - 5 Litros - Lavyx ",
       "image": "/images/products/imglimpauto/limpadordealuconcLUMY-XLAVYX.png",
       "rating": 5,
-      "price": 20.00,
+      "price": 22.00,
       "category": "Limpeza Automotiva",
       "isAvailable": true
     },
@@ -449,7 +449,7 @@
       "name": "Vassoura Cristal Kanto",
       "image": "/images/products/equilimp/vassourascristalkanto.png",
       "rating": 4,
-      "price": 8.00,
+      "price": 8.50,
       "category": "Equipamentos de Limpeza",
       "isAvailable": true
     },
@@ -508,10 +508,10 @@
 
     {
       "id": 50,
-      "name": "Pano de Chão Xadrez - ESGOTADO",
+      "name": "Pano de Chão Xadrez",
       "image": "/images/products/equilimp/panodechaoxadrez.png",
       "rating": 4,
-      "price":0 ,
+      "price": 5.99,
       "category": "Equipamentos de Limpeza",
       "isAvailable": true
     },
@@ -629,7 +629,7 @@
       "name": "Limpa Pisos UAU - 750ml",
       "image": "/images/products/outrasimg/limpapisosneutralizaodores.png",
       "rating": 4,
-      "price": 10.50,
+      "price": 11.90,
       "category": "Limpeza Doméstica",
       "isAvailable": true
   },
@@ -712,7 +712,7 @@
       "name": "Multiuso UAU Limão Siciliano - 500ml",
       "image": "/images/products/outrasimg/multiusodesenuaulimaosiciliano500ml.png",
       "rating": 4,
-      "price": 5.50,
+      "price": 5.95,
       "category": "Limpeza Doméstica",
       "isAvailable": true
   },
@@ -739,7 +739,7 @@
       "name": "Pedra Sanitária Pratik -Lavanda",
       "image": "/images/products/outrasimg/pratikpedrasanitaria.png",
       "rating": 4,
-      "price": 2.49,
+      "price": 2.79,
       "category": "Limpeza Doméstica",
       "isAvailable": true
   },
@@ -844,7 +844,7 @@
   "name": "Sabão Marmorizado Econômico - 450g",
   "image": "/images/products/SabaoMarmorizadoEconomico450g.png",
   "rating": 4,
-  "price": 3.99,
+  "price": 4.50,
   "category": "Limpeza Doméstica",
   "isAvailable": true
 },
@@ -895,15 +895,7 @@
     "category": "Descartáveis",
     "isAvailable": true
   },
-  {
-    "id": 92,
-    "name": "Papel Toalha Interfolhado Premium 2400 folhas - 100% Celulose",
-    "image": "/images/products/PapelToalhaInterfolhadoPremium2400folhas-100Celulose.png",
-    "rating": 4,
-    "price": 35.50,
-    "category": "Descartáveis",
-    "isAvailable": true
-  },
+  
 
   {
     "id": 92.1,
@@ -919,7 +911,7 @@
     "name": "Papel toalha Interfolhado 1000 folhas - Pimpo",
     "image": "/images/products/PapeltoalhaInterfolhado1000folhasPimpo.png",
     "rating": 4,
-    "price": 11.60,
+    "price": 12.50,
     "category": "Descartáveis",
     "isAvailable": true
   },
@@ -976,7 +968,7 @@
     "name": "Copo Descartável - 180ml - 100un",
     "image": "/images/products/copodescartavel.png",
     "rating": 4,
-    "price": 4.85,
+    "price": 5.25,
     "category": "Descartáveis",
     "isAvailable": true
   },
