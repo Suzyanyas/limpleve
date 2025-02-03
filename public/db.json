@@ -14,7 +14,7 @@
       "name": "Água sanitária Ibilimp - 5 Litros",
       "image": "/images/products/aguasaniibilimp.png",
       "rating": 4,
-      "price": 7.90,
+      "price": 9.50,
       "category": "Limpeza Doméstica",
       "isAvailable": true
       
@@ -114,7 +114,7 @@
       "name": "Detergente Di Kasa - 5 Litros",
       "image": "/images/products/detergentedikasa.png",
       "rating": 5,
-      "price": 9.90,
+      "price": 10.90,
       "category": "Limpeza Doméstica",
       "fragrances": ["Côco", "Limão", "Maçã", "Neutro", "Clean"],
       "isAvailable": true
@@ -184,7 +184,7 @@
       "name": "Limpador de Alumínio Concentrado ALUMAGI - Agius Prime - 20 Litros",
       "image": "/images/products/imglimpauto/alumagi20l.png",
       "rating": 5,
-      "price": 105.00,
+      "price": 110.00,
       "category": "Limpeza Automotiva",
       "isAvailable": true
     },
@@ -203,7 +203,7 @@
       "name": "Hidratante de Bancos de Couro - Agius Prime - 500ml",
       "image": "/images/products/imglimpauto/couroprimeagiushidratentebanco.png",
       "rating": 5,
-      "price": 26.75,
+      "price": 28.90,
       "category": "Limpeza Automotiva",
       "isAvailable": true
     },
@@ -213,7 +213,7 @@
       "name": "Desengraxante Limpador de Chassis Concentrado - DSX - 20 Litros",
       "image": "/images/products/imglimpauto/dsxagius20l.png",
       "rating": 5,
-      "price": 75.00,
+      "price": 78.00,
       "category": "Limpeza Automotiva",
       "isAvailable": true
     },
@@ -223,7 +223,7 @@
       "name": "Lava autos - Agius Prime - 5 Litros",
       "image": "/images/products/imglimpauto/lavaautosagiusprimeamarelo.png",
       "rating": 5,
-      "price": 26.50,
+      "price": 28.50,
       "category": "Limpeza Automotiva",
       "isAvailable": true
     },
@@ -293,20 +293,12 @@
       "name": "Lume Prime - Restaurador de Plásticos e Pneus - Agius Prime - 200ml",
       "image": "/images/products/imglimpauto/lumeprimeagiusprime.png",
       "rating": 5,
-      "price": 24.50,
+      "price": 28.50,
       "category": "Limpeza Automotiva",
       "isAvailable": true
     },
 
-    {
-      "id": 28,
-      "name": "Mega Cera de Carnaúba - Agius Prime - 3 Litros",
-      "image": "/images/products/imglimpauto/megaceracarnaubaagiusprime.png",
-      "rating": 5,
-      "price": 49.90,
-      "category": "Limpeza Automotiva",
-      "isAvailable": true
-    },
+    
 
     {
       "id": 29,
@@ -638,7 +630,7 @@
     "name": "Limpa pisos Azulim - Porcelanato - 750ml",
     "image": "/images/products/outrasimg/azulimporcelanato.png",
     "rating": 4,
-    "price": 9.90,
+    "price": 11.90,
     "category": "Limpeza Doméstica",
     "isAvailable": true
   },
@@ -675,7 +667,7 @@
       "name": "Lustra Móveis UAU",
       "image": "/images/products/outrasimg/lustramoveisuauperfumesfloresefolhaserosaeseducao.png",
       "rating": 4,
-      "price": 7.90,
+      "price": 8.90,
       "category": "Limpeza Doméstica",
       "fragrances": ["Flores e Folhas(Roxo)", "Rosas e Sedução(Vermelho)"],
       "isAvailable": true
@@ -685,7 +677,7 @@
       "name": "Lustra Móveis Ypê - 200ml",
       "image": "/images/products/outrasimg/lustramoveisypebrilho200ml.png",
       "rating": 4,
-      "price": 6.99,
+      "price": 7.69,
       "category": "Limpeza Doméstica",
       "isAvailable": true
   },
@@ -698,15 +690,7 @@
       "category": "Limpeza Doméstica",
       "isAvailable": true
   },
-  {
-      "id": 72,
-      "name": "Multiuso Econômico - 500ml",
-      "image": "/images/products/outrasimg/multiusoeconomico500ml.png",
-      "rating": 4,
-      "price": 2.99,
-      "category": "Limpeza Doméstica",
-      "isAvailable": true
-  },
+ 
   {
       "id": 73,
       "name": "Multiuso UAU Limão Siciliano - 500ml",
@@ -753,15 +737,7 @@
       "isAvailable": true
       
   },
-  {
-      "id": 80,
-      "name": "Sabão em Pó Brilhante - 400g",
-      "image": "/images/products/outrasimg/sabaoempobrilhante400g.png",
-      "rating": 4,
-      "price": 5.49,
-      "category": "Limpeza Doméstica",
-      "isAvailable": true
-  },
+ 
   {
       "id": 81,
       "name": "Sabão em Pó Tradicional Marilux - 5kg",
@@ -776,19 +752,11 @@
       "name": "Sabão em Pó Tixan Ypê - 800g",
       "image": "/images/products/outrasimg/tixanype800g.png",
       "rating": 4,
-      "price": 9.90,
+      "price": 10.90,
       "category": "Limpeza Doméstica",
       "isAvailable": true
   },
-  {
-    "id": 83, 
-    "name": "Sabão em Pó - Econômico -  400g",
-    "image": "/images/products/outrasimg/lavaroupaseconomico400g.png",
-    "rating": 4,
-    "price": 3.59,
-    "category": "Limpeza Doméstica",
-    "isAvailable": true
-  },
+ 
 
   {
       "id": 84,
@@ -800,24 +768,8 @@
       "fragrances": ["Ariel(Verde)", "Côco(Branco)", "Ommo Caribe(Azul)"],
       "isAvailable": true
   },
-  {
-      "id": 85,
-      "name": "Sabão em Pó Urca - 400g",
-      "image": "/images/products/outrasimg/sabaourca400g.png",
-      "rating": 4,
-      "price": 1.99,
-      "category": "Limpeza Doméstica",
-      "isAvailable": true
-  },
-  {
-      "id": 86,
-      "name": "Sabão em Pó Urca - 4kg",
-      "image": "/images/products/outrasimg/sabaourca4kg.png",
-      "rating": 4,
-      "price": 17.90,
-      "category": "Limpeza Doméstica",
-      "isAvailable": true
-  },
+ 
+  
   {
     "id": 86.2,
     "name": "Sabão em barra Urca 1kg - Neutro, Limão e Original",
@@ -834,7 +786,7 @@
   "name": "Sabão em barra Coco 900g - FC",
   "image": "/images/products/SabaoembarraCoco900g-FC.png",
   "rating": 4,
-  "price": 9.49,
+  "price": 11.90,
   "category": "Limpeza Doméstica",
   "isAvailable": true
 },
