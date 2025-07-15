@@ -63,7 +63,7 @@
   "name": "Cera Líquida Samar - 2 Litros",
   "image": "/images/products/ceraliquida2litros.png",
   "rating": 4,
-  "price": 6.50,
+  "price": 7.50,
   "category": "Limpeza Doméstica",
   "fragrances": ["Incolor", "Vermelha"],
   "isAvailable": true
@@ -73,7 +73,7 @@
       "name": "Desinfetante Samar - 2 Litros",
       "image": "/images/products/aromatizanteroxoverdeazul2litros.png",
       "rating": 5,
-      "price": 5.00,
+      "price": 5.90,
       "category": "Limpeza Doméstica",
       "fragrances": ["Flor do Campo - Lilás", "Stilus - Azul escuro", "Natura - Azul Claro"],
       "isAvailable": true
@@ -126,7 +126,7 @@
       "name": "Detergente Samar - 2 Litros",
       "image": "/images/products/detergentemacalimaoneutro2litros.png",
       "rating": 5,
-      "price": 6.75,
+      "price": 7.50,
       "category": "Limpeza Doméstica",
       "fragrances": ["Limão", "Maçã", "Neutro"],
       "isAvailable": true
@@ -157,7 +157,7 @@
       "name": "Limpador de bancos de couro - Agius Prime - 500ml",
       "image": "/images/products/imglimpauto/agilylipacouroagiusprime.png",
       "rating": 5,
-      "price": 22.75,
+      "price": 22.90,
       "category": "Limpeza Automotiva",
       "isAvailable": true
     },
@@ -166,7 +166,7 @@
       "name": "Desengraxante Limpador de Chassis Concentrado - DSX - 5 Litros",
       "image": "/images/products/imglimpauto/agiusprimedsxdesengraxantelipchassis.png",
       "rating": 4,
-      "price": 32.50,
+      "price": 34.50,
       "category": "Limpeza Automotiva",
       "isAvailable": true
     },
@@ -175,7 +175,7 @@
       "name": "Revitalizador de Plásticos Externos - Agius Prime - 400g",
       "image": "/images/products/imglimpauto/agiusprimereviplast.png",
       "rating": 5,
-      "price": 24.50,
+      "price": 25.50,
       "category": "Limpeza Automotiva",
       "isAvailable": true
     },
@@ -184,7 +184,7 @@
       "name": "Limpador de Alumínio Concentrado ALUMAGI - Agius Prime - 20 Litros",
       "image": "/images/products/imglimpauto/alumagi20l.png",
       "rating": 5,
-      "price": 110.00,
+      "price": 115.00,
       "category": "Limpeza Automotiva",
       "isAvailable": true
     },
@@ -193,7 +193,7 @@
       "name": "Aromatizante Automotivo - Agius Prime - 1 Litro",
       "image": "/images/products/imglimpauto/aromatizanteautoagiusroxoverdeamarelo.png",
       "rating": 5,
-      "price": 16.50,
+      "price": 18.50,
       "category": "Limpeza Automotiva",
       "isAvailable": true
     },
@@ -213,7 +213,7 @@
       "name": "Desengraxante Limpador de Chassis Concentrado - DSX - 20 Litros",
       "image": "/images/products/imglimpauto/dsxagius20l.png",
       "rating": 5,
-      "price": 78.00,
+      "price": 85.00,
       "category": "Limpeza Automotiva",
       "isAvailable": true
     },
@@ -223,7 +223,7 @@
       "name": "Lava autos - Agius Prime - 5 Litros",
       "image": "/images/products/imglimpauto/lavaautosagiusprimeamarelo.png",
       "rating": 5,
-      "price": 28.50,
+      "price": 29.90,
       "category": "Limpeza Automotiva",
       "isAvailable": true
     },
@@ -273,7 +273,7 @@
       "name": "Limpador Multiuso Auto - Agius Prime - 1 Litro ",
       "image": "/images/products/imglimpauto/limpadormultiagiusauto.png",
       "rating": 5,
-      "price": 16.50,
+      "price": 18.50,
       "category": "Limpeza Automotiva",
       "isAvailable": true
     },
@@ -283,7 +283,7 @@
       "name": "Limpa Estofados a seco - Agius Prime - 1 Litro ",
       "image": "/images/products/imglimpauto/limpaestofadosagiusprime1litro.png",
       "rating": 5,
-      "price": 16.50,
+      "price": 18.50,
       "category": "Limpeza Automotiva",
       "isAvailable": true
     },
@@ -293,7 +293,7 @@
       "name": "Lume Prime - Restaurador de Plásticos e Pneus - Agius Prime - 200ml",
       "image": "/images/products/imglimpauto/lumeprimeagiusprime.png",
       "rating": 5,
-      "price": 28.50,
+      "price": 30.50,
       "category": "Limpeza Automotiva",
       "isAvailable": true
     },
@@ -305,27 +305,19 @@
       "name": "Pneu Preto - Revitalizador de Pneus - Agius Prime - 1 Litro",
       "image": "/images/products/imglimpauto/pneupretoagiusprime.png",
       "rating": 5,
-      "price": 16.50,
+      "price": 18.50,
       "category": "Limpeza Automotiva",
       "isAvailable": true
     },
 
-    {
-      "id": 30,
-      "name": "Pneu Preto - Revitalizador de Pneus - Agius Prime - 20 Litros",
-      "image": "/images/products/imglimpauto/pneupretoagiusrevitalizadordepneus20l (1).png",
-      "rating": 5,
-      "price": 99.00,
-      "category": "Limpeza Automotiva",
-      "isAvailable": true
-    },
+   
 
     {
       "id": 31,
       "name": "Pulvi Prime - Protetor de chassis e caixas de rodas antiferrugem - Agius Prime - 1 Litro",
       "image": "/images/products/imglimpauto/pulviprimeagiusantiferrugem.png",
       "rating": 5,
-      "price": 18.50,
+      "price": 20.50,
       "category": "Limpeza Automotiva",
       "isAvailable": true
     },
@@ -344,27 +336,19 @@
       "name": "Restaura Prime - Restaurador de plásticos - Agius Prime - 500ml",
       "image": "/images/products/imglimpauto/restauraprimeagiusprime.png",
       "rating": 5,
-      "price": 48.50,
+      "price": 50.00,
       "category": "Limpeza Automotiva",
       "isAvailable": true
     },
 
-    {
-      "id": 34,
-      "name": "Strong Prime - Limpador de Pneus e Borrachas - Agius Prime - 500ml",
-      "image": "/images/products/imglimpauto/strongprimeagius.png",
-      "rating": 5,
-      "price": 36.90,
-      "category": "Limpeza Automotiva",
-      "isAvailable": true
-    },
+    
 
     {
       "id": 35,
       "name": "Tornado - Flotador Concentrado de Limpeza Extrema - Agius Prime - 1 Litro",
       "image": "/images/products/imglimpauto/tornadoagiusprime1litro.png",
       "rating": 5,
-      "price": 18.50,
+      "price": 20.50,
       "category": "Limpeza Automotiva",
       "isAvailable": true
     },
@@ -461,7 +445,7 @@
       "name": "Esponja Brilhus - Não Risca",
       "image": "/images/products/equilimp/esponjanaoriscabrilhus.jpg",
       "rating": 4,
-      "price": 1.49,
+      "price": 1.89,
       "category": "Equipamentos de Limpeza",
       "isAvailable": true
     },
@@ -473,7 +457,7 @@
       "name": "Esponja Flash Limp - Poliéster",
       "image": "/images/products/equilimp/esponjapoliesternaorisca.png",
       "rating": 4,
-      "price": 3.89,
+      "price": 4.50,
       "category": "Equipamentos de Limpeza",
       "isAvailable": true
     },
@@ -513,7 +497,7 @@
       "name": "Pano Esfregão Leve 3 Pague 2 - Brilhex",
       "image": "/images/products/equilimp/panoesfregao.png",
       "rating": 4,
-      "price": 8.00,
+      "price": 8.50,
       "category": "Equipamentos de Limpeza",
       "isAvailable": true
     },
@@ -572,7 +556,7 @@
       "name": "Lava Roupas - Ibilimp - 2 Litros",
       "image": "/images/products/outrasimg/ibilimp2litros.png",
       "rating": 4,
-      "price": 6.50,
+      "price": 7.50,
       "category": "Limpeza Doméstica",
       "fragrances": ["Canoa(Verde)", "Jeri(Azul)"],
       "isAvailable": true
@@ -602,7 +586,7 @@
       "name": "Limpa Cerâmica Samar - Pinho Gel - 5 Litros",
       "image": "/images/products/outrasimg/limpaceramicapinhogel5litros.png",
       "rating": 4,
-      "price": 16.50,
+      "price": 18.50,
       "category": "Limpeza Doméstica",
       "isAvailable": true
   },
@@ -720,10 +704,10 @@
   },
   {
       "id": 76,
-      "name": "Pedra Sanitária Pratik -Lavanda",
+      "name": "Pedra Sanitária Pratik - Lavanda",
       "image": "/images/products/outrasimg/pratikpedrasanitaria.png",
       "rating": 4,
-      "price": 2.79,
+      "price": 2.95,
       "category": "Limpeza Doméstica",
       "isAvailable": true
   },
@@ -732,7 +716,7 @@
       "name": "Sabão em Pó Ala - Lavanda - 500g",
       "image": "/images/products/outrasimg/sabaoala500g.png",
       "rating": 4,
-      "price": 3.49,
+      "price": 3.89,
       "category": "Limpeza Doméstica",
       "isAvailable": true
       
@@ -743,16 +727,7 @@
       "name": "Sabão em Pó Tradicional Marilux - 5kg",
       "image": "/images/products/outrasimg/marilux5kgbrancogarantido.png",
       "rating": 4,
-      "price": 16.90,
-      "category": "Limpeza Doméstica",
-      "isAvailable": true
-  },
-  {
-      "id": 82,
-      "name": "Sabão em Pó Tixan Ypê - 800g",
-      "image": "/images/products/outrasimg/tixanype800g.png",
-      "rating": 4,
-      "price": 10.90,
+      "price": 18.90,
       "category": "Limpeza Doméstica",
       "isAvailable": true
   },
@@ -769,17 +744,6 @@
       "isAvailable": true
   },
  
-  
-  {
-    "id": 86.2,
-    "name": "Sabão em barra Urca 1kg - Neutro, Limão e Original",
-    "image": "/images/products/SabaoembarraUrca1kgNeutroLimãoOriginal.png",
-    "rating": 4,
-    "price": 8.59,
-    "category": "Limpeza Doméstica",
-    "fragrances": ["Neutro", "Limão", "Original"],
-    "isAvailable": true
-},
 
 {
   "id": 86.3,
@@ -796,7 +760,7 @@
   "name": "Sabão Marmorizado Econômico - 450g",
   "image": "/images/products/SabaoMarmorizadoEconomico450g.png",
   "rating": 4,
-  "price": 4.50,
+  "price": 4.89,
   "category": "Limpeza Doméstica",
   "isAvailable": true
 },
@@ -834,7 +798,7 @@
     "name": "Papel Higiênico Rolo 300 metros - 8 rolos por Pacote",
     "image": "/images/products/PapelHigiênicoRolo300metros.png",
     "rating": 4,
-    "price": 34.50,
+    "price": 36.50,
     "category": "Descartáveis",
     "isAvailable": true
   },
@@ -843,7 +807,7 @@
     "name": "Papel Higiênico Rolo 300 metros Premium - 8 rolos por Pacote",
     "image": "/images/products/PapelHigiênicoRolo300metrosPremium.png",
     "rating": 4,
-    "price": 56.00,
+    "price": 58.00,
     "category": "Descartáveis",
     "isAvailable": true
   },
@@ -868,15 +832,7 @@
     "isAvailable": true
   },
   
-  {
-    "id": 94,
-    "name": "Papel Toalha 1000 folhas Higipel - 100% Celulose ",
-    "image": "/images/products/PapelToalha1000folhasHigipel-100Celulose.png",
-    "rating": 4,
-    "price": 17.50,
-    "category": "Descartáveis",
-    "isAvailable": true
-  },
+ 
 
   {
     "id": 95,
@@ -911,7 +867,7 @@
     "name": "Copo Descartável - 150ml - 100un",
     "image": "/images/products/copodescartavel.png",
     "rating": 4,
-    "price": 4.60,
+    "price": 4.75,
     "category": "Descartáveis",
     "isAvailable": true
   },
