@@ -99,7 +99,8 @@ export default function SidebarCart({
       ) : (
         <>
           <div className="total-container">
-            <b>Total: </b> R$ {calculateTotal(selectedProducts).toFixed(2)}
+            <span className="total-label">Total:</span>
+            <span className="total-value">R$ {calculateTotal(selectedProducts).toFixed(2)}</span>
           </div>
 
           <div className="delivery-address">

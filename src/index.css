@@ -4,6 +4,9 @@
 @import url('https://fonts.googleapis.com/css2?family=Allura&display=swap');
 
 @import url('https://fonts.googleapis.com/css2?family=Bebas+Neue&display=swap');
+ 
+@import url('https://fonts.googleapis.com/css2?family=Poppins:wght@400;500&family=Montserrat:wght@600&display=swap');
+
 
 * {
   margin: 0;
@@ -145,6 +148,14 @@ nav ul li:hover {
 
 .menu-button {
   display: none;
+}
+
+.menu-item-link {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  text-decoration: none;
+  color: inherit;
 }
 
 /* END NAVBAR */
@@ -377,8 +388,9 @@ nav ul li:hover {
   display: flex;
   flex-direction: column;
   position: relative;
-
+  box-shadow: -4px 4px 8px rgba(0, 0, 0, 0.15);
 }
+
 
 
 .product.unavailable img {
@@ -421,7 +433,9 @@ nav ul li:hover {
 }
 
 .product .name {
-  font-weight: bold;
+  font-family: 'Poppins', sans-serif;
+  font-weight: 400; /* normal */
+  font-weight:bold;
   margin-top: 0.8rem;
   margin-bottom: 0.8rem;
 }
@@ -463,7 +477,53 @@ nav ul li:hover {
   text-align: center;
   font-size: large;
   font-weight: bolder; 
+  box-shadow: 2px 2px 8px rgba(0, 0, 0, 0.5); 
 }
+
+.fragrance-selector {
+  appearance: none;
+  -webkit-appearance: auto;
+  -moz-appearance: auto;
+
+  background-color: #fff;
+  border: 1px solid #ddd;
+  border-radius: 8px;
+  padding: 0.6rem 1.2rem;
+  font-size: 1rem;
+  color: #333;
+
+  /* seta SVG personalizada */
+  background-image: none;
+  background-repeat: no-repeat;
+  background-position: right 0.8rem center;
+  background-size: 1rem;
+
+  cursor: pointer;
+  transition: all 0.3s ease;
+  box-shadow: 0 2px 4px rgba(0,0,0,0.08);
+}
+
+/* foco */
+.fragrance-selector:focus {
+  border-color: var(--primary-color);
+  box-shadow: 0 0 0 3px rgba(39,174,96,0.2);
+  outline: none;
+}
+
+/* Remove seta nativa no IE e Edge */
+.fragrance-selector::-ms-expand {
+  display: none;
+}
+
+/* Remove seta nativa em WebKit */
+.fragrance-selector::-webkit-inner-spin-button,
+.fragrance-selector::-webkit-outer-spin-button {
+  -webkit-appearance: none;
+  margin: 0;
+}
+
+
+
 
 /* CSS para os controles de quantidade */
 
@@ -540,19 +600,21 @@ nav ul li:hover {
 /*End CSS para o popup */
 
 .btn-icon {
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  gap: 0.25rem;
-  padding: 0.8rem;
-  background-color: var(--primary-color); /* Utilize a variável de cor primária do seu projeto */
-  color: #fff;
-  border-radius: 8px;
-  font-size: 1rem;
-  transition: all 0.2s;
-  border: none;
-  cursor: pointer;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    gap: 0.25rem;
+    padding: 0.8rem;
+    background-color: #25D366; /* verde WhatsApp */
+    color: #fff;
+    border-radius: 8px;
+    font-size: 1rem;
+    transition: all 0.2s;
+    border: none;
+    cursor: pointer;
+    box-shadow: 2px 2px 8px rgba(0, 0, 0, 0.5); /* Opacidade corrigida para ficar mais realista */
 }
+
 
 .btn-icon:hover {
   background-color: #007bff; /* Cor de hover desejada */
@@ -574,6 +636,7 @@ nav ul li:hover {
 
 .add-to-cart-btn {
   background-color: var(--secondary-color);
+  
 }
 
 .add-to-cart-btn:hover {
@@ -721,7 +784,11 @@ p{
 }
 
 .sidebar-cart .total-container {
-  margin-block: 1rem;
+    text-align: center;
+    background-color: #c4c4c4;
+    padding: 5px;
+    border-radius: 5px;
+    box-shadow: 2px 2px 8px rgba(0, 0, 0, 0.2);
 }
 
 .sidebar-cart .left-side {
@@ -819,12 +886,28 @@ p{
   border-radius: 5px;
 }
 
-.total-container{
+.total-container {
   text-align: center;
-  background-color: #c4c4c4;
-  padding: 5px;
-  border-radius: 5px;
+  background-color: #f5f5f5;
+  padding: 1rem;
+  border-radius: 12px;
+  box-shadow: 0 4px 10px rgba(0,0,0,0.1);
+  font-size: 1.2rem;
+  color: #333;
+  margin: 1rem 0;
 }
+
+.total-container .total-label {
+  font-weight: 500;
+  color: black;
+}
+
+.total-container .total-value {
+  font-weight: 700;
+  color: var(--dark-secondary-color); 
+  margin-left: 0.5rem;
+}
+
 
 .payment-method {
   margin: 10px 0;

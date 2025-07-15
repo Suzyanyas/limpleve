@@ -41,11 +41,11 @@ export default function Product({
 
   return (
     <div className={`product ${!isAvailable ? "unavailable" : ""}`}>
-      <img 
-        src={currentImage} 
-        alt={name} 
-        onClick={openPopup} 
-        className={!isAvailable ? "unavailable" : ""} 
+      <img
+        src={currentImage}
+        alt={name}
+        onClick={openPopup}
+        className={!isAvailable ? "unavailable" : ""}
       />
       <p className="name">{name}</p>
       <div className={`price-container ${price > 50 ? "expensive" : ""}`}>
@@ -55,26 +55,29 @@ export default function Product({
       {fragrances.length > 0 && (
         <div className="fragrance-selector">
           <label htmlFor={`fragrance-${id}`}>Escolha uma Fragrância:</label>
-          <select
-            id={`fragrance-${id}`}
-            value={selectedFragrance}
-            onChange={handleFragranceChange}
-            disabled={!isAvailable}
-          >
-            <option value="">Selecione uma Fragrância</option>
-            {fragrances.map((fragrance, index) => (
-              <option key={index} value={fragrance}>
-                {fragrance}
-              </option>
-            ))}
-          </select>
+          <div className="fragrance-selector-wrapper">
+            <select
+              id={`fragrance-${id}`}
+              value={selectedFragrance}
+              onChange={handleFragranceChange}
+              disabled={!isAvailable}
+            >
+              <option value="" disabled>Selecione</option>
+              {fragrances.map((fragrance, index) => (
+                <option key={index} value={fragrance}>
+                  {fragrance}
+                </option>
+              ))}
+            </select>
+
+          </div>
         </div>
       )}
 
       <div className="buttons">
-        <button 
-          onClick={addToCart} 
-          className="btn-icon add-to-cart-btn" 
+        <button
+          onClick={addToCart}
+          className="btn-icon add-to-cart-btn"
           disabled={!isAvailable}
         >
           <span>Adicionar ao carrinho</span>
