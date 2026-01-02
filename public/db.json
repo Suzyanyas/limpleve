@@ -42,7 +42,7 @@
       "name": "Amaciante Di Kasa - 5 Litros",
       "image": "/images/products/amaciantedikasa.png",
       "rating": 5,
-      "price": 16.00,
+      "price": 17.50,
       "category": "Limpeza Doméstica",
       "fragrances": ["Meu sonho - Branco", "Confort - Azul", "Yellow Soft Amarelo"],
       "isAvailable": true
@@ -55,7 +55,7 @@
     "price": 16.00,
     "category": "Limpeza Doméstica",
     "fragrances": ["Conforlageno - Rosa", "Confornew - Branco", "Dawny Azul"],
-    "isAvailable": true
+    "isAvailable": false
     
 },
 {
@@ -73,7 +73,7 @@
       "name": "Desinfetante Samar - 2 Litros",
       "image": "/images/products/aromatizanteroxoverdeazul2litros.png",
       "rating": 5,
-      "price": 5.90,
+      "price": 6.50,
       "category": "Limpeza Doméstica",
       "fragrances": ["Flor do Campo - Lilás", "Stilus - Azul escuro", "Natura - Azul Claro"],
       "isAvailable": true
@@ -114,7 +114,7 @@
       "name": "Detergente Di Kasa - 5 Litros",
       "image": "/images/products/detergentedikasa.png",
       "rating": 5,
-      "price": 10.90,
+      "price": 12.00,
       "category": "Limpeza Doméstica",
       "fragrances": ["Côco", "Limão", "Maçã", "Neutro", "Clean"],
       "isAvailable": true
@@ -388,7 +388,7 @@
       "rating": 4,
       "price": 14.74,
       "category": "Equipamentos de Limpeza",
-      "isAvailable": true
+      "isAvailable":false
     },
 
     {
@@ -398,7 +398,7 @@
       "rating": 4,
       "price": 14.74,
       "category": "Equipamentos de Limpeza",
-      "isAvailable": true
+      "isAvailable": false
     },
 
     {
@@ -408,7 +408,7 @@
       "rating": 4,
       "price": 9.90,
       "category": "Equipamentos de Limpeza",
-      "isAvailable": true
+      "isAvailable": false
     },
     {
       "id": 42,
@@ -417,7 +417,7 @@
       "rating": 4,
       "price": 9.90,
       "category": "Equipamentos de Limpeza",
-      "isAvailable": true
+      "isAvailable": false
     },
 
     {
@@ -427,7 +427,7 @@
       "rating": 4,
       "price": 8.50,
       "category": "Equipamentos de Limpeza",
-      "isAvailable": true
+      "isAvailable": false
     },
 
     {
@@ -437,12 +437,12 @@
       "rating": 4,
       "price": 8.00,
       "category": "Equipamentos de Limpeza",
-      "isAvailable": true
+      "isAvailable": false
     },
 
     {
       "id": 45,
-      "name": "Esponja Brilhus - Não Risca",
+      "name": "Esponja Bombril - Não Risca",
       "image": "/images/products/equilimp/esponjanaoriscabrilhus.jpg",
       "rating": 4,
       "price": 1.89,
@@ -528,7 +528,7 @@
       "rating": 4,
       "price": 15.50,
       "category": "Equipamentos de Limpeza",
-      "isAvailable": false
+      "isAvailable": true
     },
 
     {
@@ -576,7 +576,7 @@
     "name": "Lava Roupas - Dikasa - Homo - 5 Litros",
     "image": "/images/products/outrasimg/lavaroupashomoazuldikasa.png",
     "rating": 4,
-    "price": 16.00,
+    "price": 17.50,
     "category": "Limpeza Doméstica",
     "isAvailable": true
   },
@@ -605,7 +605,7 @@
       "name": "Limpa Pisos UAU - 750ml",
       "image": "/images/products/outrasimg/limpapisosneutralizaodores.png",
       "rating": 4,
-      "price": 11.90,
+      "price": 12.99,
       "category": "Limpeza Doméstica",
       "isAvailable": true
   },
@@ -634,7 +634,7 @@
     "rating": 4,
     "price": 4.50,
     "category": "Limpeza Doméstica",
-    "isAvailable": true
+    "isAvailable": false
 },
 {
   "id": 68.2,
@@ -661,7 +661,7 @@
       "name": "Lustra Móveis Ypê - 200ml",
       "image": "/images/products/outrasimg/lustramoveisypebrilho200ml.png",
       "rating": 4,
-      "price": 7.69,
+      "price": 7.99,
       "category": "Limpeza Doméstica",
       "isAvailable": true
   },
@@ -680,7 +680,7 @@
       "name": "Multiuso UAU Limão Siciliano - 500ml",
       "image": "/images/products/outrasimg/multiusodesenuaulimaosiciliano500ml.png",
       "rating": 4,
-      "price": 5.95,
+      "price": 6.50,
       "category": "Limpeza Doméstica",
       "isAvailable": true
   },
@@ -698,7 +698,7 @@
       "name": "Pastilha Adesiva Pato Lavanda - 3 Pastilhas",
       "image": "/images/products/outrasimg/pastilhapatolavanda3pastilhas.png",
       "rating": 4,
-      "price": 8.50,
+      "price": 9.90,
       "category": "Limpeza Doméstica",
       "isAvailable": true
   },
@@ -709,7 +709,7 @@
       "rating": 4,
       "price": 2.95,
       "category": "Limpeza Doméstica",
-      "isAvailable": true
+      "isAvailable": false
   },
   {
       "id": 79,
@@ -738,7 +738,7 @@
       "name": "Sabão Samar 5 Litros",
       "image": "/images/products/outrasimg/sabaoliquidosamar5litros.png",
       "rating": 4,
-      "price": 13.90,
+      "price": 14.50,
       "category": "Limpeza Doméstica",
       "fragrances": ["Ariel(Verde)", "Côco(Branco)", "Ommo Caribe(Azul)"],
       "isAvailable": true
@@ -752,7 +752,7 @@
   "rating": 4,
   "price": 11.90,
   "category": "Limpeza Doméstica",
-  "isAvailable": true
+  "isAvailable": false
 },
 
 {
@@ -760,7 +760,7 @@
   "name": "Sabão Marmorizado Econômico - 450g",
   "image": "/images/products/SabaoMarmorizadoEconomico450g.png",
   "rating": 4,
-  "price": 4.89,
+  "price": 5.50,
   "category": "Limpeza Doméstica",
   "isAvailable": true
 },
@@ -782,7 +782,7 @@
     "rating": 4,
     "price": 2.79,
     "category": "Descartáveis",
-    "isAvailable": true
+    "isAvailable": false
   },
   {
     "id": 89,
@@ -791,7 +791,7 @@
     "rating": 4,
     "price": 1.99,
     "category": "Descartáveis",
-    "isAvailable": true
+    "isAvailable": false
   },
   {
     "id": 90,
@@ -809,7 +809,7 @@
     "rating": 4,
     "price": 58.00,
     "category": "Descartáveis",
-    "isAvailable": true
+    "isAvailable": false
   },
   
 
@@ -841,7 +841,7 @@
     "rating": 4,
     "price": 110.00,
     "category": "Descartáveis",
-    "isAvailable": true
+    "isAvailable": false
   },
   {
     "id": 96,
