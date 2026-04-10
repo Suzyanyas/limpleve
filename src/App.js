@@ -8,16 +8,17 @@ import SidebarCart from './components/SidebarCart';
 import Footer from './components/Footer';
 import ScrollToTopButton from './components/ScrollToTopButton';
 import AdminPanel from './components/AdminPanel';
+import SetPassword from './components/SetPassword';
 import { getAllProducts, getProductsByCategory } from './services/productService';
 
-// Detecta token de convite/recuperação no hash e redireciona para /admin
+// Detecta token de convite no hash e redireciona para /set-password
 const AuthRedirect = () => {
   const navigate = useNavigate();
 
   useEffect(() => {
     const hash = window.location.hash;
-    if (hash && (hash.includes('type=invite') || hash.includes('type=recovery') || hash.includes('access_token'))) {
-      navigate('/admin', { replace: true });
+    if (hash && hash.includes('type=invite')) {
+      navigate('/set-password', { replace: true });
     }
   }, [navigate]);
 
@@ -205,6 +206,10 @@ function App() {
             <Route
               path='/admin'
               element={<AdminPanel />}
+            />
+            <Route
+              path='/set-password'
+              element={<SetPassword />}
             />
           </Routes>
         </main>
