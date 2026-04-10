@@ -1,24 +1,34 @@
 import React, { useEffect, useState } from 'react';
 import { BrowserRouter as Router, Routes, Route, useParams } from 'react-router-dom';
+import { Toaster } from 'react-hot-toast';
 import Navbar from './components/Navbar';
 import HomePage from './components/pages/HomePage';
 import ProductsPage from './components/pages/ProductsPage';
 import SidebarCart from './components/SidebarCart';
 import Footer from './components/Footer';
 import ScrollToTopButton from './components/ScrollToTopButton';
+import AdminPanel from './components/AdminPanel';
+import { getAllProducts, getProductsByCategory } from './services/productService';
 
 const CategoryProductsPage = ({ addProductToCart }) => {
   const { category } = useParams();
   const [categoryProducts, setCategoryProducts] = useState([]);
+  const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    fetch('/db.json')
-      .then((res) => res.json())
-      .then((data) => {
-        const filteredProducts = data.products.filter((product) => product.category.toLowerCase() === category.toLowerCase());
-        setCategoryProducts(filteredProducts);
-      });
+    loadCategoryProducts();
   }, [category]);
+
+  const loadCategoryProducts = async () => {
+    setLoading(true);
+    const data = await getProductsByCategory(category);
+    setCategoryProducts(data);
+    setLoading(false);
+  };
+
+  if (loading) {
+    return <div style={{ textAlign: 'center', padding: '50px' }}>Carregando produtos...</div>;
+  }
 
   return (
     <ProductsPage
@@ -38,14 +48,18 @@ function App() {
   const [changeNeeded, setChangeNeeded] = useState(false);
   const [changeAmount, setChangeAmount] = useState('');
   const [deliveryAddress, setDeliveryAddress] = useState('');
+  const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    fetch('/db.json')
-      .then((res) => res.json())
-      .then((data) => {
-        setProducts(data.products);
-      });
+    loadProducts();
   }, []);
+
+  const loadProducts = async () => {
+    setLoading(true);
+    const data = await getAllProducts();
+    setProducts(data);
+    setLoading(false);
+  };
 
   useEffect(() => {
     const total = selectedProducts.reduce((sum, product) => sum + product.price * product.quantity, 0);
@@ -101,6 +115,30 @@ function App() {
 
   return (
     <Router>
+      <Toaster 
+        position="top-right"
+        toastOptions={{
+          duration: 3000,
+          style: {
+            background: '#363636',
+            color: '#fff',
+            padding: '16px',
+            borderRadius: '8px',
+          },
+          success: {
+            iconTheme: {
+              primary: '#10b981',
+              secondary: '#fff',
+            },
+          },
+          error: {
+            iconTheme: {
+              primary: '#ef4444',
+              secondary: '#fff',
+            },
+          },
+        }}
+      />
       <div className='App'>
         <Navbar
           selectedProducts={selectedProducts}
@@ -150,6 +188,10 @@ function App() {
             <Route
               path='/products/:category'
               element={<CategoryProductsPage addProductToCart={addProductToCart} />}
+            />
+            <Route
+              path='/admin'
+              element={<AdminPanel />}
             />
           </Routes>
         </main>

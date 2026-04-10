@@ -1,0 +1,290 @@
+.management-dashboard {
+  min-height: 100vh;
+  background: linear-gradient(135deg, #1e3c72 0%, #2a5298 100%);
+  padding: 20px;
+}
+
+.dashboard-header {
+  text-align: center;
+  margin-bottom: 40px;
+  padding: 30px 0;
+}
+
+.header-title {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+.logo-container {
+  text-align: center;
+}
+
+.logo-img {
+  max-height: 150px;
+  width: auto;
+  object-fit: contain;
+  filter: drop-shadow(2px 2px 8px rgba(0,0,0,0.3));
+}
+
+.logo {
+  font-size: 48px;
+  font-weight: bold;
+  color: white;
+  text-shadow: 2px 2px 8px rgba(0, 0, 0, 0.3);
+  font-family: 'Arial', sans-serif;
+  letter-spacing: 2px;
+}
+
+.subtitle {
+  font-size: 36px;
+  font-weight: 300;
+  color: white;
+  text-shadow: 2px 2px 8px rgba(0, 0, 0, 0.3);
+  margin-top: 5px;
+  font-family: 'Arial', sans-serif;
+}
+
+.dashboard-cards {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+  gap: 20px;
+  max-width: 1200px;
+  margin: 0 auto;
+}
+
+.dashboard-card {
+  background: linear-gradient(135deg, #ffa666 0%, #ffb380 100%);
+  border-radius: 20px;
+  padding: 20px;
+  box-shadow: 0 8px 20px rgba(0, 0, 0, 0.2);
+  transition: transform 0.3s ease, box-shadow 0.3s ease;
+  min-height: 300px;
+  cursor: pointer;
+}
+
+.dashboard-card:hover {
+  transform: translateY(-5px);
+  box-shadow: 0 12px 30px rgba(0, 0, 0, 0.3);
+}
+
+.picking-card {
+  background: linear-gradient(135deg, #ffb380 0%, #ffc299 100%);
+}
+
+.routes-card {
+  background: linear-gradient(135deg, #ffc299 0%, #ffd1b3 100%);
+}
+
+.card-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 20px;
+  padding-bottom: 10px;
+  border-bottom: 2px solid rgba(255, 255, 255, 0.3);
+}
+
+.card-header h3 {
+  color: white;
+  font-size: 24px;
+  margin: 0;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  text-shadow: 1px 1px 3px rgba(0, 0, 0, 0.2);
+}
+
+.card-header .icon {
+  font-size: 28px;
+}
+
+.card-header-actions {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.btn-new,
+.btn-expand {
+  background: white;
+  border: none;
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2);
+  transition: all 0.3s ease;
+  font-size: 18px;
+}
+
+.btn-new:hover,
+.btn-expand:hover {
+  transform: scale(1.1);
+  box-shadow: 0 6px 15px rgba(0, 0, 0, 0.3);
+}
+
+.plus-icon {
+  font-size: 22px;
+  color: #ff9966;
+  font-weight: bold;
+}
+
+.btn-expand {
+  color: #ff9966;
+  font-weight: bold;
+}
+
+.card-content {
+  color: white;
+}
+
+.loading,
+.empty-state {
+  text-align: center;
+  padding: 40px 20px;
+  color: rgba(255, 255, 255, 0.8);
+  font-size: 16px;
+}
+
+.items-list {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+}
+
+.item {
+  background: rgba(255, 255, 255, 0.2);
+  padding: 12px 15px;
+  margin-bottom: 10px;
+  border-radius: 12px;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.item:hover {
+  background: rgba(255, 255, 255, 0.3);
+  transform: translateX(5px);
+}
+
+.item.picked {
+  background: rgba(76, 175, 80, 0.3);
+}
+
+.checkbox {
+  font-size: 18px;
+  color: white;
+}
+
+.checkbox.checked {
+  color: #4caf50;
+  font-weight: bold;
+}
+
+.item-name {
+  flex: 1;
+  font-size: 16px;
+  color: white;
+  font-weight: 500;
+}
+
+.more-items {
+  text-align: center;
+  padding: 10px;
+  color: rgba(255, 255, 255, 0.7);
+  font-style: italic;
+  font-size: 14px;
+}
+
+/* Rotas específicas */
+.routes-lists {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+
+.route-section h4 {
+  margin: 0 0 10px 0;
+  font-size: 16px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  color: white;
+  text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.2);
+}
+
+.status-icon {
+  font-size: 20px;
+}
+
+.status-badge {
+  margin-left: auto;
+  font-size: 18px;
+}
+
+.status-badge.next {
+  color: #ff5722;
+}
+
+.status-badge.success {
+  color: #4caf50;
+}
+
+/* ── Inline section panel ── */
+.inline-section {
+  max-width: 1200px;
+  margin: 28px auto 0;
+  background: white;
+  border-radius: 24px 24px 0 0;
+  box-shadow: 0 -6px 30px rgba(0, 0, 0, 0.18);
+  overflow: hidden;
+  animation: slideUp 0.35s ease;
+}
+
+@keyframes slideUp {
+  from {
+    opacity: 0;
+    transform: translateY(30px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* Override budget-manager inside inline panel */
+.inline-section .budget-manager {
+  min-height: unset;
+  background: transparent;
+  padding: 0;
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+  .dashboard-cards {
+    grid-template-columns: 1fr;
+  }
+
+  .logo {
+    font-size: 36px;
+  }
+
+  .subtitle {
+    font-size: 28px;
+  }
+
+  .dashboard-card {
+    min-height: auto;
+  }
+
+  .inline-section {
+    border-radius: 16px 16px 0 0;
+    margin: 16px auto 0;
+  }
+}

@@ -1,0 +1,211 @@
+.picking-manager {
+  min-height: 100vh;
+  background: linear-gradient(135deg, #ffb380 0%, #ffc299 100%);
+  padding: 20px;
+}
+
+.picking-content {
+  max-width: 800px;
+  margin: 0 auto;
+  padding: 20px;
+}
+
+.loading {
+  text-align: center;
+  padding: 60px 20px;
+  color: white;
+  font-size: 18px;
+}
+
+.picking-section {
+  margin-bottom: 30px;
+}
+
+.picking-item {
+  background: rgba(255, 255, 255, 0.95);
+  padding: 20px;
+  margin-bottom: 15px;
+  border-radius: 12px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+  transition: all 0.3s ease;
+}
+
+.picking-item:hover {
+  transform: translateY(-3px);
+  box-shadow: 0 6px 16px rgba(0, 0, 0, 0.15);
+}
+
+.picking-item.picked {
+  background: rgba(76, 175, 80, 0.15);
+  border-left: 4px solid #4caf50;
+}
+
+.picking-item.pending {
+  background: rgba(255, 255, 255, 0.95);
+  border-left: 4px solid #ff9966;
+}
+
+.item-info {
+  display: flex;
+  align-items: center;
+  gap: 15px;
+  flex: 1;
+}
+
+.checkbox {
+  font-size: 24px;
+  color: #ccc;
+}
+
+.checkbox.checked {
+  color: #4caf50;
+  font-weight: bold;
+}
+
+.customer-name {
+  font-size: 18px;
+  font-weight: 600;
+  color: #333;
+}
+
+.customer-code {
+  font-size: 14px;
+  color: #666;
+  margin-left: 8px;
+}
+
+.btn-pick,
+.btn-unpick {
+  padding: 10px 24px;
+  border: none;
+  border-radius: 8px;
+  font-size: 14px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.btn-pick {
+  background: linear-gradient(135deg, #1e3c72 0%, #2a5298 100%);
+  color: white;
+  box-shadow: 0 4px 12px rgba(30, 60, 114, 0.3);
+}
+
+.btn-pick:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 6px 16px rgba(30, 60, 114, 0.4);
+}
+
+.btn-unpick {
+  background: #f0f0f0;
+  color: #666;
+  border: 2px solid #e0e0e0;
+}
+
+.btn-unpick:hover {
+  background: #e6e6e6;
+  color: #333;
+}
+
+.btn-delete-pick {
+  background: none;
+  border: 2px solid #fca5a5;
+  border-radius: 8px;
+  width: 42px;
+  height: 42px;
+  font-size: 16px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.2s;
+}
+
+.btn-delete-pick:hover {
+  background: #fee2e2;
+}
+
+.item-actions {
+  display: flex;
+  gap: 8px;
+  align-items: center;
+}
+
+.btn-route {
+  padding: 10px 16px;
+  border: none;
+  border-radius: 8px;
+  font-size: 14px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  background: linear-gradient(135deg, #e67e22 0%, #d35400 100%);
+  color: white;
+  box-shadow: 0 4px 12px rgba(230, 126, 34, 0.3);
+}
+
+.btn-route:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 6px 16px rgba(230, 126, 34, 0.4);
+}
+
+.badge-routed {
+  padding: 8px 14px;
+  border-radius: 8px;
+  font-size: 13px;
+  font-weight: 600;
+  background: rgba(255, 255, 255, 0.2);
+  color: white;
+  border: 1.5px solid rgba(255, 255, 255, 0.4);
+}
+
+.empty-state {
+  text-align: center;
+  padding: 80px 20px;
+  color: white;
+}
+
+.empty-icon {
+  font-size: 64px;
+  margin-bottom: 20px;
+}
+
+.empty-state p {
+  font-size: 18px;
+  margin: 0;
+  text-shadow: 1px 1px 3px rgba(0, 0, 0, 0.2);
+}
+
+.header-icon {
+  font-size: 32px;
+  background: white;
+  width: 50px;
+  height: 50px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+  .picking-item {
+    flex-direction: column;
+    gap: 15px;
+    align-items: stretch;
+  }
+
+  .item-info {
+    justify-content: flex-start;
+  }
+
+  .btn-pick,
+  .btn-unpick {
+    width: 100%;
+    padding: 12px;
+  }
+}

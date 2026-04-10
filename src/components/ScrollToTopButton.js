@@ -15,10 +15,14 @@ export default function ScrollToTopButton() {
   };
 
   const scrollToTop = () => {
-    window.scrollTo({
-      top: 0,
-      behavior: 'smooth'
-    });
+    const scrollToTopSmooth = () => {
+      const currentScroll = window.pageYOffset || document.documentElement.scrollTop;
+      if (currentScroll > 0) {
+        window.requestAnimationFrame(scrollToTopSmooth);
+        window.scrollTo(0, currentScroll - currentScroll / 8);
+      }
+    };
+    scrollToTopSmooth();
   };
 
   useEffect(() => {
