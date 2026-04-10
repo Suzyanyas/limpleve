@@ -15,16 +15,17 @@ const CategoryProductsPage = ({ addProductToCart }) => {
   const [categoryProducts, setCategoryProducts] = useState([]);
   const [loading, setLoading] = useState(true);
 
-  useEffect(() => {
-    loadCategoryProducts();
-  }, [category]);
-
   const loadCategoryProducts = async () => {
     setLoading(true);
     const data = await getProductsByCategory(category);
     setCategoryProducts(data);
     setLoading(false);
   };
+
+  useEffect(() => {
+    loadCategoryProducts();
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [category]);
 
   if (loading) {
     return <div style={{ textAlign: 'center', padding: '50px' }}>Carregando produtos...</div>;
@@ -48,17 +49,14 @@ function App() {
   const [changeNeeded, setChangeNeeded] = useState(false);
   const [changeAmount, setChangeAmount] = useState('');
   const [deliveryAddress, setDeliveryAddress] = useState('');
-  const [loading, setLoading] = useState(true);
 
   useEffect(() => {
     loadProducts();
   }, []);
 
   const loadProducts = async () => {
-    setLoading(true);
     const data = await getAllProducts();
     setProducts(data);
-    setLoading(false);
   };
 
   useEffect(() => {

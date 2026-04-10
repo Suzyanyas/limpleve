@@ -47,6 +47,7 @@ export default function BudgetManager({ onBack, initialBudget, openNew, onUpdate
   useEffect(() => {
     loadData();
     if (!initialBudget) loadBudgetsList();
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   const loadBudgetsList = async () => {
