@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import { BrowserRouter as Router, Routes, Route, useParams } from 'react-router-dom';
+import { BrowserRouter as Router, Routes, Route, useParams, useNavigate } from 'react-router-dom';
 import { Toaster } from 'react-hot-toast';
 import Navbar from './components/Navbar';
 import HomePage from './components/pages/HomePage';
@@ -9,6 +9,20 @@ import Footer from './components/Footer';
 import ScrollToTopButton from './components/ScrollToTopButton';
 import AdminPanel from './components/AdminPanel';
 import { getAllProducts, getProductsByCategory } from './services/productService';
+
+// Detecta token de convite/recuperação no hash e redireciona para /admin
+const AuthRedirect = () => {
+  const navigate = useNavigate();
+
+  useEffect(() => {
+    const hash = window.location.hash;
+    if (hash && (hash.includes('type=invite') || hash.includes('type=recovery') || hash.includes('access_token'))) {
+      navigate('/admin', { replace: true });
+    }
+  }, [navigate]);
+
+  return null;
+};
 
 const CategoryProductsPage = ({ addProductToCart }) => {
   const { category } = useParams();
@@ -113,7 +127,8 @@ function App() {
 
   return (
     <Router>
-      <Toaster 
+      <AuthRedirect />
+      <Toaster
         position="top-right"
         toastOptions={{
           duration: 3000,
