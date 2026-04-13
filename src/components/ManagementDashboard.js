@@ -1,4 +1,5 @@
 import { useState, useEffect, useRef } from 'react';
+import { useSearchParams } from 'react-router-dom';
 import toast from 'react-hot-toast';
 import {
   getAllBudgets,
@@ -11,18 +12,32 @@ import RouteManager from './RouteManager';
 import './ManagementDashboard.css';
 
 export default function ManagementDashboard() {
-  const [activeView, setActiveView] = useState('dashboard'); // dashboard, budgets, picking, routes
+  const [searchParams, setSearchParams] = useSearchParams();
   const [budgets, setBudgets] = useState([]);
   const [pickingOrders, setPickingOrders] = useState([]);
   const [routes, setRoutes] = useState([]);
   const [loading, setLoading] = useState(true);
   const [selectedBudget, setSelectedBudget] = useState(null);
-  const [openNewBudget, setOpenNewBudget] = useState(false);
   const sectionRef = useRef(null);
+
+  // Lê estado da URL
+  const activeView = searchParams.get('view') || 'dashboard';
+  const openNewBudget = searchParams.get('new') === 'true';
+  const budgetId = searchParams.get('budgetId');
 
   useEffect(() => {
     loadData();
   }, []);
+
+  // Quando a view muda para budgets com budgetId, carrega o orçamento
+  useEffect(() => {
+    if (activeView === 'budgets' && budgetId) {
+      const found = budgets.find(b => b.id === budgetId);
+      if (found) setSelectedBudget(found);
+    } else if (activeView !== 'budgets') {
+      setSelectedBudget(null);
+    }
+  }, [activeView, budgetId, budgets]);
 
   const loadData = async () => {
     setLoading(true);
@@ -64,9 +79,11 @@ export default function ManagementDashboard() {
   };
 
   const handleCardClick = (view, budget = null, isNew = false) => {
-    setActiveView(view);
+    const params = { view };
+    if (isNew) params.new = 'true';
+    if (budget?.id) params.budgetId = budget.id;
     setSelectedBudget(budget);
-    setOpenNewBudget(isNew);
+    setSearchParams(params, { replace: false });
     setTimeout(() => {
       if (sectionRef.current) {
         const top = sectionRef.current.getBoundingClientRect().top + window.scrollY - 16;
@@ -76,8 +93,8 @@ export default function ManagementDashboard() {
   };
 
   const handleBack = () => {
-    setActiveView('dashboard');
     setSelectedBudget(null);
+    setSearchParams({}, { replace: true });
     loadData();
     smoothScroll(0, 600);
   };
@@ -88,6 +105,9 @@ export default function ManagementDashboard() {
   const pickingPicked = pickingOrders.filter(p => p.status === 'picked');
   const routesNext = routes.filter(r => r.status === 'next');
   const routesInProgress = routes.filter(r => r.status === 'in_progress');
+
+  // Orçamento inicial para o BudgetManager
+  const initialBudget = budgetId ? selectedBudget : null;
 
   return (
     <div className="management-dashboard">
@@ -167,8 +187,8 @@ export default function ManagementDashboard() {
             ) : (
               <ul className="items-list">
                 {pickingPicked.slice(0, 2).map(order => (
-                  <li 
-                    key={order.id} 
+                  <li
+                    key={order.id}
                     className="item picked"
                     onClick={() => handleCardClick('picking')}
                   >
@@ -177,8 +197,8 @@ export default function ManagementDashboard() {
                   </li>
                 ))}
                 {pickingPending.slice(0, 2).map(order => (
-                  <li 
-                    key={order.id} 
+                  <li
+                    key={order.id}
                     className="item"
                     onClick={() => handleCardClick('picking')}
                   >
@@ -219,8 +239,8 @@ export default function ManagementDashboard() {
                     </h4>
                     <ul className="items-list">
                       {routesNext.slice(0, 2).map(route => (
-                        <li 
-                          key={route.id} 
+                        <li
+                          key={route.id}
                           className="item"
                           onClick={() => handleCardClick('routes')}
                         >
@@ -239,8 +259,8 @@ export default function ManagementDashboard() {
                     </h4>
                     <ul className="items-list">
                       {routesInProgress.slice(0, 2).map(route => (
-                        <li 
-                          key={route.id} 
+                        <li
+                          key={route.id}
                           className="item"
                           onClick={() => handleCardClick('routes')}
                         >
@@ -262,9 +282,9 @@ export default function ManagementDashboard() {
         <div ref={sectionRef} className="inline-section">
           {activeView === 'budgets' && (
             <BudgetManager
-              key={`budgets-${openNewBudget}-${selectedBudget?.id ?? 'new'}`}
+              key={`budgets-${openNewBudget}-${budgetId ?? 'new'}`}
               onBack={handleBack}
-              initialBudget={selectedBudget}
+              initialBudget={initialBudget}
               openNew={openNewBudget}
               onUpdate={loadData}
               onApproved={() => handleCardClick('picking')}

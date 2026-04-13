@@ -37,6 +37,7 @@ export default function BudgetManager({ onBack, initialBudget, openNew, onUpdate
   const [budgetData, setBudgetData] = useState(null);
   const [deliveryAddress, setDeliveryAddress] = useState('');
   const [paymentMethod, setPaymentMethod] = useState('');
+  const [notes, setNotes] = useState('');
   const [customerWhatsapp, setCustomerWhatsapp] = useState('');
   const [customerFilter, setCustomerFilter] = useState('');
   const [productFilter, setProductFilter] = useState('');
@@ -65,6 +66,7 @@ export default function BudgetManager({ onBack, initialBudget, openNew, onUpdate
     setCustomerWhatsapp('');
     setDeliveryAddress('');
     setPaymentMethod('');
+    setNotes('');
     setCreatingCustomer(null);
   };
 
@@ -74,6 +76,7 @@ export default function BudgetManager({ onBack, initialBudget, openNew, onUpdate
       setBudgetData(budget);
       setDeliveryAddress(budget.delivery_address || '');
       setPaymentMethod(budget.payment_method || '');
+      setNotes(budget.notes || '');
       const customer = customers.find(c => c.id === budget.customer_id);
       setSelectedCustomer(customer || { name: budget.customer_name, code: budget.customer_code });
       setCustomerWhatsapp(customer?.whatsapp || '');
@@ -129,7 +132,7 @@ export default function BudgetManager({ onBack, initialBudget, openNew, onUpdate
     setCustomerFilter(customer.name);
     setCustomerWhatsapp(customer.phone || customer.whatsapp || '');
     // Preenche endereço salvo no cadastro do cliente (pode ser editado no orçamento)
-    if (customer.address) setDeliveryAddress(customer.address);
+    setDeliveryAddress(customer.address || '');
     setShowCustomerDropdown(false);
   };
 
@@ -368,7 +371,8 @@ export default function BudgetManager({ onBack, initialBudget, openNew, onUpdate
       total: calculateTotal(),
       status: 'draft',
       delivery_address: deliveryAddress,
-      payment_method: paymentMethod
+      payment_method: paymentMethod,
+      notes: notes
     };
 
     const itemsToSave = buildItemsToSave();
@@ -811,6 +815,17 @@ export default function BudgetManager({ onBack, initialBudget, openNew, onUpdate
               />
               <div className="rf-value print-only">{paymentMethod}</div>
             </div>
+
+            {/* Observação */}
+            {notes ? (
+              <>
+                <div className="receipt-divider">- - - - - - - - - - - - - - - -</div>
+                <div className="receipt-field-block">
+                  <div className="rf-label">OBS:</div>
+                  <div className="rf-value">{notes}</div>
+                </div>
+              </>
+            ) : null}
           </div>
 
           {/* Botões de ação - não imprime */}
@@ -861,7 +876,7 @@ export default function BudgetManager({ onBack, initialBudget, openNew, onUpdate
               </div>
               <button
                 className="chip-clear"
-                onClick={() => { setSelectedCustomer(null); setCustomerFilter(''); setCustomerWhatsapp(''); }}
+                onClick={() => { setSelectedCustomer(null); setCustomerFilter(''); setCustomerWhatsapp(''); setDeliveryAddress(''); }}
               >✕</button>
             </div>
           ) : (
@@ -1152,6 +1167,18 @@ export default function BudgetManager({ onBack, initialBudget, openNew, onUpdate
             value={paymentMethod}
             onChange={(e) => setPaymentMethod(e.target.value)}
             placeholder="Ex: Dinheiro, PIX, Cartão..."
+          />
+        </div>
+
+        {/* Observação */}
+        <div className="form-section">
+          <label className="section-label">Observação</label>
+          <textarea
+            className="address-input"
+            value={notes}
+            onChange={(e) => setNotes(e.target.value)}
+            placeholder="Informações adicionais para o romaneio..."
+            rows={2}
           />
         </div>
 

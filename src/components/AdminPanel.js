@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import toast from 'react-hot-toast';
 import {
   getAllProducts,
@@ -62,8 +62,14 @@ export default function AdminPanel() {
     return () => subscription.unsubscribe();
   }, []);
 
+  const prevSessionRef = useRef(undefined);
   useEffect(() => {
-    if (session) loadProducts();
+    // Só carrega produtos quando passa de sem sessão para com sessão (primeiro login)
+    // Evita recarregar ao trocar de aba (Supabase TOKEN_REFRESHED dispara onAuthStateChange)
+    if (session && !prevSessionRef.current) {
+      loadProducts();
+    }
+    prevSessionRef.current = session;
   }, [session]);
 
   // Resetar página quando filtros mudarem
