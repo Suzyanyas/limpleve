@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import { useState, useEffect } from 'react';
 import toast from 'react-hot-toast';
 import {
   getAllProducts,
@@ -9,6 +9,7 @@ import {
 } from '../services/productService';
 import { getOverviewStats } from '../services/managementService';
 import ManagementDashboard from './ManagementDashboard';
+import CustomerManager from './CustomerManager';
 import AdminLogin from './AdminLogin';
 import { supabase } from '../supabaseClient';
 import './AdminPanel.css';
@@ -307,6 +308,12 @@ export default function AdminPanel() {
             Produtos
           </button>
           <button
+            className={`tab-button ${activeTab === 'customers' ? 'active' : ''}`}
+            onClick={() => setActiveTab('customers')}
+          >
+            Clientes
+          </button>
+          <button
             className={`tab-button ${activeTab === 'settings' ? 'active' : ''}`}
             onClick={() => setActiveTab('settings')}
           >
@@ -320,6 +327,13 @@ export default function AdminPanel() {
           </button>
         </div>
       </div>
+
+      {/* Clientes */}
+      {activeTab === 'customers' && (
+        <div className="tab-content">
+          <CustomerManager />
+        </div>
+      )}
 
       {/* Conteúdo da Aba de Gestão (LimpLeve Online) */}
       {activeTab === 'management' && (
