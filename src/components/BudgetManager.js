@@ -127,7 +127,9 @@ export default function BudgetManager({ onBack, initialBudget, openNew, onUpdate
   const handleSelectCustomer = (customer) => {
     setSelectedCustomer(customer);
     setCustomerFilter(customer.name);
-    setCustomerWhatsapp(customer.whatsapp || '');
+    setCustomerWhatsapp(customer.phone || customer.whatsapp || '');
+    // Preenche endereço salvo no cadastro do cliente (pode ser editado no orçamento)
+    if (customer.address) setDeliveryAddress(customer.address);
     setShowCustomerDropdown(false);
   };
 
@@ -159,9 +161,9 @@ export default function BudgetManager({ onBack, initialBudget, openNew, onUpdate
 
   const handleWhatsappBlur = async () => {
     if (!selectedCustomer?.id) return;
-    if (customerWhatsapp === (selectedCustomer.whatsapp || '')) return;
-    await updateCustomer(selectedCustomer.id, { whatsapp: customerWhatsapp });
-    setSelectedCustomer(prev => ({ ...prev, whatsapp: customerWhatsapp }));
+    if (customerWhatsapp === (selectedCustomer.phone || '')) return;
+    await updateCustomer(selectedCustomer.id, { phone: customerWhatsapp });
+    setSelectedCustomer(prev => ({ ...prev, phone: customerWhatsapp }));
   };
 
 
