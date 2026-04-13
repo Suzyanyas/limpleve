@@ -1201,12 +1201,9 @@
 
 /* Linha tracejada */
 .receipt-divider {
-  color: #555;
-  font-size: 13px;
-  letter-spacing: 1px;
+  border: none;
+  border-bottom: 1px dashed #ccc;
   margin: 6px 0;
-  white-space: nowrap;
-  overflow: hidden;
 }
 
 /* Itens do pedido */

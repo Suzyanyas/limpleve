@@ -762,7 +762,7 @@ export default function BudgetManager({ onBack, initialBudget, openNew, onUpdate
             </div>
 
             <div className="receipt-date">{dateStr}</div>
-            <div className="receipt-divider">- - - - - - - - - - - - - - - -</div>
+            <div className="receipt-divider" />
 
             {/* Itens */}
             <div className="receipt-items">
@@ -779,7 +779,7 @@ export default function BudgetManager({ onBack, initialBudget, openNew, onUpdate
               }) : <div className="receipt-item">Nenhum produto</div>}
             </div>
 
-            <div className="receipt-divider">- - - - - - - - - - - - - - - -</div>
+            <div className="receipt-divider" />
 
             {/* Nome */}
             <div className="receipt-field">
@@ -800,7 +800,7 @@ export default function BudgetManager({ onBack, initialBudget, openNew, onUpdate
               <div className="rf-value print-only">{deliveryAddress}</div>
             </div>
 
-            <div className="receipt-divider">- - - - - - - - - - - - - - - -</div>
+            <div className="receipt-divider" />
 
             {/* Pagamento */}
             <div className="receipt-field-block">
@@ -819,7 +819,7 @@ export default function BudgetManager({ onBack, initialBudget, openNew, onUpdate
             {/* Observação */}
             {notes ? (
               <>
-                <div className="receipt-divider">- - - - - - - - - - - - - - - -</div>
+                <div className="receipt-divider" />
                 <div className="receipt-field-block">
                   <div className="rf-label">OBS:</div>
                   <div className="rf-value">{notes}</div>
