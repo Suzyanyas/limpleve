@@ -7,7 +7,7 @@ import {
   deleteProduct,
   toggleProductAvailability
 } from '../services/productService';
-import { getOverviewStats } from '../services/managementService';
+import { getOverviewStats, getDailyHistory } from '../services/managementService';
 import ManagementDashboard from './ManagementDashboard';
 import CustomerManager from './CustomerManager';
 import AdminLogin from './AdminLogin';
@@ -40,6 +40,10 @@ export default function AdminPanel() {
   const [uploadMethod, setUploadMethod] = useState('upload'); // 'url' ou 'upload'
   const [overviewStats, setOverviewStats] = useState(null);
   const [statsLoading, setStatsLoading] = useState(false);
+  const [dailyHistory, setDailyHistory] = useState([]);
+  const [dailyLoading, setDailyLoading] = useState(false);
+  const [historyDays, setHistoryDays] = useState(7);
+  const [expandedDay, setExpandedDay] = useState(null);
 
   // Função de scroll suave customizada
   const smoothScrollToTop = () => {
@@ -84,8 +88,35 @@ export default function AdminPanel() {
         setOverviewStats(data);
         setStatsLoading(false);
       });
+      loadDailyHistory(historyDays);
     }
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [activeTab, session]);
+
+  const loadDailyHistory = async (days) => {
+    setDailyLoading(true);
+    const data = await getDailyHistory(days);
+    setDailyHistory(data);
+    setDailyLoading(false);
+  };
+
+  const handleHistoryDaysChange = (days) => {
+    setHistoryDays(days);
+    setExpandedDay(null);
+    loadDailyHistory(days);
+  };
+
+  const formatDayLabel = (dateStr) => {
+    const [year, month, day] = dateStr.split('-').map(Number);
+    const d = new Date(year, month - 1, day);
+    const today = new Date();
+    today.setHours(0, 0, 0, 0);
+    const yesterday = new Date(today);
+    yesterday.setDate(yesterday.getDate() - 1);
+    if (d.getTime() === today.getTime()) return 'Hoje';
+    if (d.getTime() === yesterday.getTime()) return 'Ontem';
+    return d.toLocaleDateString('pt-BR', { weekday: 'short', day: '2-digit', month: '2-digit' });
+  };
 
   const loadProducts = async () => {
     setLoading(true);
@@ -797,7 +828,7 @@ export default function AdminPanel() {
                   <div className="ov-icon">📋</div>
                   <div className="ov-info">
                     <span className="ov-value">{overviewStats.monthCount}</span>
-                    <span className="ov-label">Orçamentos este mês</span>
+                    <span className="ov-label">Vendas este mês</span>
                   </div>
                   <div className="ov-sub">{overviewStats.weekCount} nos últimos 7 dias</div>
                 </div>
@@ -817,7 +848,7 @@ export default function AdminPanel() {
                     <span className="ov-value">R$ {overviewStats.avgTicket.toFixed(2)}</span>
                     <span className="ov-label">Ticket médio</span>
                   </div>
-                  <div className="ov-sub">Por pedido (excl. cancelados)</div>
+                  <div className="ov-sub">Por venda confirmada</div>
                 </div>
 
                 <div className="ov-card split">
@@ -831,6 +862,29 @@ export default function AdminPanel() {
                     <span className="ov-split-label">❌ Cancelados</span>
                   </div>
                 </div>
+
+                <div className="ov-card split">
+                  <div className="ov-split-item delivered">
+                    <span className="ov-split-value">{overviewStats.presencial}</span>
+                    <span className="ov-split-label">Presencial</span>
+                  </div>
+                  <div className="ov-split-divider" />
+                  <div className="ov-split-item">
+                    <span className="ov-split-value">{overviewStats.online}</span>
+                    <span className="ov-split-label">Online</span>
+                  </div>
+                </div>
+
+                {overviewStats.pendingTotal > 0 && (
+                  <div className="ov-card orange">
+                    <div className="ov-icon">⏳</div>
+                    <div className="ov-info">
+                      <span className="ov-value">R$ {overviewStats.pendingTotal.toFixed(2)}</span>
+                      <span className="ov-label">A receber</span>
+                    </div>
+                    <div className="ov-sub">Valores pendentes de cobrança</div>
+                  </div>
+                )}
               </div>
 
               {/* Produtos mais vendidos */}
@@ -858,6 +912,91 @@ export default function AdminPanel() {
                       </div>
                     );
                   })}
+                </div>
+              )}
+
+              {/* Histórico por dia */}
+              <div className="daily-history-header">
+                <h2 className="stats-section-title">Histórico por Dia</h2>
+                <div className="daily-period-tabs">
+                  {[7, 14, 30].map(d => (
+                    <button
+                      key={d}
+                      className={`period-tab ${historyDays === d ? 'active' : ''}`}
+                      onClick={() => handleHistoryDaysChange(d)}
+                    >
+                      {d === 7 ? '7 dias' : d === 14 ? '14 dias' : '30 dias'}
+                    </button>
+                  ))}
+                </div>
+              </div>
+
+              {dailyLoading ? (
+                <div className="stats-loading">Carregando histórico...</div>
+              ) : dailyHistory.length === 0 ? (
+                <p className="stats-empty">Nenhuma venda nos últimos {historyDays} dias.</p>
+              ) : (
+                <div className="daily-history-list">
+                  {dailyHistory.map(day => (
+                    <div key={day.date} className="daily-day-block">
+                      <button
+                        className={`daily-day-header ${expandedDay === day.date ? 'expanded' : ''}`}
+                        onClick={() => setExpandedDay(expandedDay === day.date ? null : day.date)}
+                      >
+                        <div className="daily-day-left">
+                          <span className="daily-day-label">{formatDayLabel(day.date)}</span>
+                          <span className="daily-day-date">{day.date.split('-').reverse().join('/')}</span>
+                        </div>
+                        <div className="daily-day-right">
+                          <span className="daily-day-count">{day.count} venda{day.count !== 1 ? 's' : ''}</span>
+                          <span className="daily-day-revenue">R$ {day.revenue.toFixed(2)}</span>
+                          {day.cancelled > 0 && (
+                            <span className="daily-day-cancelled">{day.cancelled} cancel.</span>
+                          )}
+                          <span className="daily-day-arrow">{expandedDay === day.date ? '▲' : '▼'}</span>
+                        </div>
+                      </button>
+
+                      {expandedDay === day.date && (
+                        <div className="daily-orders-list">
+                          {day.budgets.map(b => (
+                            <div key={b.id} className={`daily-order-row ${b.status === 'cancelled' ? 'cancelled' : ''}`}>
+                              <div className="daily-order-info">
+                                <span className="daily-order-name">{b.customer_name}</span>
+                                <span className={`daily-order-status status-${b.status}`}>
+                                  {b.status === 'confirmed' ? 'Confirmado'
+                                    : b.status === 'delivered' ? 'Entregue'
+                                    : b.status === 'cancelled' ? 'Cancelado'
+                                    : b.status === 'draft' ? 'Rascunho'
+                                    : b.status}
+                                </span>
+                              </div>
+                              <div className="daily-order-meta">
+                                <span className="daily-order-type">
+                                  {b.sale_type === 'online' ? 'Online' : 'Presencial'}
+                                </span>
+                                <span className="daily-order-time">
+                                  {new Date(b.created_at).toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' })}
+                                </span>
+                                <span className="daily-order-total">
+                                  R$ {parseFloat(b.total || 0).toFixed(2)}
+                                </span>
+                              </div>
+                              {b.budget_items && b.budget_items.length > 0 && (
+                                <div className="daily-order-items">
+                                  {b.budget_items.map((item, idx) => (
+                                    <span key={idx} className="daily-order-item">
+                                      {item.quantity}x {item.product_name}
+                                    </span>
+                                  ))}
+                                </div>
+                              )}
+                            </div>
+                          ))}
+                        </div>
+                      )}
+                    </div>
+                  ))}
                 </div>
               )}
             </>

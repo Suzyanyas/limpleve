@@ -1,15 +1,15 @@
 import { useState, useEffect } from 'react';
 import toast from 'react-hot-toast';
 import {
-  getAllPickingOrders,
+  getTodayPickingOrders,
   updatePickingStatus,
   deletePickingOrder,
   createDeliveryRoute,
-  getAllDeliveryRoutes
+  getTodayDeliveryRoutes
 } from '../services/managementService';
 import './PickingManager.css';
 
-export default function PickingManager({ onBack, onUpdate }) {
+export default function PickingManager({ onBack, onUpdate, onOpenBudget }) {
   const [pickingOrders, setPickingOrders] = useState([]);
   const [routedBudgetIds, setRoutedBudgetIds] = useState(new Set());
   const [loading, setLoading] = useState(true);
@@ -21,8 +21,8 @@ export default function PickingManager({ onBack, onUpdate }) {
   const loadData = async () => {
     setLoading(true);
     const [orders, routes] = await Promise.all([
-      getAllPickingOrders(),
-      getAllDeliveryRoutes()
+      getTodayPickingOrders(),
+      getTodayDeliveryRoutes()
     ]);
     setPickingOrders(orders);
     // Conjunto de budget_ids que já têm rota (exceto canceladas)
@@ -116,7 +116,10 @@ export default function PickingManager({ onBack, onUpdate }) {
                   <div key={order.id} className="picking-item picked">
                     <div className="item-info">
                       <span className="checkbox checked">✓</span>
-                      <span className="customer-name">{order.customer_name}</span>
+                      <span
+                        className={`customer-name${onOpenBudget && order.budget_id ? ' customer-name-link' : ''}`}
+                        onClick={() => onOpenBudget && order.budget_id && onOpenBudget(order.budget_id)}
+                      >{order.customer_name}</span>
                     </div>
                     <div className="item-actions">
                       {routedBudgetIds.has(order.budget_id) ? (
@@ -155,7 +158,10 @@ export default function PickingManager({ onBack, onUpdate }) {
                   <div key={order.id} className="picking-item pending">
                     <div className="item-info">
                       <span className="checkbox">☐</span>
-                      <span className="customer-name">{order.customer_name}</span>
+                      <span
+                        className={`customer-name${onOpenBudget && order.budget_id ? ' customer-name-link' : ''}`}
+                        onClick={() => onOpenBudget && order.budget_id && onOpenBudget(order.budget_id)}
+                      >{order.customer_name}</span>
                     </div>
                     <div className="item-actions">
                       <button

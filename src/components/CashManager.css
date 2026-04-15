@@ -1,0 +1,597 @@
+.cash-manager {
+  background: #f5f7fa;
+  min-height: 100vh;
+  padding: 24px 16px 40px;
+}
+
+/* ── Barra de status (usada na lista de orçamentos) ── */
+.cash-status-bar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  background: linear-gradient(135deg, #2a5298 0%, #1e3c72 100%);
+  border-radius: 12px;
+  padding: 14px 18px;
+  gap: 12px;
+  flex-wrap: wrap;
+}
+
+.cash-status-left {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.cash-status-dot {
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  background: #4ade80;
+  box-shadow: 0 0 6px #4ade80;
+}
+
+.cash-status-dot.closed {
+  background: #f87171;
+  box-shadow: 0 0 6px #f87171;
+}
+
+.cash-status-label {
+  color: white;
+  font-weight: 700;
+  font-size: 0.9rem;
+}
+
+.cash-status-turno {
+  color: rgba(255,255,255,0.7);
+  font-size: 0.8rem;
+}
+
+.cash-status-amounts {
+  display: flex;
+  gap: 14px;
+  flex-wrap: wrap;
+}
+
+.cash-status-amount {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+.cash-status-amount span:first-child {
+  font-size: 0.7rem;
+  color: rgba(255,255,255,0.6);
+  text-transform: uppercase;
+}
+
+.cash-status-amount span:last-child {
+  font-size: 0.88rem;
+  font-weight: 700;
+  color: white;
+}
+
+.cash-status-btn {
+  background: rgba(255,255,255,0.15);
+  border: 1.5px solid rgba(255,255,255,0.4);
+  color: white;
+  border-radius: 8px;
+  padding: 7px 14px;
+  font-size: 0.82rem;
+  font-weight: 700;
+  cursor: pointer;
+  white-space: nowrap;
+}
+
+.cash-status-btn:hover { background: rgba(255,255,255,0.25); }
+
+/* ── Header do módulo de caixa ── */
+.cash-header {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin-bottom: 24px;
+}
+
+.cash-title {
+  font-size: 1.4rem;
+  font-weight: 800;
+  color: #1e3c72;
+}
+
+.cash-back-btn {
+  background: #e8edf5;
+  border: none;
+  border-radius: 8px;
+  padding: 8px 14px;
+  font-size: 1rem;
+  cursor: pointer;
+  color: #1e3c72;
+  font-weight: 700;
+}
+
+.cash-report-btn {
+  margin-left: auto;
+  background: #e8edf5;
+  border: none;
+  border-radius: 8px;
+  padding: 8px 14px;
+  font-size: 0.85rem;
+  font-weight: 700;
+  cursor: pointer;
+  color: #1e3c72;
+}
+
+.cash-report-btn:hover {
+  background: #d0daf0;
+}
+
+/* ── Abertura / Fechamento ── */
+.cash-open-card {
+  background: white;
+  border-radius: 16px;
+  padding: 24px;
+  box-shadow: 0 2px 12px rgba(0,0,0,0.08);
+  max-width: 480px;
+  margin: 0 auto;
+}
+
+.cash-open-title {
+  font-size: 1.1rem;
+  font-weight: 700;
+  color: #1e3c72;
+  margin-bottom: 20px;
+}
+
+.turno-toggle {
+  display: flex;
+  gap: 10px;
+  margin-bottom: 20px;
+}
+
+.turno-btn {
+  flex: 1;
+  padding: 12px;
+  border: 2px solid #e0e0e0;
+  border-radius: 10px;
+  background: #f8f8f8;
+  font-size: 0.95rem;
+  font-weight: 700;
+  cursor: pointer;
+  transition: all 0.2s;
+  color: #555;
+}
+
+.turno-btn.active {
+  border-color: #1e3c72;
+  background: #eef2fb;
+  color: #1e3c72;
+}
+
+/* Tabela de cédulas */
+.cedulas-table {
+  width: 100%;
+  border-collapse: collapse;
+  margin-bottom: 16px;
+}
+
+.cedulas-table th {
+  text-align: left;
+  padding: 6px 8px;
+  font-size: 0.78rem;
+  color: #888;
+  text-transform: uppercase;
+  border-bottom: 1px solid #eee;
+}
+
+.cedulas-table td {
+  padding: 6px 8px;
+  font-size: 0.9rem;
+  border-bottom: 1px solid #f5f5f5;
+}
+
+.cedula-label {
+  font-weight: 700;
+  color: #333;
+  width: 80px;
+}
+
+.cedula-input {
+  width: 70px;
+  padding: 5px 8px;
+  border: 1.5px solid #e0e0e0;
+  border-radius: 8px;
+  font-size: 0.9rem;
+  text-align: center;
+}
+
+.cedula-input:focus {
+  outline: none;
+  border-color: #1e3c72;
+}
+
+.cedula-total {
+  font-weight: 700;
+  color: #1e3c72;
+  text-align: right;
+}
+
+.cash-saldo-total {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 14px 0 0;
+  border-top: 2px solid #1e3c72;
+  margin-bottom: 20px;
+}
+
+.cash-saldo-label {
+  font-size: 1rem;
+  font-weight: 700;
+  color: #333;
+}
+
+.cash-saldo-value {
+  font-size: 1.4rem;
+  font-weight: 900;
+  color: #1e3c72;
+}
+
+.btn-open-cash {
+  width: 100%;
+  padding: 16px;
+  background: linear-gradient(135deg, #16a34a 0%, #15803d 100%);
+  color: white;
+  border: none;
+  border-radius: 12px;
+  font-size: 1rem;
+  font-weight: 800;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.btn-open-cash:hover { opacity: 0.9; transform: translateY(-1px); }
+
+/* ── Painel do turno ── */
+.cash-session-panel {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.cash-session-header {
+  background: linear-gradient(135deg, #1e3c72 0%, #2a5298 100%);
+  border-radius: 16px;
+  padding: 20px;
+  color: white;
+}
+
+.cash-session-title {
+  font-size: 1rem;
+  font-weight: 700;
+  opacity: 0.8;
+  margin-bottom: 4px;
+}
+
+.cash-session-saldo {
+  font-size: 2rem;
+  font-weight: 900;
+}
+
+.cash-session-saldo-label {
+  font-size: 0.8rem;
+  opacity: 0.7;
+}
+
+.cash-session-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 10px;
+  margin-top: 14px;
+}
+
+.cash-session-stat {
+  background: rgba(255,255,255,0.15);
+  border-radius: 10px;
+  padding: 10px;
+  text-align: center;
+}
+
+.cash-session-stat-label {
+  font-size: 0.7rem;
+  opacity: 0.75;
+  display: block;
+  margin-bottom: 4px;
+}
+
+.cash-session-stat-value {
+  font-size: 1rem;
+  font-weight: 800;
+}
+
+/* Ações rápidas */
+.cash-quick-actions {
+  display: flex;
+  gap: 10px;
+}
+
+.cash-action-btn {
+  flex: 1;
+  padding: 14px 10px;
+  border: none;
+  border-radius: 12px;
+  font-size: 0.85rem;
+  font-weight: 700;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.cash-action-btn.sangria {
+  background: #fff3cd;
+  color: #92400e;
+  border: 2px solid #fcd34d;
+}
+
+.cash-action-btn.despesa {
+  background: #fee2e2;
+  color: #991b1b;
+  border: 2px solid #fca5a5;
+}
+
+.cash-action-btn.reforco {
+  background: #dcfce7;
+  color: #14532d;
+  border: 2px solid #86efac;
+}
+
+.cash-action-btn.fechar {
+  background: #1e3c72;
+  color: white;
+}
+
+/* Lista de transações */
+.cash-transactions-card {
+  background: white;
+  border-radius: 16px;
+  padding: 20px;
+  box-shadow: 0 2px 12px rgba(0,0,0,0.06);
+}
+
+.cash-transactions-title {
+  font-size: 0.95rem;
+  font-weight: 700;
+  color: #333;
+  margin-bottom: 14px;
+}
+
+.cash-transaction-item {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 10px 0;
+  border-bottom: 1px solid #f0f0f0;
+  gap: 10px;
+}
+
+.cash-transaction-item:last-child { border-bottom: none; }
+
+.cash-tx-left {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.cash-tx-name {
+  font-size: 0.88rem;
+  font-weight: 700;
+  color: #222;
+}
+
+.cash-tx-meta {
+  font-size: 0.75rem;
+  color: #888;
+}
+
+.cash-tx-right {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.cash-tx-value {
+  font-weight: 800;
+  font-size: 0.95rem;
+}
+
+.cash-tx-delete {
+  background: none;
+  border: none;
+  cursor: pointer;
+  font-size: 0.85rem;
+  opacity: 0.35;
+  padding: 2px 4px;
+  border-radius: 4px;
+  transition: opacity 0.15s;
+}
+
+.cash-tx-delete:hover {
+  opacity: 1;
+  background: #fee2e2;
+}
+
+.cash-tx-value.venda { color: #16a34a; }
+.cash-tx-value.reforco { color: #15803d; font-weight: 800; }
+.cash-tx-value.sangria { color: #92400e; }
+.cash-tx-value.despesa { color: #dc2626; }
+
+/* Modal de sangria/despesa */
+.cash-modal-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(0,0,0,0.5);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 1000;
+  padding: 20px;
+}
+
+.cash-modal {
+  background: white;
+  border-radius: 16px;
+  padding: 24px;
+  width: 100%;
+  max-width: 400px;
+  box-shadow: 0 8px 32px rgba(0,0,0,0.2);
+}
+
+.cash-modal-title {
+  font-size: 1.1rem;
+  font-weight: 800;
+  color: #1e3c72;
+  margin-bottom: 18px;
+}
+
+.cash-modal-field {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  margin-bottom: 14px;
+}
+
+.cash-modal-field label {
+  font-size: 0.85rem;
+  font-weight: 700;
+  color: #555;
+}
+
+.cash-modal-field input,
+.cash-modal-field select,
+.cash-modal-field textarea {
+  padding: 10px 12px;
+  border: 1.5px solid #e0e0e0;
+  border-radius: 10px;
+  font-size: 0.95rem;
+  color: #111;
+}
+
+.cash-modal-field input:focus,
+.cash-modal-field select:focus,
+.cash-modal-field textarea:focus {
+  outline: none;
+  border-color: #1e3c72;
+}
+
+.cash-modal-actions {
+  display: flex;
+  gap: 10px;
+  margin-top: 18px;
+}
+
+.cash-modal-cancel {
+  flex: 1;
+  padding: 12px;
+  background: #f0f0f0;
+  border: none;
+  border-radius: 10px;
+  font-weight: 700;
+  cursor: pointer;
+  color: #555;
+}
+
+.cash-modal-confirm {
+  flex: 2;
+  padding: 12px;
+  background: linear-gradient(135deg, #1e3c72 0%, #2a5298 100%);
+  border: none;
+  border-radius: 10px;
+  font-weight: 800;
+  color: white;
+  cursor: pointer;
+}
+
+.cash-modal-confirm.reforco {
+  background: linear-gradient(135deg, #15803d 0%, #16a34a 100%);
+}
+
+.cash-modal-hint {
+  font-size: 0.8rem;
+  color: #64748b;
+  background: #f0fdf4;
+  border: 1px solid #bbf7d0;
+  border-radius: 8px;
+  padding: 8px 12px;
+  margin-bottom: 14px;
+}
+
+.reforco-value {
+  color: #15803d;
+}
+
+/* ── Fechamento ── */
+.cash-close-diff {
+  display: flex;
+  justify-content: space-between;
+  padding: 14px 0 0;
+  border-top: 2px dashed #ccc;
+  margin-top: 10px;
+  margin-bottom: 20px;
+}
+
+.diff-ok { color: #16a34a; font-weight: 800; }
+.diff-warn { color: #dc2626; font-weight: 800; }
+
+.btn-close-cash {
+  width: 100%;
+  padding: 16px;
+  background: linear-gradient(135deg, #dc2626 0%, #b91c1c 100%);
+  color: white;
+  border: none;
+  border-radius: 12px;
+  font-size: 1rem;
+  font-weight: 800;
+  cursor: pointer;
+}
+
+/* ── Relatório ── */
+.cash-report-card {
+  background: white;
+  border-radius: 16px;
+  padding: 20px;
+  box-shadow: 0 2px 12px rgba(0,0,0,0.06);
+}
+
+.cash-report-title {
+  font-size: 1rem;
+  font-weight: 800;
+  color: #1e3c72;
+  margin-bottom: 16px;
+  border-bottom: 2px solid #eef2fb;
+  padding-bottom: 10px;
+}
+
+.cash-report-row {
+  display: flex;
+  justify-content: space-between;
+  padding: 7px 0;
+  font-size: 0.9rem;
+  border-bottom: 1px solid #f5f5f5;
+}
+
+.cash-report-row.total {
+  font-weight: 800;
+  font-size: 1rem;
+  border-top: 2px solid #1e3c72;
+  border-bottom: none;
+  padding-top: 12px;
+  color: #1e3c72;
+}
+
+.cash-report-row.negativo span:last-child { color: #dc2626; }
+.cash-report-row.positivo span:last-child { color: #16a34a; }
+
+.cash-empty {
+  text-align: center;
+  padding: 40px 20px;
+  color: #aaa;
+  font-size: 0.9rem;
+}

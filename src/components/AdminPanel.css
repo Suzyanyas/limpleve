@@ -4,7 +4,9 @@
   padding: 0;
   font-family: 'Inter', 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
   min-height: 100vh;
+  overflow-x: hidden;
 }
+
 
 .admin-header {
   display: flex;
@@ -96,6 +98,11 @@
 
 .tab-content {
   animation: fadeIn 0.3s ease-in;
+  padding: 24px 28px;
+}
+
+.tab-content.management-tab {
+  padding: 0;
 }
 
 @keyframes fadeIn {
@@ -180,6 +187,7 @@
 .ov-card.blue   { background: linear-gradient(135deg, #304D73, #2a5298); color: #fff; }
 .ov-card.green  { background: linear-gradient(135deg, #1a7a4a, #27ae60); color: #fff; }
 .ov-card.purple { background: linear-gradient(135deg, #6d28d9, #8b5cf6); color: #fff; }
+.ov-card.orange { background: linear-gradient(135deg, #b45309, #d97706); color: #fff; }
 .ov-card.split  { background: #fff; border: 1px solid #e8edf5; flex-direction: row; align-items: center; padding: 16px; }
 
 .ov-icon {
@@ -1079,12 +1087,13 @@
 /* Responsivo */
 @media (max-width: 968px) {
   .admin-panel {
-    padding: 15px;
-    margin: 20px auto;
+    padding: 0;
+    margin: 0 auto;
   }
 
   .admin-header {
-    justify-content: flex-start;
+    justify-content: space-between;
+    padding: 12px 16px 0;
   }
 
   .admin-header h1 {
@@ -1100,15 +1109,47 @@
     padding: 0 15px;
   }
 
+  /* Abas com scroll horizontal — linha única */
   .admin-tabs {
+    display: flex;
+    flex-wrap: nowrap;
     overflow-x: auto;
     -webkit-overflow-scrolling: touch;
+    scrollbar-width: none;
+    gap: 0;
+    margin-top: 12px;
+    padding: 0;
+    min-width: 0;
+    max-width: 100%;
+  }
+
+  .admin-tabs::-webkit-scrollbar {
+    display: none;
   }
 
   .tab-button {
-    padding: 12px 20px;
-    font-size: 0.95rem;
+    padding: 10px 14px;
+    font-size: 0.82rem;
     white-space: nowrap;
+    text-align: center;
+    justify-content: center;
+    flex-shrink: 0;
+    border-bottom: 3px solid transparent;
+    border-radius: 6px 6px 0 0;
+  }
+
+  .tab-button.active {
+    background: rgba(255,255,255,0.15);
+    border-bottom-color: white;
+  }
+
+  /* Conteúdo das abas com padding lateral */
+  .tab-content {
+    padding: 16px;
+  }
+
+  .tab-content.management-tab {
+    padding: 0;
   }
 
   .pagination-controls {
@@ -1170,19 +1211,71 @@
   }
 }
 
-@media (max-width: 480px) {
+@media (max-width: 536px) {
   .admin-panel {
-    padding: 10px;
-    margin: 10px auto;
+    padding: 0;
+    margin: 0 auto;
   }
 
   .admin-header {
-    padding: 15px 0;
-    justify-content: flex-start;
+    padding: 10px 12px 0;
+    justify-content: space-between;
   }
 
-  .admin-header h1 {
-    font-size: 1.5rem;
+  .admin-header-left {
+    display: none; /* remove spacer fantasma em mobile pequeno */
+  }
+
+  .admin-title {
+    font-size: 0.85rem;
+    padding: 6px 14px;
+    letter-spacing: 1px;
+  }
+
+  .btn-logout {
+    padding: 6px 12px;
+    font-size: 0.8rem;
+  }
+
+  /* Sair em cima, título abaixo centralizado */
+  .admin-header {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 10px;
+  }
+
+  .btn-logout {
+    order: -1;
+    align-self: flex-end;
+  }
+
+  .admin-title {
+    font-size: 0.85rem;
+    padding: 6px 20px;
+    letter-spacing: 1px;
+    align-self: center;
+  }
+
+  /* Abas em grade — sem scroll lateral */
+  .admin-tabs {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    overflow-x: unset;
+    margin-top: 8px;
+    min-width: unset;
+    max-width: unset;
+  }
+
+  .tab-button {
+    padding: 9px 6px;
+    font-size: 0.76rem;
+    white-space: normal;
+    text-align: center;
+    justify-content: center;
+    line-height: 1.3;
+    flex-shrink: unset;
+    border-bottom: 3px solid transparent;
+    border-radius: 6px 6px 0 0;
   }
 
   .btn-add-product {
@@ -1195,9 +1288,9 @@
     padding: 0 10px;
   }
 
-  .tab-button {
-    padding: 10px 15px;
-    font-size: 0.85rem;
+  /* Conteúdo com padding menor */
+  .tab-content {
+    padding: 12px;
   }
 
   .pagination-container {
@@ -1323,5 +1416,260 @@
   .admin-panel {
     margin: 0 !important;
     padding: 0 !important;
+  }
+}
+
+/* ============================================ */
+/* HISTÓRICO POR DIA */
+/* ============================================ */
+
+.daily-history-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-top: 32px;
+  flex-wrap: wrap;
+  gap: 12px;
+}
+
+.daily-history-header .stats-section-title {
+  margin-top: 0;
+}
+
+.daily-period-tabs {
+  display: flex;
+  gap: 6px;
+}
+
+.period-tab {
+  padding: 6px 16px;
+  border: 1.5px solid #d0d7e3;
+  border-radius: 20px;
+  background: white;
+  font-size: 0.82rem;
+  font-weight: 600;
+  color: #5a6a82;
+  cursor: pointer;
+  transition: all 0.18s;
+}
+
+.period-tab.active {
+  background: #1e3c72;
+  color: white;
+  border-color: #1e3c72;
+}
+
+.daily-history-list {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  margin-top: 12px;
+}
+
+.daily-day-block {
+  border: 1.5px solid #e4eaf2;
+  border-radius: 10px;
+  overflow: hidden;
+  background: #fff;
+}
+
+.daily-day-header {
+  width: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 12px 16px;
+  background: #f5f8fd;
+  border: none;
+  cursor: pointer;
+  text-align: left;
+  transition: background 0.15s;
+  gap: 12px;
+}
+
+.daily-day-header:hover {
+  background: #eaf0fa;
+}
+
+.daily-day-header.expanded {
+  background: #ddeaf8;
+  border-bottom: 1.5px solid #c8d9ef;
+}
+
+.daily-day-left {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.daily-day-label {
+  font-weight: 700;
+  font-size: 0.95rem;
+  color: #1e3c72;
+  min-width: 60px;
+}
+
+.daily-day-date {
+  font-size: 0.8rem;
+  color: #7a8fa8;
+}
+
+.daily-day-right {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin-left: auto;
+}
+
+.daily-day-count {
+  font-size: 0.82rem;
+  color: #5a6a82;
+  background: #e8f0fe;
+  padding: 2px 8px;
+  border-radius: 10px;
+}
+
+.daily-day-revenue {
+  font-weight: 700;
+  font-size: 0.95rem;
+  color: #1a7f4b;
+}
+
+.daily-day-cancelled {
+  font-size: 0.78rem;
+  color: #c0392b;
+  background: #fde8e8;
+  padding: 2px 7px;
+  border-radius: 10px;
+}
+
+.daily-day-arrow {
+  font-size: 0.7rem;
+  color: #8a9ab0;
+}
+
+.daily-orders-list {
+  padding: 8px 12px 12px;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.daily-order-row {
+  background: #f9fbff;
+  border: 1px solid #e8eef8;
+  border-radius: 8px;
+  padding: 10px 12px;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.daily-order-row.cancelled {
+  background: #fff8f8;
+  border-color: #f5c6c6;
+  opacity: 0.85;
+}
+
+.daily-order-info {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+}
+
+.daily-order-name {
+  font-weight: 600;
+  font-size: 0.88rem;
+  color: #2d3748;
+}
+
+.daily-order-status {
+  font-size: 0.72rem;
+  font-weight: 600;
+  padding: 2px 8px;
+  border-radius: 10px;
+}
+
+.daily-order-status.status-confirmed {
+  background: #d4edda;
+  color: #155724;
+}
+
+.daily-order-status.status-delivered {
+  background: #cce5ff;
+  color: #004085;
+}
+
+.daily-order-status.status-cancelled {
+  background: #f8d7da;
+  color: #721c24;
+}
+
+.daily-order-status.status-draft {
+  background: #e2e3e5;
+  color: #383d41;
+}
+
+.daily-order-meta {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  font-size: 0.78rem;
+  color: #7a8fa8;
+}
+
+.daily-order-type {
+  background: #f0f4ff;
+  padding: 1px 7px;
+  border-radius: 8px;
+  color: #3a5a9a;
+  font-weight: 500;
+}
+
+.daily-order-time {
+  color: #9aaabb;
+}
+
+.daily-order-total {
+  margin-left: auto;
+  font-weight: 700;
+  font-size: 0.88rem;
+  color: #1e3c72;
+}
+
+.daily-order-items {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px;
+  margin-top: 2px;
+}
+
+.daily-order-item {
+  font-size: 0.72rem;
+  background: #eef3fb;
+  color: #4a6080;
+  padding: 2px 7px;
+  border-radius: 6px;
+}
+
+@media (max-width: 480px) {
+  .daily-history-header {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+
+  .daily-day-header {
+    padding: 10px 12px;
+    flex-wrap: wrap;
+    gap: 6px;
+  }
+
+  .daily-day-right {
+    gap: 8px;
+  }
+
+  .daily-order-meta {
+    flex-wrap: wrap;
   }
 }

@@ -71,6 +71,19 @@
   color: #333;
 }
 
+.customer-name-link {
+  cursor: pointer;
+  text-decoration: underline;
+  text-underline-offset: 3px;
+  text-decoration-color: #2a5298;
+  color: #1e3c72;
+  transition: color 0.15s;
+}
+
+.customer-name-link:hover {
+  color: #2a5298;
+}
+
 .customer-code {
   font-size: 14px;
   color: #666;

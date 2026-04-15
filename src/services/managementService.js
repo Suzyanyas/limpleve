@@ -315,8 +315,11 @@ export const getAllDeliveryRoutes = async () => {
       .select(`
         *,
         budgets (
+          id,
           total,
           payment_method,
+          payment_status,
+          entrada_valor,
           delivery_address,
           budget_items (
             product_name,
@@ -453,6 +456,97 @@ export const updateBudgetStatus = async (budgetId, status) => {
 };
 
 // ============================================
+// HISTÓRICO DIÁRIO (para o dashboard)
+// ============================================
+
+export const getDailyHistory = async (days = 30) => {
+  try {
+    const since = new Date();
+    since.setDate(since.getDate() - days + 1);
+    since.setHours(0, 0, 0, 0);
+
+    const { data, error } = await supabase
+      .from('budgets')
+      .select(`
+        id, customer_name, total, status, sale_type, payment_status, created_at,
+        budget_items(product_name, quantity, total_price)
+      `)
+      .gte('created_at', since.toISOString())
+      .order('created_at', { ascending: false });
+
+    if (error) throw error;
+
+    // Agrupa por data local
+    const grouped = {};
+    (data || []).forEach(b => {
+      const d = new Date(b.created_at);
+      const key = `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`;
+      if (!grouped[key]) grouped[key] = { date: key, budgets: [], revenue: 0, count: 0, cancelled: 0 };
+      grouped[key].budgets.push(b);
+      if (b.status === 'cancelled') {
+        grouped[key].cancelled++;
+      } else {
+        grouped[key].revenue += parseFloat(b.total || 0);
+        grouped[key].count++;
+      }
+    });
+
+    return Object.values(grouped).sort((a, b) => b.date.localeCompare(a.date));
+  } catch (error) {
+    console.error('Erro ao buscar histórico diário:', error);
+    return [];
+  }
+};
+
+// ============================================
+// FILTROS DO DIA (limpeza automática à meia-noite)
+// ============================================
+
+const getTodayStart = () => {
+  const now = new Date();
+  now.setHours(0, 0, 0, 0);
+  return now;
+};
+
+export const getTodayBudgets = async () => {
+  const all = await getAllBudgets();
+  const todayStart = getTodayStart();
+  return all.filter(b =>
+    new Date(b.created_at) >= todayStart &&
+    b.status !== 'delivered' &&
+    b.status !== 'cancelled'
+  );
+};
+
+export const getTodayPickingOrders = async () => {
+  const [allPicking, allRoutes] = await Promise.all([
+    getAllPickingOrders(),
+    getAllDeliveryRoutes()
+  ]);
+  const todayStart = getTodayStart();
+  // Remove separações cujo orçamento já foi entregue
+  const deliveredBudgetIds = new Set(
+    allRoutes
+      .filter(r => r.status === 'delivered')
+      .map(r => r.budget_id)
+      .filter(Boolean)
+  );
+  return allPicking
+    .filter(p => new Date(p.created_at) >= todayStart)
+    .filter(p => !p.budget_id || !deliveredBudgetIds.has(p.budget_id));
+};
+
+export const getTodayDeliveryRoutes = async () => {
+  const all = await getAllDeliveryRoutes();
+  const todayStart = getTodayStart();
+  return all.filter(r =>
+    new Date(r.created_at) >= todayStart &&
+    r.status !== 'delivered' &&
+    r.status !== 'cancelled'
+  );
+};
+
+// ============================================
 // ESTATÍSTICAS
 // ============================================
 
@@ -462,65 +556,208 @@ export const getOverviewStats = async () => {
     const startOfMonth = new Date(now.getFullYear(), now.getMonth(), 1).toISOString();
     const startOfWeek = new Date(now - 7 * 24 * 60 * 60 * 1000).toISOString();
 
-    const [budgetsRes, itemsRes] = await Promise.all([
+    const [budgetsRes, routesRes] = await Promise.all([
       supabase
         .from('budgets')
-        .select('id, total, status, created_at'),
+        .select('id, total, status, created_at, sale_type, payment_status, entrada_valor, budget_items(product_name, quantity, total_price)'),
       supabase
-        .from('budget_items')
-        .select('product_name, quantity, total_price')
+        .from('delivery_routes')
+        .select('id, status, budget_id')
     ]);
 
     if (budgetsRes.error) throw budgetsRes.error;
-    if (itemsRes.error) throw itemsRes.error;
 
     const budgets = budgetsRes.data || [];
-    const items = itemsRes.data || [];
+    const routes = routesRes.data || [];
 
-    // Orçamentos do mês
-    const monthBudgets = budgets.filter(b => b.created_at >= startOfMonth);
-    const weekBudgets = budgets.filter(b => b.created_at >= startOfWeek);
+    // Apenas vendas confirmadas (exclui rascunhos e cancelados)
+    const sales = budgets.filter(b => b.status === 'confirmed' || b.status === 'delivered');
+    const monthSales = sales.filter(b => b.created_at >= startOfMonth);
+    const weekSales = sales.filter(b => b.created_at >= startOfWeek);
 
-    // Faturamento total (todos os tempos)
-    const totalRevenue = budgets.reduce((sum, b) => sum + parseFloat(b.total || 0), 0);
+    // Faturamento (apenas vendas confirmadas)
+    const totalRevenue = sales.reduce((sum, b) => sum + parseFloat(b.total || 0), 0);
+    const monthRevenue = monthSales.reduce((sum, b) => sum + parseFloat(b.total || 0), 0);
 
-    // Faturamento do mês
-    const monthRevenue = monthBudgets.reduce((sum, b) => sum + parseFloat(b.total || 0), 0);
+    // Ticket médio
+    const avgTicket = sales.length > 0 ? totalRevenue / sales.length : 0;
 
-    // Ticket médio (pedidos que não foram cancelados)
-    const validBudgets = budgets.filter(b => b.status !== 'cancelled');
-    const avgTicket = validBudgets.length > 0
-      ? validBudgets.reduce((sum, b) => sum + parseFloat(b.total || 0), 0) / validBudgets.length
-      : 0;
-
-    // Entregues vs cancelados
-    const delivered = budgets.filter(b => b.status === 'delivered').length;
+    // Entregues = rotas com status delivered
+    const delivered = routes.filter(r => r.status === 'delivered').length;
     const cancelled = budgets.filter(b => b.status === 'cancelled').length;
 
-    // Produtos mais vendidos
+    // Breakdown presencial vs online
+    const presencial = sales.filter(b => b.sale_type === 'presencial' || !b.sale_type).length;
+    const online = sales.filter(b => b.sale_type === 'online').length;
+
+    // A receber: soma dos valores pendentes
+    const aReceberTotal = sales
+      .filter(b => b.payment_status === 'a_receber')
+      .reduce((sum, b) => sum + parseFloat(b.total || 0), 0);
+    const parcialTotal = sales
+      .filter(b => b.payment_status === 'parcial')
+      .reduce((sum, b) => sum + Math.max(0, parseFloat(b.total || 0) - parseFloat(b.entrada_valor || 0)), 0);
+    const pendingTotal = aReceberTotal + parcialTotal;
+
+    // Produtos mais vendidos (de vendas confirmadas, itens já vêm junto com o budget)
     const productMap = {};
-    items.forEach(item => {
-      const name = item.product_name;
-      if (!productMap[name]) productMap[name] = { name, qty: 0, revenue: 0 };
-      productMap[name].qty += parseInt(item.quantity || 0);
-      productMap[name].revenue += parseFloat(item.total_price || 0);
+    sales.forEach(b => {
+      (b.budget_items || []).forEach(item => {
+        const name = item.product_name;
+        if (!productMap[name]) productMap[name] = { name, qty: 0, revenue: 0 };
+        productMap[name].qty += parseInt(item.quantity || 0);
+        productMap[name].revenue += parseFloat(item.total_price || 0);
+      });
     });
     const topProducts = Object.values(productMap)
       .sort((a, b) => b.qty - a.qty)
       .slice(0, 5);
 
     return {
-      monthCount: monthBudgets.length,
-      weekCount: weekBudgets.length,
+      monthCount: monthSales.length,
+      weekCount: weekSales.length,
       totalRevenue,
       monthRevenue,
       avgTicket,
       delivered,
       cancelled,
+      presencial,
+      online,
+      pendingTotal,
       topProducts
     };
   } catch (error) {
     console.error('Erro ao buscar estatísticas:', error);
     return null;
+  }
+};
+
+// ============================================
+// CAIXA
+// ============================================
+
+export const getOpenSession = async () => {
+  try {
+    const today = new Date().toISOString().split('T')[0];
+    const { data, error } = await supabase
+      .from('cash_sessions')
+      .select('*')
+      .eq('status', 'aberto')
+      .eq('data', today)
+      .order('opened_at', { ascending: false })
+      .limit(1)
+      .maybeSingle();
+    if (error) throw error;
+    return data;
+  } catch (error) {
+    console.error('Erro ao buscar sessão aberta:', error);
+    return null;
+  }
+};
+
+export const openCashSession = async (turno, saldo_inicial, saldo_inicial_detalhes) => {
+  try {
+    const today = new Date().toISOString().split('T')[0];
+    const { data, error } = await supabase
+      .from('cash_sessions')
+      .insert([{ turno, data: today, saldo_inicial, saldo_inicial_detalhes, status: 'aberto' }])
+      .select()
+      .single();
+    if (error) throw error;
+    return { success: true, data };
+  } catch (error) {
+    console.error('Erro ao abrir caixa:', error);
+    return { success: false, error };
+  }
+};
+
+export const closeCashSession = async (sessionId, saldo_final) => {
+  try {
+    const { error } = await supabase
+      .from('cash_sessions')
+      .update({ status: 'fechado', saldo_final, closed_at: new Date().toISOString() })
+      .eq('id', sessionId);
+    if (error) throw error;
+    return { success: true };
+  } catch (error) {
+    console.error('Erro ao fechar caixa:', error);
+    return { success: false, error };
+  }
+};
+
+export const getSessionTransactions = async (sessionId) => {
+  try {
+    const { data, error } = await supabase
+      .from('cash_transactions')
+      .select('*')
+      .eq('session_id', sessionId)
+      .order('created_at', { ascending: true });
+    if (error) throw error;
+    return data || [];
+  } catch (error) {
+    console.error('Erro ao buscar transações:', error);
+    return [];
+  }
+};
+
+export const createCashTransaction = async (transaction) => {
+  try {
+    const { data, error } = await supabase
+      .from('cash_transactions')
+      .insert([transaction])
+      .select()
+      .single();
+    if (error) throw error;
+    return { success: true, data };
+  } catch (error) {
+    console.error('Erro ao criar transação:', error);
+    return { success: false, error };
+  }
+};
+
+export const getTodaySessions = async () => {
+  try {
+    const today = new Date().toISOString().split('T')[0];
+    const { data, error } = await supabase
+      .from('cash_sessions')
+      .select('*')
+      .eq('data', today)
+      .order('opened_at', { ascending: true });
+    if (error) throw error;
+    return data || [];
+  } catch (error) {
+    console.error('Erro ao buscar sessões do dia:', error);
+    return [];
+  }
+};
+
+export const deleteCashTransaction = async (id) => {
+  try {
+    const { error } = await supabase
+      .from('cash_transactions')
+      .delete()
+      .eq('id', id);
+    if (error) throw error;
+    return { success: true };
+  } catch (error) {
+    console.error('Erro ao excluir transação:', error);
+    return { success: false, error };
+  }
+};
+
+export const getTodayTransactions = async () => {
+  try {
+    const today = new Date().toISOString().split('T')[0];
+    const { data, error } = await supabase
+      .from('cash_transactions')
+      .select('*, cash_sessions(data)')
+      .gte('created_at', today + 'T00:00:00')
+      .lte('created_at', today + 'T23:59:59')
+      .order('created_at', { ascending: false });
+    if (error) throw error;
+    return data || [];
+  } catch (error) {
+    console.error('Erro ao buscar transações do dia:', error);
+    return [];
   }
 };

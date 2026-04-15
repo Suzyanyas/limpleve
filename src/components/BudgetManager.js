@@ -2,7 +2,7 @@ import { useState, useEffect } from 'react';
 import toast from 'react-hot-toast';
 import {
   getAllCustomers,
-  getAllBudgets,
+  getTodayBudgets,
   createCustomer,
   updateCustomer,
   createBudget,
@@ -11,14 +11,17 @@ import {
   deleteBudget,
   getBudgetById,
   createPickingOrder,
-  createDeliveryRoute
+  createDeliveryRoute,
+  getOpenSession,
+  createCashTransaction
 } from '../services/managementService';
 import { getAllProducts, createProduct } from '../services/productService';
 import { supabase } from '../supabaseClient';
+import CashManager, { CashStatusBar } from './CashManager';
 import './BudgetManager.css';
 
 export default function BudgetManager({ onBack, initialBudget, openNew, onUpdate, onApproved }) {
-  const [view, setView] = useState((initialBudget || openNew) ? 'form' : 'list'); // list, form, detail, romaneio
+  const [view, setView] = useState((initialBudget || openNew) ? 'form' : 'list'); // list, form, detail, romaneio, caixa
   const [budgets, setBudgets] = useState([]);
   const [budgetsLoading, setBudgetsLoading] = useState(false);
   const [customers, setCustomers] = useState([]);
@@ -37,6 +40,12 @@ export default function BudgetManager({ onBack, initialBudget, openNew, onUpdate
   const [budgetData, setBudgetData] = useState(null);
   const [deliveryAddress, setDeliveryAddress] = useState('');
   const [paymentMethod, setPaymentMethod] = useState('');
+  const [paymentStatus, setPaymentStatus] = useState('pago');
+  const [entradaValue, setEntradaValue] = useState('');
+  const [entradaMethod, setEntradaMethod] = useState('dinheiro');
+  const [saleType, setSaleType] = useState('presencial');
+  const [mistoValues, setMistoValues] = useState({ dinheiro: '', pix: '', cartao: '' });
+  const [trocoRecebido, setTrocoRecebido] = useState('');
   const [notes, setNotes] = useState('');
   const [customerWhatsapp, setCustomerWhatsapp] = useState('');
   const [customerFilter, setCustomerFilter] = useState('');
@@ -44,6 +53,8 @@ export default function BudgetManager({ onBack, initialBudget, openNew, onUpdate
   const [showCustomerDropdown, setShowCustomerDropdown] = useState(false);
   const [showProductDropdown, setShowProductDropdown] = useState(false);
   const [creatingCustomer, setCreatingCustomer] = useState(null); // null | { name, whatsapp }
+  const [hasPicking, setHasPicking] = useState(false);
+  const [hasRoute, setHasRoute] = useState(false);
 
   useEffect(() => {
     loadData();
@@ -53,7 +64,7 @@ export default function BudgetManager({ onBack, initialBudget, openNew, onUpdate
 
   const loadBudgetsList = async () => {
     setBudgetsLoading(true);
-    const data = await getAllBudgets();
+    const data = await getTodayBudgets();
     setBudgets(data);
     setBudgetsLoading(false);
   };
@@ -66,6 +77,12 @@ export default function BudgetManager({ onBack, initialBudget, openNew, onUpdate
     setCustomerWhatsapp('');
     setDeliveryAddress('');
     setPaymentMethod('');
+    setPaymentStatus('pago');
+    setEntradaValue('');
+    setEntradaMethod('dinheiro');
+    setSaleType('presencial');
+    setMistoValues({ dinheiro: '', pix: '', cartao: '' });
+    setTrocoRecebido('');
     setNotes('');
     setCreatingCustomer(null);
   };
@@ -75,7 +92,20 @@ export default function BudgetManager({ onBack, initialBudget, openNew, onUpdate
     if (budget) {
       setBudgetData(budget);
       setDeliveryAddress(budget.delivery_address || '');
-      setPaymentMethod(budget.payment_method || '');
+      const pm = budget.payment_method || '';
+      if (pm.startsWith('misto|')) {
+        setPaymentMethod('misto');
+        const parsed = { dinheiro: '', pix: '', cartao: '' };
+        pm.split('|').slice(1).forEach(part => {
+          const [key, val] = part.split(':');
+          if (key in parsed) parsed[key] = val;
+        });
+        setMistoValues(parsed);
+      } else {
+        setPaymentMethod(pm);
+      }
+      setPaymentStatus(budget.payment_status || 'pago');
+      setSaleType(budget.sale_type || 'presencial');
       setNotes(budget.notes || '');
       const customer = customers.find(c => c.id === budget.customer_id);
       setSelectedCustomer(customer || { name: budget.customer_name, code: budget.customer_code });
@@ -88,6 +118,15 @@ export default function BudgetManager({ onBack, initialBudget, openNew, onUpdate
           total_price: item.total_price
         })));
       }
+
+      // Verifica se já tem separação e/ou rota para este orçamento
+      const [pickingRes, routeRes] = await Promise.all([
+        supabase.from('picking').select('id').eq('budget_id', budgetId).limit(1),
+        supabase.from('delivery_routes').select('id').eq('budget_id', budgetId).neq('status', 'cancelled').limit(1)
+      ]);
+      setHasPicking((pickingRes.data?.length ?? 0) > 0);
+      setHasRoute((routeRes.data?.length ?? 0) > 0);
+
       setView('detail');
     } else {
       toast.error('Orçamento não encontrado');
@@ -348,6 +387,53 @@ export default function BudgetManager({ onBack, initialBudget, openNew, onUpdate
     return items.reduce((sum, item) => sum + parseFloat(item.total_price), 0);
   };
 
+  const formatPaymentMethod = () => {
+    const labels = {
+      dinheiro: '💵 Dinheiro',
+      pix: '📱 PIX',
+      cartao_debito: '💳 Cartão Débito',
+      cartao_credito: '💳 Cartão Crédito',
+      boleto: 'Boleto',
+    };
+    if (paymentMethod === 'misto') {
+      const parts = [];
+      if (parseFloat(mistoValues.dinheiro) > 0) parts.push(`💵 Dinheiro R$${parseFloat(mistoValues.dinheiro).toFixed(2)}`);
+      if (parseFloat(mistoValues.pix) > 0) parts.push(`📱 PIX R$${parseFloat(mistoValues.pix).toFixed(2)}`);
+      if (parseFloat(mistoValues.cartao) > 0) parts.push(`💳 Cartão R$${parseFloat(mistoValues.cartao).toFixed(2)}`);
+      return parts.length > 0 ? parts.join(' + ') : '🔀 Misto';
+    }
+    return labels[paymentMethod] || paymentMethod;
+  };
+
+  const formatPaymentMethodPlain = () => {
+    const labels = {
+      dinheiro: 'Dinheiro',
+      pix: 'PIX',
+      cartao_debito: 'Cartao Debito',
+      cartao_credito: 'Cartao Credito',
+      boleto: 'Boleto',
+    };
+    if (paymentMethod === 'misto') {
+      const parts = [];
+      if (parseFloat(mistoValues.dinheiro) > 0) parts.push(`Dinheiro R$${parseFloat(mistoValues.dinheiro).toFixed(2)}`);
+      if (parseFloat(mistoValues.pix) > 0) parts.push(`PIX R$${parseFloat(mistoValues.pix).toFixed(2)}`);
+      if (parseFloat(mistoValues.cartao) > 0) parts.push(`Cartao R$${parseFloat(mistoValues.cartao).toFixed(2)}`);
+      return parts.length > 0 ? parts.join(' + ') : 'Misto';
+    }
+    return labels[paymentMethod] || paymentMethod;
+  };
+
+  const buildPaymentMethodToSave = () => {
+    if (paymentMethod === 'misto') {
+      const parts = [];
+      if (parseFloat(mistoValues.dinheiro) > 0) parts.push(`dinheiro:${parseFloat(mistoValues.dinheiro).toFixed(2)}`);
+      if (parseFloat(mistoValues.pix) > 0) parts.push(`pix:${parseFloat(mistoValues.pix).toFixed(2)}`);
+      if (parseFloat(mistoValues.cartao) > 0) parts.push(`cartao:${parseFloat(mistoValues.cartao).toFixed(2)}`);
+      return `misto|${parts.join('|')}`;
+    }
+    return paymentMethod;
+  };
+
   const buildItemsToSave = () => items.map(item => {
     const rawId = item.product.id;
     const numericId = typeof rawId === 'number' ? rawId : parseFloat(rawId);
@@ -370,8 +456,12 @@ export default function BudgetManager({ onBack, initialBudget, openNew, onUpdate
       customer_code: selectedCustomer.code || null,
       total: calculateTotal(),
       status: 'draft',
-      delivery_address: deliveryAddress,
-      payment_method: paymentMethod,
+      delivery_address: saleType === 'online' ? deliveryAddress : '',
+      payment_method: buildPaymentMethodToSave(),
+      sale_type: saleType,
+      payment_status: paymentStatus,
+      entrada_valor: paymentStatus === 'parcial' ? parseFloat(entradaValue) || 0 : null,
+      entrada_method: paymentStatus === 'parcial' ? entradaMethod : null,
       notes: notes
     };
 
@@ -400,6 +490,89 @@ export default function BudgetManager({ onBack, initialBudget, openNew, onUpdate
         toast.error('Erro ao salvar orçamento');
       }
     }
+  };
+
+  const handleGenerateSale = async () => {
+    if (!selectedCustomer) { toast.error('Selecione um cliente'); return; }
+    if (items.length === 0) { toast.error('Adicione pelo menos um produto'); return; }
+    if (!paymentMethod) { toast.error('Selecione a forma de pagamento'); return; }
+
+    // 1. Salva o orçamento
+    const budgetPayload = {
+      customer_id: selectedCustomer.id || null,
+      customer_name: selectedCustomer.name,
+      customer_code: selectedCustomer.code || null,
+      total: calculateTotal(),
+      status: 'confirmed',
+      delivery_address: saleType === 'online' ? deliveryAddress : '',
+      payment_method: buildPaymentMethodToSave(),
+      sale_type: saleType,
+      payment_status: paymentStatus,
+      entrada_valor: paymentStatus === 'parcial' ? parseFloat(entradaValue) || 0 : null,
+      entrada_method: paymentStatus === 'parcial' ? entradaMethod : null,
+      notes: notes
+    };
+    const itemsToSave = buildItemsToSave();
+    let savedBudget = budgetData;
+
+    if (!budgetData) {
+      const result = await createBudget(budgetPayload, itemsToSave);
+      if (!result.success) { toast.error('Erro ao salvar orçamento'); return; }
+      savedBudget = result.data;
+      setBudgetData(result.data);
+    } else {
+      const result = await updateBudget(budgetData.id, budgetPayload, itemsToSave);
+      if (!result.success) { toast.error('Erro ao atualizar orçamento'); return; }
+      await updateBudgetStatus(budgetData.id, 'confirmed');
+      setBudgetData(prev => ({ ...prev, ...budgetPayload }));
+    }
+
+    // 2. Cria ordem de separação
+    const { data: existing } = await supabase
+      .from('picking')
+      .select('id')
+      .eq('budget_id', savedBudget.id)
+      .limit(1);
+    if (!existing || existing.length === 0) {
+      await createPickingOrder({
+        budget_id: savedBudget.id,
+        customer_name: savedBudget.customer_name || selectedCustomer.name,
+        customer_code: savedBudget.customer_code || selectedCustomer.code,
+        status: 'pending'
+      });
+    }
+
+    // 3. Lança no caixa se payment_status === 'pago' ou 'parcial'
+    if (paymentStatus !== 'a_receber') {
+      const session = await getOpenSession();
+      const valorLancado = paymentStatus === 'parcial'
+        ? parseFloat(entradaValue) || 0
+        : calculateTotal();
+      await createCashTransaction({
+        session_id: session?.id || null,
+        budget_id: savedBudget.id,
+        tipo: 'venda',
+        valor: valorLancado,
+        forma_pagamento: paymentStatus === 'parcial' ? entradaMethod : buildPaymentMethodToSave(),
+        sale_type: saleType,
+        payment_status: paymentStatus,
+        entrada_valor: paymentStatus === 'parcial' ? parseFloat(entradaValue) || 0 : null,
+        entrada_method: paymentStatus === 'parcial' ? entradaMethod : null,
+        observacao: selectedCustomer.name
+      });
+      toast.success(session ? 'Venda registrada no caixa!' : 'Venda registrada (sem turno aberto)');
+    }
+
+    onUpdate && onUpdate();
+    setView('romaneio');
+    setTimeout(() => {
+      const afterPrint = () => {
+        window.removeEventListener('afterprint', afterPrint);
+        onApproved && onApproved();
+      };
+      window.addEventListener('afterprint', afterPrint);
+      window.print();
+    }, 400);
   };
 
   const handleApprove = async () => {
@@ -536,6 +709,7 @@ export default function BudgetManager({ onBack, initialBudget, openNew, onUpdate
 
     if (result.success) {
       toast.success('Rota criada com sucesso!');
+      setHasRoute(true);
       onUpdate && onUpdate();
     } else {
       toast.error('Erro ao criar rota');
@@ -576,6 +750,7 @@ export default function BudgetManager({ onBack, initialBudget, openNew, onUpdate
 
     if (result.success) {
       toast.success('Enviado para separação!');
+      setHasPicking(true);
       onUpdate && onUpdate();
     } else {
       toast.error('Erro ao enviar para separação');
@@ -597,6 +772,9 @@ export default function BudgetManager({ onBack, initialBudget, openNew, onUpdate
             + Novo
           </button>
         </div>
+
+        <div className="list-content">
+          <CashStatusBar onOpen={() => setView('caixa')} />
 
         {budgetsLoading ? (
           <div className="list-loading">Carregando...</div>
@@ -637,6 +815,7 @@ export default function BudgetManager({ onBack, initialBudget, openNew, onUpdate
             ))}
           </div>
         )}
+        </div>
       </div>
     );
   }
@@ -691,12 +870,42 @@ export default function BudgetManager({ onBack, initialBudget, openNew, onUpdate
               <span>{budgetData.delivery_address}</span>
             </div>
           )}
-          {budgetData?.payment_method && (
-            <div className="detail-info">
-              <span className="detail-info-label">Pagamento</span>
-              <span>{budgetData.payment_method}</span>
-            </div>
-          )}
+          {budgetData?.payment_method && (() => {
+            const ps = budgetData.payment_status;
+            const pm = budgetData.payment_method;
+            const pmLabels = {
+              dinheiro: 'Dinheiro', pix: 'PIX',
+              cartao_debito: 'Débito', cartao_credito: 'Crédito',
+              boleto: 'Boleto',
+            };
+            const pmFormatted = pm.startsWith('misto|')
+              ? pm.replace('misto|', '').split('|').map(p => {
+                  const [k, v] = p.split(':');
+                  return `${pmLabels[k] || k}: R$ ${parseFloat(v).toFixed(2)}`;
+                }).join(' + ')
+              : (pmLabels[pm] || pm);
+
+            return (
+              <div className="detail-info" style={{ flexDirection: 'column', alignItems: 'flex-start', gap: 4 }}>
+                <span className="detail-info-label">Pagamento</span>
+                {ps === 'parcial' ? (
+                  <>
+                    <span>Pagamento parcial</span>
+                    <span style={{ fontSize: '0.82rem', color: '#555' }}>
+                      Valor pago: R$ {parseFloat(budgetData.entrada_valor || 0).toFixed(2)} ({pmLabels[budgetData.entrada_method] || budgetData.entrada_method || pmFormatted})
+                    </span>
+                    <span style={{ fontSize: '0.82rem', color: '#dc2626' }}>
+                      Restante: R$ {Math.max(0, total - parseFloat(budgetData.entrada_valor || 0)).toFixed(2)} na entrega
+                    </span>
+                  </>
+                ) : ps === 'a_receber' ? (
+                  <span style={{ color: '#dc2626', fontWeight: 700 }}>A receber</span>
+                ) : (
+                  <span>{pmFormatted}</span>
+                )}
+              </div>
+            );
+          })()}
         </div>
 
         {!isConfirmed ? (
@@ -726,18 +935,28 @@ export default function BudgetManager({ onBack, initialBudget, openNew, onUpdate
               <span className="action-icon">🖨️</span>
               <span>Imprimir Romaneio</span>
             </button>
-            <button className="detail-action-btn picking" onClick={handleSendToPicking}>
-              <span className="action-icon">📦</span>
-              <span>Enviar para Separação</span>
-            </button>
-            <button className="detail-action-btn route" onClick={handleCreateRoute}>
-              <span className="action-icon">📍</span>
-              <span>Criar Rota</span>
-            </button>
+            {!hasPicking && (
+              <button className="detail-action-btn picking" onClick={handleSendToPicking}>
+                <span className="action-icon">📦</span>
+                <span>Enviar para Separação</span>
+              </button>
+            )}
+            {hasPicking && !hasRoute && (
+              <button className="detail-action-btn route" onClick={handleCreateRoute}>
+                <span className="action-icon">📍</span>
+                <span>Criar Rota</span>
+              </button>
+            )}
+            {hasPicking && <span className="badge-already">📦 Em Separação</span>}
+            {hasRoute && <span className="badge-already">📍 Rota criada</span>}
           </div>
         )}
       </div>
     );
+  }
+
+  if (view === 'caixa') {
+    return <CashManager onBack={() => setView('list')} />;
   }
 
   if (view === 'romaneio') {
@@ -758,7 +977,7 @@ export default function BudgetManager({ onBack, initialBudget, openNew, onUpdate
           <div className="receipt">
             {/* Logo */}
             <div className="receipt-logo">
-              <img src="/images/logo-limpleve.png" alt="LimpLeve" />
+              <img src="/images/limpleveromaneio.png" alt="LimpLeve" />
             </div>
 
             <div className="receipt-date">{dateStr}</div>
@@ -806,14 +1025,46 @@ export default function BudgetManager({ onBack, initialBudget, openNew, onUpdate
             <div className="receipt-field-block">
               <div className="rf-label">PAGAMENTO:</div>
               <div className="receipt-total">R$ {calculateTotal().toFixed(2)}</div>
-              <input
-                className="receipt-input no-print"
-                type="text"
-                value={paymentMethod}
-                onChange={(e) => setPaymentMethod(e.target.value)}
-                placeholder="Ex: PIX, Dinheiro, Cartão..."
-              />
-              <div className="rf-value print-only">{paymentMethod}</div>
+              {paymentStatus === 'pago' && paymentMethod && (
+                <div className="rf-value">{formatPaymentMethodPlain()}</div>
+              )}
+              {paymentStatus === 'pago' && (paymentMethod === 'dinheiro' || (paymentMethod === 'misto' && parseFloat(mistoValues.dinheiro) > 0)) && parseFloat(trocoRecebido) > 0 && (
+                <>
+                  <div className="rf-value">Recebido: R$ {parseFloat(trocoRecebido).toFixed(2)}</div>
+                  {(() => {
+                    const cashAmount = paymentMethod === 'dinheiro' ? calculateTotal() : parseFloat(mistoValues.dinheiro);
+                    const troco = parseFloat(trocoRecebido) - cashAmount;
+                    return troco >= 0
+                      ? <div className="rf-value" style={{ fontWeight: 700 }}>Troco: R$ {troco.toFixed(2)}</div>
+                      : null;
+                  })()}
+                </>
+              )}
+              {paymentStatus === 'parcial' && (
+                <>
+                  <div className="rf-value">
+                    Valor pago: R$ {parseFloat(entradaValue || 0).toFixed(2)} ({entradaMethod === 'dinheiro' ? 'Dinheiro' : entradaMethod === 'pix' ? 'PIX' : entradaMethod === 'boleto' ? 'Boleto' : 'Cartão'})
+                  </div>
+                  {entradaMethod === 'dinheiro' && parseFloat(trocoRecebido) > 0 && (() => {
+                    const troco = parseFloat(trocoRecebido) - parseFloat(entradaValue || 0);
+                    return troco >= 0
+                      ? <div className="rf-value" style={{ fontWeight: 700 }}>Troco: R$ {troco.toFixed(2)}</div>
+                      : null;
+                  })()}
+                  <div className="rf-value" style={{ color: '#dc2626' }}>
+                    Restante: R$ {Math.max(0, calculateTotal() - (parseFloat(entradaValue) || 0)).toFixed(2)} na entrega
+                  </div>
+                </>
+              )}
+              {paymentStatus === 'a_receber' && (
+                <div className="rf-value" style={{ color: '#dc2626' }}>A RECEBER</div>
+              )}
+            </div>
+
+            {/* Tipo de venda */}
+            <div className="receipt-field">
+              <span className="rf-label">TIPO:</span>
+              <span className="rf-value">{saleType === 'presencial' ? 'Presencial' : 'Online'}</span>
             </div>
 
             {/* Observação */}
@@ -831,7 +1082,7 @@ export default function BudgetManager({ onBack, initialBudget, openNew, onUpdate
           {/* Botões de ação - não imprime */}
           <div className="romaneio-actions no-print">
             <button className="btn-print" onClick={handlePrint}>Imprimir</button>
-            <button className="btn-whatsapp" onClick={handleSendWhatsapp}>📱 WhatsApp</button>
+            <button className="btn-whatsapp" onClick={handleSendWhatsapp}>WhatsApp</button>
             <button className="btn-route" onClick={handleCreateRoute}>Criar Rota</button>
           </div>
         </div>
@@ -1146,28 +1397,229 @@ export default function BudgetManager({ onBack, initialBudget, openNew, onUpdate
           <div className="total-value">R$ {calculateTotal().toFixed(2)}</div>
         </div>
 
-        {/* Endereço */}
+        {/* Tipo de venda */}
         <div className="form-section">
-          <label className="section-label">Endereço de entrega</label>
-          <textarea
-            className="address-input"
-            value={deliveryAddress}
-            onChange={(e) => setDeliveryAddress(e.target.value)}
-            placeholder="Rua, número, bairro..."
-            rows={2}
-          />
+          <label className="section-label">Tipo de venda</label>
+          <div className="sale-type-toggle">
+            <button
+              type="button"
+              className={`sale-type-btn ${saleType === 'presencial' ? 'active' : ''}`}
+              onClick={() => setSaleType('presencial')}
+            >
+              🏪 Presencial
+            </button>
+            <button
+              type="button"
+              className={`sale-type-btn ${saleType === 'online' ? 'active' : ''}`}
+              onClick={() => setSaleType('online')}
+            >
+              📱 Online
+            </button>
+          </div>
         </div>
+
+        {/* Endereço — só obrigatório se online */}
+        {saleType === 'online' && (
+          <div className="form-section">
+            <label className="section-label">Endereço de entrega</label>
+            <textarea
+              className="address-input"
+              value={deliveryAddress}
+              onChange={(e) => setDeliveryAddress(e.target.value)}
+              placeholder="Rua, número, bairro..."
+              rows={2}
+            />
+          </div>
+        )}
 
         {/* Forma de pagamento */}
         <div className="form-section">
           <label className="section-label">Forma de pagamento</label>
-          <input
-            type="text"
-            className="payment-input"
-            value={paymentMethod}
-            onChange={(e) => setPaymentMethod(e.target.value)}
-            placeholder="Ex: Dinheiro, PIX, Cartão..."
-          />
+          <div className="payment-options">
+            {['dinheiro', 'pix', 'cartao_debito', 'cartao_credito', 'boleto', 'misto'].map(opt => (
+              <button
+                key={opt}
+                type="button"
+                className={`payment-opt-btn ${paymentMethod === opt ? 'active' : ''}`}
+                onClick={() => setPaymentMethod(opt)}
+              >
+                {opt === 'dinheiro' && '💵 Dinheiro'}
+                {opt === 'pix' && '📱 PIX'}
+                {opt === 'cartao_debito' && '💳 Débito'}
+                {opt === 'cartao_credito' && '💳 Crédito'}
+                {opt === 'boleto' && 'Boleto'}
+                {opt === 'misto' && '🔀 Misto'}
+              </button>
+            ))}
+          </div>
+
+          {/* Troco — pagamento total em dinheiro */}
+          {paymentMethod === 'dinheiro' && paymentStatus === 'pago' && (
+            <div className="troco-box">
+              <div className="troco-row">
+                <span className="troco-label">Valor recebido</span>
+                <input
+                  type="number"
+                  className="misto-input"
+                  placeholder="R$ 0,00"
+                  min="0"
+                  step="0.01"
+                  value={trocoRecebido}
+                  onChange={e => setTrocoRecebido(e.target.value)}
+                />
+              </div>
+              {parseFloat(trocoRecebido) > 0 && (
+                <div className={`troco-result ${parseFloat(trocoRecebido) >= calculateTotal() ? 'troco-ok' : 'troco-warn'}`}>
+                  {parseFloat(trocoRecebido) >= calculateTotal()
+                    ? `Troco: R$ ${(parseFloat(trocoRecebido) - calculateTotal()).toFixed(2)}`
+                    : `Faltam R$ ${(calculateTotal() - parseFloat(trocoRecebido)).toFixed(2)}`}
+                </div>
+              )}
+            </div>
+          )}
+
+          {/* Misto — divisão de valores */}
+          {paymentMethod === 'misto' && (
+            <div className="misto-breakdown">
+              {[
+                { key: 'dinheiro', label: '💵 Dinheiro' },
+                { key: 'pix', label: '📱 PIX' },
+                { key: 'cartao', label: '💳 Cartão' },
+              ].map(({ key, label }) => (
+                <div key={key} className="misto-row">
+                  <span className="misto-label">{label}</span>
+                  <input
+                    type="number"
+                    className="misto-input"
+                    placeholder="R$ 0,00"
+                    min="0"
+                    step="0.01"
+                    value={mistoValues[key]}
+                    onChange={e => setMistoValues(prev => ({ ...prev, [key]: e.target.value }))}
+                  />
+                </div>
+              ))}
+              {(() => {
+                const soma = (parseFloat(mistoValues.dinheiro) || 0) + (parseFloat(mistoValues.pix) || 0) + (parseFloat(mistoValues.cartao) || 0);
+                const total = calculateTotal();
+                const diff = soma - total;
+                const exato = Math.abs(diff) < 0.01;
+                const sobra = diff > 0.01;
+                const falta = diff < -0.01;
+                return (
+                  <div className="misto-total-row">
+                    <span>Total informado:</span>
+                    <span className={exato || sobra ? 'misto-ok' : 'misto-warn'}>
+                      R$ {soma.toFixed(2)}
+                      {' '}
+                      {exato && '✓'}
+                      {sobra && `✓ (troco R$ ${diff.toFixed(2)})`}
+                      {falta && `(falta R$ ${Math.abs(diff).toFixed(2)})`}
+                    </span>
+                  </div>
+                );
+              })()}
+              {/* Troco para a parte em dinheiro do misto */}
+              {parseFloat(mistoValues.dinheiro) > 0 && paymentStatus === 'pago' && (
+                <div className="troco-box" style={{ marginTop: 8 }}>
+                  <div className="troco-row">
+                    <span className="troco-label">Recebido em dinheiro</span>
+                    <input
+                      type="number"
+                      className="misto-input"
+                      placeholder="R$ 0,00"
+                      min="0"
+                      step="0.01"
+                      value={trocoRecebido}
+                      onChange={e => setTrocoRecebido(e.target.value)}
+                    />
+                  </div>
+                  {parseFloat(trocoRecebido) > 0 && (
+                    <div className={`troco-result ${parseFloat(trocoRecebido) >= parseFloat(mistoValues.dinheiro) ? 'troco-ok' : 'troco-warn'}`}>
+                      {parseFloat(trocoRecebido) >= parseFloat(mistoValues.dinheiro)
+                        ? `Troco: R$ ${(parseFloat(trocoRecebido) - parseFloat(mistoValues.dinheiro)).toFixed(2)}`
+                        : `Faltam R$ ${(parseFloat(mistoValues.dinheiro) - parseFloat(trocoRecebido)).toFixed(2)}`}
+                    </div>
+                  )}
+                </div>
+              )}
+            </div>
+          )}
+        </div>
+
+        {/* Status de pagamento */}
+        <div className="form-section">
+          <label className="section-label">Status do pagamento</label>
+          <div className="sale-type-toggle">
+            <button type="button" className={`sale-type-btn ${paymentStatus === 'pago' ? 'active' : ''}`} onClick={() => setPaymentStatus('pago')}>
+              ✅ Pago
+            </button>
+            <button type="button" className={`sale-type-btn ${paymentStatus === 'parcial' ? 'active' : ''}`} onClick={() => setPaymentStatus('parcial')}>
+              🔄 Pagamento parcial
+            </button>
+            <button type="button" className={`sale-type-btn ${paymentStatus === 'a_receber' ? 'active' : ''}`} onClick={() => setPaymentStatus('a_receber')}>
+              ⏳ A receber
+            </button>
+          </div>
+
+          {paymentStatus === 'parcial' && (
+            <div className="misto-breakdown" style={{ marginTop: 12 }}>
+              <div className="misto-row">
+                <span className="misto-label">Valor pago</span>
+                <input
+                  type="number"
+                  className="misto-input"
+                  placeholder="R$ 0,00"
+                  min="0"
+                  step="0.01"
+                  value={entradaValue}
+                  onChange={e => setEntradaValue(e.target.value)}
+                />
+                <select
+                  className="misto-input"
+                  value={entradaMethod}
+                  onChange={e => setEntradaMethod(e.target.value)}
+                  style={{ maxWidth: 130 }}
+                >
+                  <option value="dinheiro">💵 Dinheiro</option>
+                  <option value="pix">📱 PIX</option>
+                  <option value="cartao_debito">💳 Débito</option>
+                  <option value="cartao_credito">💳 Crédito</option>
+                  <option value="boleto">Boleto</option>
+                </select>
+              </div>
+              <div className="misto-total-row">
+                <span>Restante na entrega:</span>
+                <span className={parseFloat(entradaValue) > 0 ? 'misto-ok' : 'misto-warn'}>
+                  R$ {Math.max(0, calculateTotal() - (parseFloat(entradaValue) || 0)).toFixed(2)}
+                </span>
+              </div>
+              {/* Troco para entrada em dinheiro */}
+              {entradaMethod === 'dinheiro' && parseFloat(entradaValue) > 0 && (
+                <div className="troco-box" style={{ marginTop: 8 }}>
+                  <div className="troco-row">
+                    <span className="troco-label">Recebido em dinheiro</span>
+                    <input
+                      type="number"
+                      className="misto-input"
+                      placeholder="R$ 0,00"
+                      min="0"
+                      step="0.01"
+                      value={trocoRecebido}
+                      onChange={e => setTrocoRecebido(e.target.value)}
+                    />
+                  </div>
+                  {parseFloat(trocoRecebido) > 0 && (
+                    <div className={`troco-result ${parseFloat(trocoRecebido) >= parseFloat(entradaValue) ? 'troco-ok' : 'troco-warn'}`}>
+                      {parseFloat(trocoRecebido) >= parseFloat(entradaValue)
+                        ? `Troco: R$ ${(parseFloat(trocoRecebido) - parseFloat(entradaValue)).toFixed(2)}`
+                        : `Faltam R$ ${(parseFloat(entradaValue) - parseFloat(trocoRecebido)).toFixed(2)}`}
+                    </div>
+                  )}
+                </div>
+              )}
+            </div>
+          )}
         </div>
 
         {/* Observação */}
@@ -1191,11 +1643,18 @@ export default function BudgetManager({ onBack, initialBudget, openNew, onUpdate
             Cancelar
           </button>
           <button
-            className="btn-primary"
+            className="btn-primary btn-save-draft"
             onClick={handleSaveBudget}
             disabled={!selectedCustomer || items.length === 0}
           >
             {budgetData ? 'Salvar Alterações' : 'Salvar Orçamento'}
+          </button>
+          <button
+            className="btn-primary btn-generate-sale"
+            onClick={handleGenerateSale}
+            disabled={!selectedCustomer || items.length === 0 || !paymentMethod}
+          >
+            ✅ Gerar Venda
           </button>
         </div>
 

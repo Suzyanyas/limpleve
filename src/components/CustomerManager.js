@@ -37,7 +37,7 @@ export default function CustomerManager() {
     setForm({
       name: customer.name || '',
       code: customer.code || '',
-      phone: customer.phone || '',
+      phone: customer.phone || customer.whatsapp || '',
       address: customer.address || '',
       notes: customer.notes || '',
     });
@@ -81,7 +81,7 @@ export default function CustomerManager() {
   const filtered = customers.filter(c =>
     c.name.toLowerCase().includes(search.toLowerCase()) ||
     (c.code || '').toLowerCase().includes(search.toLowerCase()) ||
-    (c.phone || '').includes(search)
+    (c.phone || c.whatsapp || '').includes(search)
   );
 
   return (
@@ -169,8 +169,8 @@ export default function CustomerManager() {
                   <td className="cm-td-name">{customer.name}</td>
                   <td>{customer.code || <span className="cm-empty-cell">—</span>}</td>
                   <td>
-                    {customer.phone
-                      ? <a href={`https://wa.me/55${customer.phone.replace(/\D/g, '')}`} target="_blank" rel="noreferrer" className="cm-whatsapp">{customer.phone}</a>
+                    {(customer.phone || customer.whatsapp)
+                      ? <a href={`https://wa.me/55${(customer.phone || customer.whatsapp).replace(/\D/g, '')}`} target="_blank" rel="noreferrer" className="cm-whatsapp">{customer.phone || customer.whatsapp}</a>
                       : <span className="cm-empty-cell">—</span>}
                   </td>
                   <td>{customer.address || <span className="cm-empty-cell">—</span>}</td>

@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Link } from "react-router-dom";
 import {
   faBars,
@@ -9,12 +9,25 @@ import {
   faCar,
   faBroom,
   faTrash,
-  faLock
+  faLock,
+  faLockOpen
 } from "@fortawesome/free-solid-svg-icons";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
+import { supabase } from "../supabaseClient";
 
 export default function Navbar({ setShowSidebarCart, selectedProducts, setSearchQuery }) {
   const [show, setShow] = useState(false);
+  const [isLoggedIn, setIsLoggedIn] = useState(false);
+
+  useEffect(() => {
+    supabase.auth.getSession().then(({ data: { session } }) => {
+      setIsLoggedIn(!!session);
+    });
+    const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
+      setIsLoggedIn(!!session);
+    });
+    return () => subscription.unsubscribe();
+  }, []);
 
   const products = selectedProducts || [];
 
@@ -85,7 +98,7 @@ export default function Navbar({ setShowSidebarCart, selectedProducts, setSearch
             </div>
 
             <Link to="/admin" className="nav-admin-btn" title="Área Administrativa">
-              <FontAwesomeIcon icon={faLock} />
+              <FontAwesomeIcon icon={isLoggedIn ? faLockOpen : faLock} />
             </Link>
 
             <button

@@ -154,6 +154,37 @@
   list-style: none;
   padding: 0;
   margin: 0;
+  max-height: 280px;
+  overflow-y: auto;
+  padding-right: 10px;
+  scroll-behavior: smooth;
+}
+
+.items-list::-webkit-scrollbar {
+  width: 8px;
+}
+
+.items-list::-webkit-scrollbar-track {
+  background: rgba(255, 255, 255, 0.15);
+  border-radius: 10px;
+  margin: 4px 0;
+}
+
+.items-list::-webkit-scrollbar-thumb {
+  background: rgba(255, 255, 255, 0.6);
+  border-radius: 10px;
+  border: 2px solid transparent;
+  background-clip: padding-box;
+}
+
+.items-list::-webkit-scrollbar-thumb:hover {
+  background: rgba(255, 255, 255, 0.9);
+  background-clip: padding-box;
+}
+
+.items-list::-webkit-scrollbar-thumb:active {
+  background: #2a5298;
+  background-clip: padding-box;
 }
 
 .item {

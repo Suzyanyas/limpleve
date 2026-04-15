@@ -2,9 +2,9 @@ import { useState, useEffect, useRef } from 'react';
 import { useSearchParams } from 'react-router-dom';
 import toast from 'react-hot-toast';
 import {
-  getAllBudgets,
-  getAllPickingOrders,
-  getAllDeliveryRoutes
+  getTodayBudgets,
+  getTodayPickingOrders,
+  getTodayDeliveryRoutes
 } from '../services/managementService';
 import BudgetManager from './BudgetManager';
 import PickingManager from './PickingManager';
@@ -29,6 +29,23 @@ export default function ManagementDashboard() {
     loadData();
   }, []);
 
+  // Timer de meia-noite: recarrega os dados quando vira o dia
+  useEffect(() => {
+    const scheduleRefresh = () => {
+      const now = new Date();
+      const midnight = new Date();
+      midnight.setHours(24, 0, 0, 0);
+      const ms = midnight - now;
+      return setTimeout(() => {
+        loadData();
+        scheduleRefresh();
+      }, ms);
+    };
+    const timer = scheduleRefresh();
+    return () => clearTimeout(timer);
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
   // Quando a view muda para budgets com budgetId, carrega o orçamento
   useEffect(() => {
     if (activeView === 'budgets' && budgetId) {
@@ -43,9 +60,9 @@ export default function ManagementDashboard() {
     setLoading(true);
     try {
       const [budgetsData, pickingData, routesData] = await Promise.all([
-        getAllBudgets(),
-        getAllPickingOrders(),
-        getAllDeliveryRoutes()
+        getTodayBudgets(),
+        getTodayPickingOrders(),
+        getTodayDeliveryRoutes()
       ]);
 
       setBudgets(budgetsData);
@@ -151,7 +168,7 @@ export default function ManagementDashboard() {
               <div className="empty-state">Nenhum orçamento</div>
             ) : (
               <ul className="items-list">
-                {draftBudgets.slice(0, 4).map(budget => (
+                {draftBudgets.map(budget => (
                   <li
                     key={budget.id}
                     className="item"
@@ -161,11 +178,6 @@ export default function ManagementDashboard() {
                     <span className="item-name">{budget.customer_name}</span>
                   </li>
                 ))}
-                {draftBudgets.length > 4 && (
-                  <li className="more-items">
-                    ... +{draftBudgets.length - 4} mais
-                  </li>
-                )}
               </ul>
             )}
           </div>
@@ -186,7 +198,7 @@ export default function ManagementDashboard() {
               <div className="empty-state">Nenhuma separação</div>
             ) : (
               <ul className="items-list">
-                {pickingPicked.slice(0, 2).map(order => (
+                {pickingPicked.map(order => (
                   <li
                     key={order.id}
                     className="item picked"
@@ -196,7 +208,7 @@ export default function ManagementDashboard() {
                     <span className="item-name">{order.customer_name}</span>
                   </li>
                 ))}
-                {pickingPending.slice(0, 2).map(order => (
+                {pickingPending.map(order => (
                   <li
                     key={order.id}
                     className="item"
@@ -206,11 +218,6 @@ export default function ManagementDashboard() {
                     <span className="item-name">{order.customer_name}</span>
                   </li>
                 ))}
-                {pickingOrders.length > 4 && (
-                  <li className="more-items">
-                    ... +{pickingOrders.length - 4} mais
-                  </li>
-                )}
               </ul>
             )}
           </div>
@@ -238,7 +245,7 @@ export default function ManagementDashboard() {
                       Próxima rota
                     </h4>
                     <ul className="items-list">
-                      {routesNext.slice(0, 2).map(route => (
+                      {routesNext.map(route => (
                         <li
                           key={route.id}
                           className="item"
@@ -258,7 +265,7 @@ export default function ManagementDashboard() {
                       Em rota
                     </h4>
                     <ul className="items-list">
-                      {routesInProgress.slice(0, 2).map(route => (
+                      {routesInProgress.map(route => (
                         <li
                           key={route.id}
                           className="item"
@@ -291,7 +298,11 @@ export default function ManagementDashboard() {
             />
           )}
           {activeView === 'picking' && (
-            <PickingManager onBack={handleBack} onUpdate={loadData} />
+            <PickingManager
+              onBack={handleBack}
+              onUpdate={loadData}
+              onOpenBudget={(budgetId) => handleCardClick('budgets', { id: budgetId })}
+            />
           )}
           {activeView === 'routes' && (
             <RouteManager onBack={handleBack} onUpdate={loadData} />
