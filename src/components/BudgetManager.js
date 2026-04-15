@@ -387,24 +387,6 @@ export default function BudgetManager({ onBack, initialBudget, openNew, onUpdate
     return items.reduce((sum, item) => sum + parseFloat(item.total_price), 0);
   };
 
-  const formatPaymentMethod = () => {
-    const labels = {
-      dinheiro: '💵 Dinheiro',
-      pix: '📱 PIX',
-      cartao_debito: '💳 Cartão Débito',
-      cartao_credito: '💳 Cartão Crédito',
-      boleto: 'Boleto',
-    };
-    if (paymentMethod === 'misto') {
-      const parts = [];
-      if (parseFloat(mistoValues.dinheiro) > 0) parts.push(`💵 Dinheiro R$${parseFloat(mistoValues.dinheiro).toFixed(2)}`);
-      if (parseFloat(mistoValues.pix) > 0) parts.push(`📱 PIX R$${parseFloat(mistoValues.pix).toFixed(2)}`);
-      if (parseFloat(mistoValues.cartao) > 0) parts.push(`💳 Cartão R$${parseFloat(mistoValues.cartao).toFixed(2)}`);
-      return parts.length > 0 ? parts.join(' + ') : '🔀 Misto';
-    }
-    return labels[paymentMethod] || paymentMethod;
-  };
-
   const formatPaymentMethodPlain = () => {
     const labels = {
       dinheiro: 'Dinheiro',
