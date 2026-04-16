@@ -124,6 +124,7 @@ export default function CashManager({ onBack }) {
   const [cedulas, setCedulas] = useState(EMPTY_CEDULAS);
   const [modal, setModal] = useState(null); // null | 'sangria' | 'despesa' | 'reforco'
   const [modalForm, setModalForm] = useState({ valor: '', categoria: '', observacao: '' });
+  const [modalCedulas, setModalCedulas] = useState(EMPTY_CEDULAS);
   const [todaySessions, setTodaySessions] = useState([]);
   const [todayTransactions, setTodayTransactions] = useState([]);
   const [saving, setSaving] = useState(false);
@@ -164,16 +165,18 @@ export default function CashManager({ onBack }) {
     setSaving(false);
   };
 
-  // ── Sangria / Despesa ──
+  // ── Sangria / Despesa / Reforço ──
   const handleModalConfirm = async () => {
-    if (!modalForm.valor || parseFloat(modalForm.valor) <= 0) {
-      toast.error('Informe o valor'); return;
+    const valor = modal === 'reforco' ? calcSaldo(modalCedulas) : parseFloat(modalForm.valor);
+    if (!valor || valor <= 0) {
+      toast.error(modal === 'reforco' ? 'Informe ao menos uma cédula' : 'Informe o valor');
+      return;
     }
     setSaving(true);
     const result = await createCashTransaction({
       session_id: session.id,
       tipo: modal,
-      valor: parseFloat(modalForm.valor),
+      valor,
       categoria_despesa: modal === 'despesa' ? modalForm.categoria : null,
       observacao: modalForm.observacao || null,
     });
@@ -184,6 +187,7 @@ export default function CashManager({ onBack }) {
       setTransactions(txs);
       setModal(null);
       setModalForm({ valor: '', categoria: '', observacao: '' });
+      setModalCedulas(EMPTY_CEDULAS);
     } else {
       toast.error('Erro ao registrar');
     }
@@ -469,30 +473,65 @@ export default function CashManager({ onBack }) {
 
       {/* ── MODAL SANGRIA / DESPESA / REFORÇO ── */}
       {modal && (
-        <div className="cash-modal-overlay" onClick={() => setModal(null)}>
+        <div className="cash-modal-overlay" onClick={() => { setModal(null); setModalCedulas(EMPTY_CEDULAS); }}>
           <div className="cash-modal" onClick={e => e.stopPropagation()}>
             <div className="cash-modal-title">
               {modal === 'sangria' ? '💸 Registrar Sangria'
                 : modal === 'despesa' ? '🧾 Registrar Despesa'
                 : '💵 Reforço de Caixa'}
             </div>
-            {modal === 'reforco' && (
-              <div className="cash-modal-hint">
-                Dinheiro adicional inserido no caixa para troco ou reposição.
+            {modal === 'reforco' ? (
+              <>
+                <div className="cash-modal-hint">
+                  Dinheiro adicional inserido no caixa para troco ou reposição.
+                </div>
+                <table className="cedulas-table">
+                  <thead>
+                    <tr>
+                      <th>Cédula/Moeda</th>
+                      <th>Qtd</th>
+                      <th>Total</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {CEDULAS.map(c => (
+                      <tr key={c.value}>
+                        <td className="cedula-label">{c.label}</td>
+                        <td>
+                          <input
+                            type="number"
+                            className="cedula-input"
+                            min="0"
+                            value={modalCedulas[c.value]}
+                            onChange={e => setModalCedulas(prev => ({ ...prev, [c.value]: e.target.value }))}
+                          />
+                        </td>
+                        <td className="cedula-total">
+                          {formatCurrency((parseFloat(modalCedulas[c.value]) || 0) * c.value)}
+                        </td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+                <div className="cash-saldo-total">
+                  <span className="cash-saldo-label">Total do reforço</span>
+                  <span className="cash-saldo-value">{formatCurrency(calcSaldo(modalCedulas))}</span>
+                </div>
+              </>
+            ) : (
+              <div className="cash-modal-field">
+                <label>Valor</label>
+                <input
+                  type="number"
+                  placeholder="R$ 0,00"
+                  min="0"
+                  step="0.01"
+                  value={modalForm.valor}
+                  onChange={e => setModalForm(p => ({ ...p, valor: e.target.value }))}
+                  autoFocus
+                />
               </div>
             )}
-            <div className="cash-modal-field">
-              <label>Valor</label>
-              <input
-                type="number"
-                placeholder="R$ 0,00"
-                min="0"
-                step="0.01"
-                value={modalForm.valor}
-                onChange={e => setModalForm(p => ({ ...p, valor: e.target.value }))}
-                autoFocus
-              />
-            </div>
             {modal === 'despesa' && (
               <div className="cash-modal-field">
                 <label>Categoria</label>
@@ -516,7 +555,7 @@ export default function CashManager({ onBack }) {
               />
             </div>
             <div className="cash-modal-actions">
-              <button className="cash-modal-cancel" onClick={() => setModal(null)}>Cancelar</button>
+              <button className="cash-modal-cancel" onClick={() => { setModal(null); setModalCedulas(EMPTY_CEDULAS); }}>Cancelar</button>
               <button
                 className={`cash-modal-confirm ${modal === 'reforco' ? 'reforco' : ''}`}
                 onClick={handleModalConfirm}
