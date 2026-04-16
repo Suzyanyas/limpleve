@@ -787,7 +787,9 @@ export default function BudgetManager({ onBack, initialBudget, openNew, onUpdate
               <div key={b.id} className="budget-list-item" onClick={() => handleOpenBudget(b)}>
                 <div className="bli-left">
                   <span className="bli-customer">{b.customer_name}</span>
-                  <span className="bli-date">{new Date(b.created_at).toLocaleDateString('pt-BR')}</span>
+                  <span className="bli-date">
+                    {new Date(b.created_at).toLocaleDateString('pt-BR')} · {new Date(b.created_at).toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' })}
+                  </span>
                 </div>
                 <div className="bli-right">
                   <span className="bli-total">R$ {parseFloat(b.total).toFixed(2)}</span>
@@ -1762,6 +1764,7 @@ export default function BudgetManager({ onBack, initialBudget, openNew, onUpdate
               </button>
               <button
                 className="post-sale-btn skip"
+                autoFocus
                 onClick={() => { setPostSaleModal(null); onApproved ? onApproved() : setView('list'); }}
               >
                 Finalizar sem mais ações
