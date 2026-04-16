@@ -24,6 +24,7 @@ const CEDULAS = [
   { label: 'R$ 0,50', value: 0.5 },
   { label: 'R$ 0,25', value: 0.25 },
   { label: 'R$ 0,10', value: 0.1 },
+  { label: 'R$ 0,05', value: 0.05 },
 ];
 
 const EMPTY_CEDULAS = Object.fromEntries(CEDULAS.map(c => [c.value, '']));
