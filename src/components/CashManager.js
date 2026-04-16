@@ -297,8 +297,8 @@ export default function CashManager({ onBack }) {
             <div className="cash-session-title">
               {session.turno === 'manha' ? '🌅 Caixa Manhã' : '🌇 Caixa Tarde'} • aberto às {new Date(session.opened_at).toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' })}
             </div>
-            <div className="cash-session-saldo">{formatCurrency(saldoEsperado)}</div>
             <div className="cash-session-saldo-label">saldo esperado</div>
+            <div className="cash-session-saldo">{formatCurrency(saldoEsperado)}</div>
             <div className="cash-session-grid">
               <div className="cash-session-stat">
                 <span className="cash-session-stat-label">Inicial</span>

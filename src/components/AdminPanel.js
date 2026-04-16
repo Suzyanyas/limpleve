@@ -11,6 +11,8 @@ import { getOverviewStats, getDailyHistory } from '../services/managementService
 import ManagementDashboard from './ManagementDashboard';
 import CustomerManager from './CustomerManager';
 import AdminLogin from './AdminLogin';
+import PinGate from './PinGate';
+import PinSettings from './PinSettings';
 import { supabase } from '../supabaseClient';
 import './AdminPanel.css';
 
@@ -34,6 +36,8 @@ export default function AdminPanel() {
   const [filterAvailability, setFilterAvailability] = useState('all');
   const [searchTerm, setSearchTerm] = useState('');
   const [activeTab, setActiveTab] = useState('management');
+  const [pinGateTarget, setPinGateTarget] = useState(null); // tab que precisa de PIN
+  const PROTECTED_TABS = ['stats', 'settings'];
   const [currentPage, setCurrentPage] = useState(1);
   const [productsPerPage, setProductsPerPage] = useState(10);
   const [imagePreview, setImagePreview] = useState('');
@@ -352,13 +356,13 @@ export default function AdminPanel() {
           </button>
           <button
             className={`tab-button ${activeTab === 'settings' ? 'active' : ''}`}
-            onClick={() => setActiveTab('settings')}
+            onClick={() => setPinGateTarget('settings')}
           >
             Configurações
           </button>
           <button
             className={`tab-button ${activeTab === 'stats' ? 'active' : ''}`}
-            onClick={() => setActiveTab('stats')}
+            onClick={() => setPinGateTarget('stats')}
           >
             Dashboard
           </button>
@@ -806,11 +810,19 @@ export default function AdminPanel() {
       {/* Conteúdo da Aba de Configurações */}
       {activeTab === 'settings' && (
         <div className="tab-content">
-          <div className="settings-placeholder">
-            <h2>⚙️ Configurações</h2>
-            <p>Em breve: Configurações gerais da loja, formas de pagamento, frete, etc.</p>
-          </div>
+          <PinSettings />
         </div>
+      )}
+
+      {/* Modal PIN */}
+      {pinGateTarget && (
+        <PinGate
+          onUnlock={() => {
+            setActiveTab(pinGateTarget);
+            setPinGateTarget(null);
+          }}
+          onClose={() => setPinGateTarget(null)}
+        />
       )}
 
       {/* Conteúdo da Aba de Dashboard */}

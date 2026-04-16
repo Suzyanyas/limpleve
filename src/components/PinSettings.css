@@ -1,0 +1,164 @@
+.pin-settings {
+  display: flex;
+  justify-content: center;
+  padding: 32px 16px;
+}
+
+.ps-card {
+  background: white;
+  border-radius: 20px;
+  padding: 32px 28px;
+  width: 100%;
+  max-width: 320px;
+  box-shadow: 0 4px 24px rgba(30, 60, 114, 0.12);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 20px;
+}
+
+.ps-title {
+  font-size: 1.1rem;
+  font-weight: 800;
+  color: #1e3c72;
+  text-align: center;
+}
+
+/* Passos */
+.ps-steps {
+  display: flex;
+  gap: 12px;
+}
+
+.ps-step {
+  width: 28px;
+  height: 28px;
+  border-radius: 50%;
+  background: #e2e8f0;
+  color: #94a3b8;
+  font-size: 0.8rem;
+  font-weight: 700;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.2s;
+}
+
+.ps-step.active {
+  background: linear-gradient(135deg, #1e3c72 0%, #2a5298 100%);
+  color: white;
+}
+
+.ps-step.done {
+  background: #10b981;
+  color: white;
+}
+
+.ps-label {
+  font-size: 0.85rem;
+  font-weight: 700;
+  color: #64748b;
+}
+
+/* Pontos */
+.ps-dots {
+  display: flex;
+  gap: 16px;
+}
+
+.ps-dot {
+  width: 14px;
+  height: 14px;
+  border-radius: 50%;
+  border: 2px solid #cbd5e1;
+  background: transparent;
+  transition: all 0.15s;
+}
+
+.ps-dot.filled {
+  background: #1e3c72;
+  border-color: #1e3c72;
+  transform: scale(1.15);
+}
+
+.ps-dot.error {
+  border-color: #f87171;
+  background: #f87171;
+}
+
+.ps-error {
+  font-size: 0.78rem;
+  color: #ef4444;
+  font-weight: 700;
+}
+
+/* Teclado */
+.ps-pad {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 10px;
+  width: 100%;
+}
+
+.ps-btn {
+  aspect-ratio: 1;
+  border: 1.5px solid #e2e8f0;
+  border-radius: 50%;
+  background: white;
+  color: #1e3c72;
+  font-size: 1.2rem;
+  font-weight: 700;
+  cursor: pointer;
+  transition: all 0.15s;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.ps-btn:hover:not(:disabled) {
+  background: #f0f4ff;
+  border-color: #1e3c72;
+}
+
+.ps-btn:active:not(:disabled) {
+  background: #dbeafe;
+  transform: scale(0.93);
+}
+
+.ps-btn-empty {
+  border: none !important;
+  background: transparent !important;
+  cursor: default;
+}
+
+.ps-btn-delete {
+  color: #ef4444;
+  border-color: #fecaca;
+}
+
+.ps-btn-delete:hover {
+  background: #fef2f2 !important;
+}
+
+/* Botão confirmar */
+.ps-confirm-btn {
+  width: 100%;
+  padding: 12px;
+  background: linear-gradient(135deg, #1e3c72 0%, #2a5298 100%);
+  color: white;
+  border: none;
+  border-radius: 12px;
+  font-size: 0.95rem;
+  font-weight: 700;
+  cursor: pointer;
+  transition: opacity 0.2s;
+}
+
+.ps-confirm-btn:disabled {
+  opacity: 0.45;
+  cursor: not-allowed;
+}
+
+.ps-confirm-btn:hover:not(:disabled) {
+  opacity: 0.9;
+}

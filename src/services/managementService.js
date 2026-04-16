@@ -761,3 +761,35 @@ export const getTodayTransactions = async () => {
     return [];
   }
 };
+
+// ============================================
+// CONFIGURAÇÕES (PIN)
+// ============================================
+
+export const getAppPin = async () => {
+  try {
+    const { data, error } = await supabase
+      .from('app_settings')
+      .select('value')
+      .eq('key', 'admin_pin')
+      .maybeSingle();
+    if (error) throw error;
+    return data?.value || null;
+  } catch (error) {
+    console.error('Erro ao buscar PIN:', error);
+    return null;
+  }
+};
+
+export const setAppPin = async (pin) => {
+  try {
+    const { error } = await supabase
+      .from('app_settings')
+      .upsert({ key: 'admin_pin', value: pin }, { onConflict: 'key' });
+    if (error) throw error;
+    return { success: true };
+  } catch (error) {
+    console.error('Erro ao salvar PIN:', error);
+    return { success: false, error };
+  }
+};

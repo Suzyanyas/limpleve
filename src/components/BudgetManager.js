@@ -18,10 +18,13 @@ import {
 import { getAllProducts, createProduct } from '../services/productService';
 import { supabase } from '../supabaseClient';
 import CashManager, { CashStatusBar } from './CashManager';
+import PinGate from './PinGate';
 import './BudgetManager.css';
 
 export default function BudgetManager({ onBack, initialBudget, openNew, onUpdate, onApproved }) {
   const [view, setView] = useState((initialBudget || openNew) ? 'form' : 'list'); // list, form, detail, romaneio, caixa
+  const [showPinGate, setShowPinGate] = useState(false);
+  const [postSaleModal, setPostSaleModal] = useState(null); // { budget } após venda presencial
   const [budgets, setBudgets] = useState([]);
   const [budgetsLoading, setBudgetsLoading] = useState(false);
   const [customers, setCustomers] = useState([]);
@@ -431,6 +434,8 @@ export default function BudgetManager({ onBack, initialBudget, openNew, onUpdate
   const handleSaveBudget = async () => {
     if (!selectedCustomer) { toast.error('Selecione um cliente'); return; }
     if (items.length === 0) { toast.error('Adicione pelo menos um produto'); return; }
+    if (!buildPaymentMethodToSave()) { toast.error('Selecione a forma de pagamento'); return; }
+    if (!paymentStatus) { toast.error('Selecione o status de pagamento'); return; }
 
     const budgetPayload = {
       customer_id: selectedCustomer.id || null,
@@ -475,15 +480,17 @@ export default function BudgetManager({ onBack, initialBudget, openNew, onUpdate
   };
 
   const handleGenerateSale = async () => {
-    if (!selectedCustomer) { toast.error('Selecione um cliente'); return; }
+    if (saleType !== 'presencial' && !selectedCustomer) { toast.error('Selecione um cliente'); return; }
     if (items.length === 0) { toast.error('Adicione pelo menos um produto'); return; }
     if (!paymentMethod) { toast.error('Selecione a forma de pagamento'); return; }
 
+    const customerForSale = selectedCustomer || { id: null, name: 'GERAL', code: null };
+
     // 1. Salva o orçamento
     const budgetPayload = {
-      customer_id: selectedCustomer.id || null,
-      customer_name: selectedCustomer.name,
-      customer_code: selectedCustomer.code || null,
+      customer_id: customerForSale.id || null,
+      customer_name: customerForSale.name,
+      customer_code: customerForSale.code || null,
       total: calculateTotal(),
       status: 'confirmed',
       delivery_address: saleType === 'online' ? deliveryAddress : '',
@@ -518,8 +525,8 @@ export default function BudgetManager({ onBack, initialBudget, openNew, onUpdate
     if (!existing || existing.length === 0) {
       await createPickingOrder({
         budget_id: savedBudget.id,
-        customer_name: savedBudget.customer_name || selectedCustomer.name,
-        customer_code: savedBudget.customer_code || selectedCustomer.code,
+        customer_name: savedBudget.customer_name || customerForSale.name,
+        customer_code: savedBudget.customer_code || customerForSale.code,
         status: 'pending'
       });
     }
@@ -540,27 +547,35 @@ export default function BudgetManager({ onBack, initialBudget, openNew, onUpdate
         payment_status: paymentStatus,
         entrada_valor: paymentStatus === 'parcial' ? parseFloat(entradaValue) || 0 : null,
         entrada_method: paymentStatus === 'parcial' ? entradaMethod : null,
-        observacao: selectedCustomer.name
+        observacao: customerForSale.name
       });
       toast.success(session ? 'Venda registrada no caixa!' : 'Venda registrada (sem turno aberto)');
     }
 
     onUpdate && onUpdate();
-    setView('romaneio');
-    setTimeout(() => {
-      const afterPrint = () => {
-        window.removeEventListener('afterprint', afterPrint);
-        onApproved && onApproved();
-      };
-      window.addEventListener('afterprint', afterPrint);
-      window.print();
-    }, 400);
+
+    if (saleType === 'presencial') {
+      // Presencial: pergunta o que fazer após a venda
+      setBudgetData(savedBudget);
+      setPostSaleModal({ budget: savedBudget });
+    } else {
+      // Online: vai direto ao romaneio e imprime
+      setView('romaneio');
+      setTimeout(() => {
+        const afterPrint = () => {
+          window.removeEventListener('afterprint', afterPrint);
+          onApproved && onApproved();
+        };
+        window.addEventListener('afterprint', afterPrint);
+        window.print();
+      }, 400);
+    }
   };
 
   const handleApprove = async () => {
     if (!budgetData) return;
 
-    if (!deliveryAddress.trim()) {
+    if (saleType === 'online' && !deliveryAddress.trim()) {
       toast.error('Preencha o endereço de entrega antes de aprovar');
       setView('form');
       return;
@@ -756,7 +771,7 @@ export default function BudgetManager({ onBack, initialBudget, openNew, onUpdate
         </div>
 
         <div className="list-content">
-          <CashStatusBar onOpen={() => setView('caixa')} />
+          <CashStatusBar onOpen={() => setShowPinGate(true)} />
 
         {budgetsLoading ? (
           <div className="list-loading">Carregando...</div>
@@ -798,6 +813,13 @@ export default function BudgetManager({ onBack, initialBudget, openNew, onUpdate
           </div>
         )}
         </div>
+
+        {showPinGate && (
+          <PinGate
+            onUnlock={() => { setShowPinGate(false); setView('caixa'); }}
+            onClose={() => setShowPinGate(false)}
+          />
+        )}
       </div>
     );
   }
@@ -913,18 +935,50 @@ export default function BudgetManager({ onBack, initialBudget, openNew, onUpdate
         ) : (
           /* Ações do romaneio aprovado */
           <div className="detail-actions">
-            <button className="detail-action-btn romaneio" onClick={() => setView('romaneio')}>
+            {(!budgetData?.payment_method || !budgetData?.payment_status) && (
+              <div className="payment-required-alert">
+                ⚠️ Preencha a <strong>forma de pagamento</strong> e o <strong>status do pagamento</strong> para continuar.
+              </div>
+            )}
+            <button
+              className="detail-action-btn romaneio"
+              onClick={() => {
+                if (!budgetData?.payment_method || !budgetData?.payment_status) {
+                  toast.error('Preencha a forma e o status de pagamento antes de imprimir o romaneio');
+                  return;
+                }
+                setView('romaneio');
+              }}
+            >
               <span className="action-icon">🖨️</span>
               <span>Imprimir Romaneio</span>
             </button>
             {!hasPicking && (
-              <button className="detail-action-btn picking" onClick={handleSendToPicking}>
+              <button
+                className="detail-action-btn picking"
+                onClick={() => {
+                  if (!budgetData?.payment_method || !budgetData?.payment_status) {
+                    toast.error('Preencha a forma e o status de pagamento antes de enviar para separação');
+                    return;
+                  }
+                  handleSendToPicking();
+                }}
+              >
                 <span className="action-icon">📦</span>
                 <span>Enviar para Separação</span>
               </button>
             )}
             {hasPicking && !hasRoute && (
-              <button className="detail-action-btn route" onClick={handleCreateRoute}>
+              <button
+                className="detail-action-btn route"
+                onClick={() => {
+                  if (!budgetData?.payment_method || !budgetData?.payment_status) {
+                    toast.error('Preencha a forma e o status de pagamento antes de criar rota');
+                    return;
+                  }
+                  handleCreateRoute();
+                }}
+              >
                 <span className="action-icon">📍</span>
                 <span>Criar Rota</span>
               </button>
@@ -1624,17 +1678,19 @@ export default function BudgetManager({ onBack, initialBudget, openNew, onUpdate
           >
             Cancelar
           </button>
-          <button
-            className="btn-primary btn-save-draft"
-            onClick={handleSaveBudget}
-            disabled={!selectedCustomer || items.length === 0}
-          >
-            {budgetData ? 'Salvar Alterações' : 'Salvar Orçamento'}
-          </button>
+          {saleType !== 'presencial' && (
+            <button
+              className="btn-primary btn-save-draft"
+              onClick={handleSaveBudget}
+              disabled={!selectedCustomer || items.length === 0}
+            >
+              {budgetData ? 'Salvar Alterações' : 'Salvar Orçamento'}
+            </button>
+          )}
           <button
             className="btn-primary btn-generate-sale"
             onClick={handleGenerateSale}
-            disabled={!selectedCustomer || items.length === 0 || !paymentMethod}
+            disabled={items.length === 0 || !paymentMethod}
           >
             ✅ Gerar Venda
           </button>
@@ -1647,6 +1703,73 @@ export default function BudgetManager({ onBack, initialBudget, openNew, onUpdate
           <button className="icon-btn">💬</button>
         </div>
       </div>
+
+      {showPinGate && (
+        <PinGate
+          onUnlock={() => { setShowPinGate(false); setView('caixa'); }}
+          onClose={() => setShowPinGate(false)}
+        />
+      )}
+
+      {postSaleModal && (
+        <div className="post-sale-overlay">
+          <div className="post-sale-modal">
+            <div className="post-sale-icon">✅</div>
+            <div className="post-sale-title">Venda registrada!</div>
+            <div className="post-sale-subtitle">O que deseja fazer agora?</div>
+            <div className="post-sale-actions">
+              <button
+                className="post-sale-btn print"
+                onClick={() => {
+                  setPostSaleModal(null);
+                  setView('romaneio');
+                  setTimeout(() => {
+                    const afterPrint = () => {
+                      window.removeEventListener('afterprint', afterPrint);
+                      onApproved && onApproved();
+                    };
+                    window.addEventListener('afterprint', afterPrint);
+                    window.print();
+                  }, 400);
+                }}
+              >
+                🖨️ Imprimir Romaneio
+              </button>
+              <button
+                className="post-sale-btn picking"
+                onClick={async () => {
+                  setPostSaleModal(null);
+                  const { data: existing } = await supabase
+                    .from('picking')
+                    .select('id')
+                    .eq('budget_id', postSaleModal.budget.id)
+                    .limit(1);
+                  if (!existing || existing.length === 0) {
+                    await createPickingOrder({
+                      budget_id: postSaleModal.budget.id,
+                      customer_name: postSaleModal.budget.customer_name,
+                      customer_code: postSaleModal.budget.customer_code,
+                      status: 'pending'
+                    });
+                    toast.success('Enviado para separação!');
+                  } else {
+                    toast('Já está em separação');
+                  }
+                  onApproved && onApproved();
+                }}
+              >
+                📦 Enviar para Separação
+              </button>
+              <button
+                className="post-sale-btn skip"
+                onClick={() => { setPostSaleModal(null); onApproved ? onApproved() : setView('list'); }}
+              >
+                Finalizar sem mais ações
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }
