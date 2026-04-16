@@ -1333,7 +1333,6 @@
   color: #000;
   padding: 16px 14px 20px;
   border-radius: 4px;
-  border: 2px solid #1e3c72;
   box-shadow: 0 4px 24px rgba(0,0,0,0.35);
   line-height: 1.4;
 }
@@ -1478,6 +1477,7 @@
 .btn-print {
   background: white;
   color: #1e3c72;
+  border: 2px solid #1e3c72 !important;
 }
 
 .btn-print:hover { opacity: 0.88; }
