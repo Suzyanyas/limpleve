@@ -374,7 +374,7 @@ export default function CashManager({ onBack }) {
       {/* ── FECHAMENTO ── */}
       {view === 'fechamento' && session && (
         <div className="cash-open-card">
-          <div className="cash-open-title">🔒 Fechar Caixa</div>
+          <div className="cash-open-title">🔒 Fechar Caixa - Conte o dinheiro.</div>
           <table className="cedulas-table">
             <thead>
               <tr><th>Cédula/Moeda</th><th>Qtd</th><th>Total</th></tr>
