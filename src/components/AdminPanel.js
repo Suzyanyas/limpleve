@@ -36,8 +36,7 @@ export default function AdminPanel() {
   const [filterAvailability, setFilterAvailability] = useState('all');
   const [searchTerm, setSearchTerm] = useState('');
   const [activeTab, setActiveTab] = useState('management');
-  const [pinGateTarget, setPinGateTarget] = useState(null); // tab que precisa de PIN
-  const PROTECTED_TABS = ['stats', 'settings'];
+  const [pinGateTarget, setPinGateTarget] = useState(null);
   const [currentPage, setCurrentPage] = useState(1);
   const [productsPerPage, setProductsPerPage] = useState(10);
   const [imagePreview, setImagePreview] = useState('');

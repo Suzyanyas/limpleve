@@ -46,6 +46,7 @@ export default function PinGate({ onUnlock, onClose }) {
     };
     window.addEventListener('keydown', handler);
     return () => window.removeEventListener('keydown', handler);
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [mode, input, confirm]);
 
   // Auto-submete quando atingir 4 dígitos
