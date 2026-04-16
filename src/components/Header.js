@@ -20,17 +20,6 @@ export default function Header() {
             transition={{ duration: 0.3 }}
           >
             <img src={bannerImage.imageUrl} alt={bannerImage.title} className="banner-image" />
-            <div className="banner-overlay">
-              <motion.div
-                className="banner-content"
-                initial={{ opacity: 0, y: 20 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ delay: 0.2, duration: 0.6 }}
-              >
-                <h2>{bannerImage.title}</h2>
-                <p>{bannerImage.description}</p>
-              </motion.div>
-            </div>
           </motion.div>
         </Link>
       </div>

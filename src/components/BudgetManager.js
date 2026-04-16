@@ -523,19 +523,21 @@ export default function BudgetManager({ onBack, initialBudget, openNew, onUpdate
       setBudgetData(prev => ({ ...prev, ...budgetPayload }));
     }
 
-    // 2. Cria ordem de separação
-    const { data: existing } = await supabase
-      .from('picking')
-      .select('id')
-      .eq('budget_id', savedBudget.id)
-      .limit(1);
-    if (!existing || existing.length === 0) {
-      await createPickingOrder({
-        budget_id: savedBudget.id,
-        customer_name: savedBudget.customer_name || customerForSale.name,
-        customer_code: savedBudget.customer_code || customerForSale.code,
-        status: 'pending'
-      });
+    // 2. Cria ordem de separação (apenas para vendas online; presencial cria no modal pós-venda se solicitado)
+    if (saleType !== 'presencial') {
+      const { data: existing } = await supabase
+        .from('picking')
+        .select('id')
+        .eq('budget_id', savedBudget.id)
+        .limit(1);
+      if (!existing || existing.length === 0) {
+        await createPickingOrder({
+          budget_id: savedBudget.id,
+          customer_name: savedBudget.customer_name || customerForSale.name,
+          customer_code: savedBudget.customer_code || customerForSale.code,
+          status: 'pending'
+        });
+      }
     }
 
     // 3. Lança no caixa se payment_status === 'pago' ou 'parcial'
