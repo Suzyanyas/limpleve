@@ -441,7 +441,33 @@
   padding: 24px;
   width: 100%;
   max-width: 400px;
+  max-height: 85vh;
+  overflow-y: auto;
   box-shadow: 0 8px 32px rgba(0,0,0,0.2);
+  scrollbar-width: thin;
+  scrollbar-color: #f97316 transparent;
+}
+
+.cash-modal::-webkit-scrollbar {
+  width: 6px;
+}
+
+.cash-modal::-webkit-scrollbar-track {
+  background: transparent;
+  border-radius: 10px;
+}
+
+.cash-modal::-webkit-scrollbar-thumb {
+  background: #f97316;
+  border-radius: 10px;
+}
+
+.cash-modal::-webkit-scrollbar-thumb:active {
+  background: #1e3c72;
+}
+
+.cash-modal:focus-within::-webkit-scrollbar-thumb {
+  background: #1e3c72;
 }
 
 .cash-modal-title {
