@@ -1548,7 +1548,7 @@
     border-radius: 0 !important;
     padding: 2mm 2mm !important;
     margin: 0 !important;
-    font-size: 12px !important;
+    font-size: 13px !important;
     font-family: Arial, 'Helvetica Neue', Helvetica, sans-serif !important;
     font-weight: 700 !important;
     color: #000 !important;
@@ -1564,28 +1564,28 @@
   }
 
   .receipt-date {
-    font-size: 12px !important;
+    font-size: 13px !important;
   }
 
   .ri-qty-name {
-    font-size: 12px !important;
+    font-size: 13px !important;
   }
 
   .ri-prices {
-    font-size: 10px !important;
+    font-size: 11px !important;
   }
 
   .rf-label {
-    font-size: 12px !important;
+    font-size: 13px !important;
   }
 
   .rf-value {
-    font-size: 11px !important;
+    font-size: 12px !important;
     font-weight: 700 !important;
   }
 
   .receipt-total {
-    font-size: 14px !important;
+    font-size: 15px !important;
   }
 
   .receipt-textarea,
