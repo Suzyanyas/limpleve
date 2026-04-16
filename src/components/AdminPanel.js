@@ -133,11 +133,16 @@ export default function AdminPanel() {
     e.preventDefault();
     
     const productData = {
-      ...formData,
-      id: parseFloat(formData.id),
+      name: formData.name,
       price: parseFloat(formData.price),
-      fragrances: formData.fragrances.length > 0 ? formData.fragrances : null
+      category: formData.category,
+      isAvailable: formData.isAvailable,
+      fragrances: formData.fragrances.length > 0 ? formData.fragrances : null,
+      image: formData.image || null,
     };
+    // Só inclui id se for um número válido (edição)
+    const parsedId = parseFloat(formData.id);
+    if (!isNaN(parsedId) && parsedId > 0) productData.id = parsedId;
 
     if (editingProduct) {
       const result = await updateProduct(editingProduct.id, productData);
