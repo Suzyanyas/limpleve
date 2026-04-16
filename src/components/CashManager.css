@@ -419,7 +419,7 @@
 }
 
 .cash-tx-value.venda { color: #16a34a; }
-.cash-tx-value.reforco { color: #15803d; font-weight: 800; }
+.cash-tx-value.reforco { color: #16a34a; font-weight: 800; }
 .cash-tx-value.sangria { color: #92400e; }
 .cash-tx-value.despesa { color: #dc2626; }
 
@@ -545,7 +545,7 @@
 }
 
 .reforco-value {
-  color: #15803d;
+  color: #4ade80;
 }
 
 /* ── Fechamento ── */
