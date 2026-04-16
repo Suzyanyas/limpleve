@@ -447,7 +447,7 @@
 }
 
 .cash-modal::-webkit-scrollbar {
-  width: 6px;
+  width: 12px;
 }
 
 .cash-modal::-webkit-scrollbar-track {
