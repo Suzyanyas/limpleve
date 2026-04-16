@@ -36,6 +36,18 @@ export default function PinGate({ onUnlock, onClose }) {
     }
   };
 
+  // Teclado físico
+  useEffect(() => {
+    if (mode === 'loading') return;
+    const handler = (e) => {
+      if (e.key >= '0' && e.key <= '9') handleDigit(e.key);
+      else if (e.key === 'Backspace') handleDelete();
+      else if (e.key === 'Escape' && onClose) onClose();
+    };
+    window.addEventListener('keydown', handler);
+    return () => window.removeEventListener('keydown', handler);
+  }, [mode, input, confirm]);
+
   // Auto-submete quando atingir 4 dígitos
   useEffect(() => {
     if (mode === 'enter' && input.length === PIN_LENGTH) {
