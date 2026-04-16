@@ -1523,15 +1523,12 @@
     margin: 4mm 3mm;
   }
 
-  /* Esconde tudo */
+  /* Zera altura do body para não gerar páginas extras */
   html, body {
-    height: auto !important;
+    height: 0 !important;
     overflow: hidden !important;
     margin: 0 !important;
     padding: 0 !important;
-  }
-
-  body {
     visibility: hidden;
   }
 
@@ -1541,12 +1538,12 @@
     visibility: visible;
   }
 
-  /* position: fixed não soma à altura do documento — evita folhas em branco */
   .receipt-wrapper {
-    position: fixed;
+    position: absolute;
     top: 0;
     left: 0;
     width: 100%;
+    height: auto;
     background: white;
     padding: 0 !important;
   }
