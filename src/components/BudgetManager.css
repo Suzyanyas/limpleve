@@ -1552,15 +1552,44 @@
     border-radius: 0 !important;
     padding: 2mm 2mm !important;
     margin: 0 !important;
-    font-size: 8px !important;
+    font-size: 7px !important;
     font-family: Arial, 'Helvetica Neue', Helvetica, sans-serif !important;
     font-weight: 700 !important;
     color: #000 !important;
     background: white !important;
+    -webkit-text-stroke: 0 !important;
+    text-shadow: none !important;
   }
 
   .receipt * {
     color: #000 !important;
+    -webkit-text-stroke: 0 !important;
+    text-shadow: none !important;
+  }
+
+  .receipt-date {
+    font-size: 7px !important;
+  }
+
+  .ri-qty-name {
+    font-size: 7px !important;
+  }
+
+  .ri-prices {
+    font-size: 6.5px !important;
+  }
+
+  .rf-label {
+    font-size: 7px !important;
+  }
+
+  .rf-value {
+    font-size: 7px !important;
+    font-weight: 700 !important;
+  }
+
+  .receipt-total {
+    font-size: 8px !important;
   }
 
   .receipt-textarea,
