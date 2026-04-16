@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import toast from 'react-hot-toast';
 import {
   getAllCustomers,
@@ -58,6 +58,13 @@ export default function BudgetManager({ onBack, initialBudget, openNew, onUpdate
   const [creatingCustomer, setCreatingCustomer] = useState(null); // null | { name, whatsapp }
   const [hasPicking, setHasPicking] = useState(false);
   const [hasRoute, setHasRoute] = useState(false);
+  const finalizarBtnRef = useRef(null);
+
+  useEffect(() => {
+    if (postSaleModal) {
+      setTimeout(() => finalizarBtnRef.current?.focus(), 50);
+    }
+  }, [postSaleModal]);
 
   useEffect(() => {
     loadData();
@@ -1763,9 +1770,9 @@ export default function BudgetManager({ onBack, initialBudget, openNew, onUpdate
                 📦 Enviar para Separação
               </button>
               <button
+                ref={finalizarBtnRef}
                 className="post-sale-btn skip"
-                autoFocus
-                onClick={() => { setPostSaleModal(null); onApproved ? onApproved() : setView('list'); }}
+                onClick={() => { setPostSaleModal(null); resetForm(); setView('form'); }}
               >
                 Finalizar sem mais ações
               </button>
