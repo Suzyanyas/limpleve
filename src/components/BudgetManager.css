@@ -688,6 +688,7 @@
 .customer-option:last-child { border-bottom: none; }
 
 .customer-option:hover { background: #f5f8ff; }
+.customer-option.highlighted { background: #e0eaff; }
 
 .option-name {
   font-size: 0.9rem;

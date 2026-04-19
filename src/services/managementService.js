@@ -123,6 +123,12 @@ export const getBudgetById = async (id) => {
           quantity,
           unit_price,
           total_price
+        ),
+        customers (
+          id,
+          name,
+          whatsapp,
+          phone
         )
       `)
       .eq('id', id)

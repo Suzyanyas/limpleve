@@ -1,4 +1,5 @@
 import { useState, useEffect, useRef } from 'react';
+import html2canvas from 'html2canvas';
 import toast from 'react-hot-toast';
 import {
   getAllCustomers,
@@ -54,17 +55,31 @@ export default function BudgetManager({ onBack, initialBudget, openNew, onUpdate
   const [customerFilter, setCustomerFilter] = useState('');
   const [productFilter, setProductFilter] = useState('');
   const [showCustomerDropdown, setShowCustomerDropdown] = useState(false);
+  const [customerHighlight, setCustomerHighlight] = useState(-1);
   const [showProductDropdown, setShowProductDropdown] = useState(false);
   const [creatingCustomer, setCreatingCustomer] = useState(null); // null | { name, whatsapp }
   const [hasPicking, setHasPicking] = useState(false);
   const [hasRoute, setHasRoute] = useState(false);
+  const [autoSendMode, setAutoSendMode] = useState(false);
   const finalizarBtnRef = useRef(null);
+  const productNameInputRef = useRef(null);
 
   useEffect(() => {
     if (postSaleModal) {
       setTimeout(() => finalizarBtnRef.current?.focus(), 50);
     }
   }, [postSaleModal]);
+
+  useEffect(() => {
+    if (autoSendMode && view === 'romaneio') {
+      setTimeout(async () => {
+        await handleSendRomaneioWhatsapp();
+        setAutoSendMode(false);
+        setView('detail');
+      }, 800);
+    }
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [autoSendMode, view]);
 
   useEffect(() => {
     loadData();
@@ -117,9 +132,10 @@ export default function BudgetManager({ onBack, initialBudget, openNew, onUpdate
       setPaymentStatus(budget.payment_status || 'pago');
       setSaleType(budget.sale_type || 'presencial');
       setNotes(budget.notes || '');
-      const customer = customers.find(c => c.id === budget.customer_id);
+      const customer = customers.find(c => c.id === budget.customer_id) || budget.customers;
+      console.log('[DEBUG] customer:', customer, '| budget.customers:', budget.customers);
       setSelectedCustomer(customer || { name: budget.customer_name, code: budget.customer_code });
-      setCustomerWhatsapp(customer?.whatsapp || '');
+      setCustomerWhatsapp(customer?.whatsapp || customer?.phone || '');
       if (budget.budget_items) {
         setItems(budget.budget_items.map(item => ({
           product: { id: item.product_id, name: item.product_name },
@@ -280,7 +296,6 @@ export default function BudgetManager({ onBack, initialBudget, openNew, onUpdate
         const result = await createProduct({
           name: trimmedName,
           price,
-          isAvailable: true
         });
         if (result.success && result.data?.[0]) {
           savedProduct = result.data[0];
@@ -322,6 +337,7 @@ export default function BudgetManager({ onBack, initialBudget, openNew, onUpdate
     });
     setProductFilter('');
     toast.success('Produto adicionado!');
+    setTimeout(() => productNameInputRef.current?.focus(), 50);
   };
 
   const handleRemoveItem = (index) => {
@@ -677,6 +693,56 @@ export default function BudgetManager({ onBack, initialBudget, openNew, onUpdate
     window.open(`https://wa.me/${fullNumber}?text=${message}`, '_blank');
   };
 
+  const handleSendRomaneioWhatsapp = async () => {
+    const number = customerWhatsapp.replace(/\D/g, '');
+    if (!number) {
+      toast.error('Número de WhatsApp não informado');
+      return;
+    }
+
+    const receipt = document.querySelector('.receipt');
+    if (!receipt) {
+      toast.error('Romaneio não encontrado para captura');
+      return;
+    }
+
+    const loadingToast = toast.loading('Enviando romaneio...');
+
+    try {
+      const canvas = await html2canvas(receipt, { scale: 2, useCORS: true, allowTaint: true, backgroundColor: '#ffffff', logging: false });
+      const imageBase64 = canvas.toDataURL('image/png').split(',')[1];
+      const fullNumber = number.length <= 11 ? `55${number}` : number;
+
+      const itemsText = items
+        .map(item => `• ${item.product?.name} x${item.quantity} - R$ ${(parseFloat(item.unit_price) * item.quantity).toFixed(2)}`)
+        .join('\n');
+
+      const caption = [
+        itemsText,
+        ``,
+        `*Total: R$ ${calculateTotal().toFixed(2)}*`,
+      ].join('\n');
+
+      const response = await fetch('https://palma-lyolytic-legalistically.ngrok-free.dev/webhook/romaneio-whatsapp', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          number: fullNumber,
+          imageBase64,
+          caption,
+        }),
+      });
+
+      if (response.ok) {
+        toast.success('Romaneio enviado via WhatsApp!', { id: loadingToast });
+      } else {
+        throw new Error('Erro na resposta do servidor');
+      }
+    } catch {
+      toast.error('Erro ao enviar romaneio', { id: loadingToast });
+    }
+  };
+
   const handlePrint = () => {
     window.print();
   };
@@ -930,7 +996,7 @@ export default function BudgetManager({ onBack, initialBudget, openNew, onUpdate
               <span className="action-icon">✏️</span>
               <span>Editar</span>
             </button>
-            <button className="detail-action-btn whatsapp" onClick={handleSendWhatsapp}>
+            <button className="detail-action-btn whatsapp" onClick={() => { setAutoSendMode(true); setView('romaneio'); }}>
               <span className="action-icon">📱</span>
               <span>Enviar para Cliente</span>
             </button>
@@ -1011,9 +1077,14 @@ export default function BudgetManager({ onBack, initialBudget, openNew, onUpdate
 
     return (
       <div className="budget-manager romaneio-view">
+        {autoSendMode && (
+          <div style={{ position: 'fixed', inset: 0, background: 'rgba(255,255,255,0.85)', zIndex: 9999, display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 18, fontWeight: 600 }}>
+            Enviando romaneio...
+          </div>
+        )}
         {/* Barra de navegação - não imprime */}
         <div className="form-breadcrumb no-print">
-          <button className="breadcrumb-back" onClick={() => setView('form')}>←</button>
+          <button className="breadcrumb-back" onClick={() => setView(budgetData?.status === 'confirmed' ? 'form' : 'detail')}>←</button>
           <nav className="breadcrumb-nav">
             <span className="breadcrumb-current">Romaneio</span>
           </nav>
@@ -1072,8 +1143,8 @@ export default function BudgetManager({ onBack, initialBudget, openNew, onUpdate
             <div className="receipt-field-block">
               <div className="rf-label">PAGAMENTO:</div>
               <div className="receipt-total">R$ {calculateTotal().toFixed(2)}</div>
-              {paymentStatus === 'pago' && paymentMethod && (
-                <div className="rf-value">{formatPaymentMethodPlain()}</div>
+              {paymentMethod && (
+                <div className="rf-value"><span style={{ fontWeight: 700 }}>Forma de Pagamento: </span>{formatPaymentMethodPlain()}</div>
               )}
               {paymentStatus === 'pago' && (paymentMethod === 'dinheiro' || (paymentMethod === 'misto' && parseFloat(mistoValues.dinheiro) > 0)) && parseFloat(trocoRecebido) > 0 && (
                 <>
@@ -1104,7 +1175,7 @@ export default function BudgetManager({ onBack, initialBudget, openNew, onUpdate
                 </>
               )}
               {paymentStatus === 'a_receber' && (
-                <div className="rf-value" style={{ color: '#dc2626' }}>A RECEBER</div>
+                <div className="rf-value">Status: <span style={{ color: '#dc2626' }}>A RECEBER</span></div>
               )}
             </div>
 
@@ -1129,7 +1200,7 @@ export default function BudgetManager({ onBack, initialBudget, openNew, onUpdate
           {/* Botões de ação - não imprime */}
           <div className="romaneio-actions no-print">
             <button className="btn-print" onClick={handlePrint}>Imprimir</button>
-            <button className="btn-whatsapp" onClick={handleSendWhatsapp}>WhatsApp</button>
+            <button className="btn-whatsapp" onClick={handleSendRomaneioWhatsapp}>WhatsApp</button>
             <button className="btn-route" onClick={handleCreateRoute}>Criar Rota</button>
           </div>
         </div>
@@ -1189,10 +1260,32 @@ export default function BudgetManager({ onBack, initialBudget, openNew, onUpdate
                 <input
                   type="text"
                   value={customerFilter}
-                  onChange={(e) => { setCustomerFilter(e.target.value); setShowCustomerDropdown(true); }}
+                  onChange={(e) => { setCustomerFilter(e.target.value); setShowCustomerDropdown(true); setCustomerHighlight(-1); }}
                   onFocus={() => setShowCustomerDropdown(true)}
                   placeholder="Buscar ou criar cliente..."
                   className="customer-search-input"
+                  onKeyDown={(e) => {
+                    const total = filteredCustomers.length + (customerFilter && !filteredCustomers.find(c => c.name.toLowerCase() === customerFilter.trim().toLowerCase()) ? 1 : 0);
+                    if (e.key === 'ArrowDown') {
+                      e.preventDefault();
+                      setCustomerHighlight(h => Math.min(h + 1, total - 1));
+                    } else if (e.key === 'ArrowUp') {
+                      e.preventDefault();
+                      setCustomerHighlight(h => Math.max(h - 1, 0));
+                    } else if (e.key === 'Enter' && showCustomerDropdown) {
+                      e.preventDefault();
+                      if (customerHighlight >= 0 && customerHighlight < filteredCustomers.length) {
+                        handleSelectCustomer(filteredCustomers[customerHighlight]);
+                      } else if (customerHighlight === filteredCustomers.length) {
+                        handleQuickAddCustomer();
+                      } else if (filteredCustomers.length === 1) {
+                        handleSelectCustomer(filteredCustomers[0]);
+                      }
+                    } else if (e.key === 'Escape') {
+                      setShowCustomerDropdown(false);
+                      setCustomerHighlight(-1);
+                    }
+                  }}
                 />
                 {customerFilter && (
                   <button className="search-clear-btn" onClick={() => { setCustomerFilter(''); setShowCustomerDropdown(false); }}>✕</button>
@@ -1202,8 +1295,8 @@ export default function BudgetManager({ onBack, initialBudget, openNew, onUpdate
               {showCustomerDropdown && (
                 <div className="customer-dropdown">
                   {filteredCustomers.length > 0
-                    ? filteredCustomers.map(c => (
-                        <div key={c.id} className="customer-option" onMouseDown={(e) => { e.preventDefault(); handleSelectCustomer(c); }}>
+                    ? filteredCustomers.map((c, i) => (
+                        <div key={c.id} className={`customer-option${customerHighlight === i ? ' highlighted' : ''}`} onMouseDown={(e) => { e.preventDefault(); handleSelectCustomer(c); }} onMouseEnter={() => setCustomerHighlight(i)}>
                           <span className="option-name">{c.name}</span>
                           <span className="option-meta">
                             {c.code && <span className="option-code">{c.code}</span>}
@@ -1214,7 +1307,7 @@ export default function BudgetManager({ onBack, initialBudget, openNew, onUpdate
                     : !customerFilter && <div className="customer-option empty">Nenhum cliente cadastrado ainda</div>
                   }
                   {customerFilter && !filteredCustomers.find(c => c.name.toLowerCase() === customerFilter.trim().toLowerCase()) && (
-                    <div className="customer-option create" onMouseDown={(e) => { e.preventDefault(); handleQuickAddCustomer(); }}>
+                    <div className={`customer-option create${customerHighlight === filteredCustomers.length ? ' highlighted' : ''}`} onMouseDown={(e) => { e.preventDefault(); handleQuickAddCustomer(); }} onMouseEnter={() => setCustomerHighlight(filteredCustomers.length)}>
                       <span className="create-icon">+</span>
                       Criar <strong>"{customerFilter}"</strong>
                     </div>
@@ -1343,6 +1436,7 @@ export default function BudgetManager({ onBack, initialBudget, openNew, onUpdate
                 <>
                   <div className="col-product">
                     <input
+                      ref={productNameInputRef}
                       type="text"
                       value={manualProductName}
                       onChange={(e) => setManualProductName(e.target.value)}
