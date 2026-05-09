@@ -132,8 +132,9 @@ export default function BudgetManager({ onBack, initialBudget, openNew, onUpdate
       setPaymentStatus(budget.payment_status || 'pago');
       setSaleType(budget.sale_type || 'presencial');
       setNotes(budget.notes || '');
-      const customer = customers.find(c => c.id === budget.customer_id) || budget.customers;
-      console.log('[DEBUG] customer:', customer, '| budget.customers:', budget.customers);
+      const local = customers.find(c => c.id === budget.customer_id);
+      const joined = budget.customers;
+      const customer = (local || joined) ? { ...(local || {}), ...(joined || {}) } : null;
       setSelectedCustomer(customer || { name: budget.customer_name, code: budget.customer_code });
       setCustomerWhatsapp(customer?.whatsapp || customer?.phone || '');
       if (budget.budget_items) {
@@ -659,7 +660,8 @@ export default function BudgetManager({ onBack, initialBudget, openNew, onUpdate
   };
 
   const handleSendWhatsapp = () => {
-    const number = customerWhatsapp.replace(/\D/g, '');
+    const raw = customerWhatsapp || selectedCustomer?.phone || selectedCustomer?.whatsapp || budgetData?.customers?.phone || budgetData?.customers?.whatsapp || '';
+    const number = raw.replace(/\D/g, '');
     if (!number) {
       toast.error('Número de WhatsApp não informado');
       return;
@@ -694,13 +696,14 @@ export default function BudgetManager({ onBack, initialBudget, openNew, onUpdate
   };
 
   const handleSendRomaneioWhatsapp = async () => {
-    const number = customerWhatsapp.replace(/\D/g, '');
+    const raw = customerWhatsapp || selectedCustomer?.phone || selectedCustomer?.whatsapp || budgetData?.customers?.phone || budgetData?.customers?.whatsapp || '';
+    const number = raw.replace(/\D/g, '');
     if (!number) {
       toast.error('Número de WhatsApp não informado');
       return;
     }
 
-    const receipt = document.querySelector('.receipt');
+    const receipt = document.querySelector('.receipt-whatsapp') || document.querySelector('.receipt');
     if (!receipt) {
       toast.error('Romaneio não encontrado para captura');
       return;
@@ -1195,6 +1198,86 @@ export default function BudgetManager({ onBack, initialBudget, openNew, onUpdate
                 </div>
               </>
             ) : null}
+          </div>
+
+          {/* Card para envio via WhatsApp - posicionado fora da tela */}
+          <div className="receipt-whatsapp" aria-hidden="true">
+            <div className="rw-header">
+              <img src="/images/logo-limpleve.png" alt="LimpLeve" className="rw-logo" />
+              <div className="rw-date">{dateStr}</div>
+            </div>
+
+            <div className="rw-customer">
+              <div className="rw-customer-label">Cliente</div>
+              <div className="rw-customer-name">{(selectedCustomer?.name || '').toUpperCase()}</div>
+            </div>
+
+            <div className="rw-items">
+              <div className="rw-items-header">
+                <span className="rw-col-name">Produto</span>
+                <span className="rw-col-qty">Qtd</span>
+                <span className="rw-col-unit">Unit.</span>
+                <span className="rw-col-total">Total</span>
+              </div>
+              {items.length > 0 ? items.map((item, i) => {
+                const qty = parseFloat(item.quantity || 1);
+                const unit = parseFloat(item.unit_price || 0);
+                const total = qty * unit;
+                return (
+                  <div key={i} className="rw-item">
+                    <span className="rw-col-name">{item.product?.name || 'Produto'}</span>
+                    <span className="rw-col-qty">{qty}</span>
+                    <span className="rw-col-unit">R$ {unit.toFixed(2)}</span>
+                    <span className="rw-col-total">R$ {total.toFixed(2)}</span>
+                  </div>
+                );
+              }) : null}
+            </div>
+
+            <div className="rw-total-box">
+              <span className="rw-total-label">TOTAL</span>
+              <span className="rw-total-value">R$ {calculateTotal().toFixed(2)}</span>
+            </div>
+
+            {paymentMethod && (
+              <div className="rw-info-row">
+                <span className="rw-info-label">Pagamento:</span>
+                <span className="rw-info-value">{formatPaymentMethodPlain()}</span>
+              </div>
+            )}
+
+            {paymentStatus === 'parcial' && (
+              <div className="rw-info-row">
+                <span className="rw-info-label">Restante:</span>
+                <span className="rw-info-value rw-pending">R$ {Math.max(0, calculateTotal() - (parseFloat(entradaValue) || 0)).toFixed(2)} na entrega</span>
+              </div>
+            )}
+
+            {paymentStatus === 'a_receber' && (
+              <div className="rw-info-row">
+                <span className="rw-info-label">Status:</span>
+                <span className="rw-info-value rw-pending">A RECEBER</span>
+              </div>
+            )}
+
+            {deliveryAddress && (
+              <div className="rw-info-block">
+                <div className="rw-info-label">Endereço de entrega</div>
+                <div className="rw-info-value">{deliveryAddress}</div>
+              </div>
+            )}
+
+            {notes && (
+              <div className="rw-info-block">
+                <div className="rw-info-label">Observação</div>
+                <div className="rw-info-value">{notes}</div>
+              </div>
+            )}
+
+            <div className="rw-footer">
+              <div className="rw-footer-title">Segue orçamento 📝</div>
+              <div className="rw-footer-text">Confira se todos os itens solicitados estão inclusos para que possamos fechar seu pedido! 🤝🏻</div>
+            </div>
           </div>
 
           {/* Botões de ação - não imprime */}
