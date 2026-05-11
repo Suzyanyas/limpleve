@@ -134,7 +134,32 @@ export default function BudgetManager({ onBack, initialBudget, openNew, onUpdate
       setNotes(budget.notes || '');
       const local = customers.find(c => c.id === budget.customer_id);
       const joined = budget.customers;
-      const customer = (local || joined) ? { ...(local || {}), ...(joined || {}) } : null;
+      let customer = (local || joined) ? { ...(local || {}), ...(joined || {}) } : null;
+      const hasPhone = () => customer?.phone || customer?.whatsapp;
+      if (!hasPhone() && budget.customer_id) {
+        const { data: freshCustomer } = await supabase
+          .from('customers')
+          .select('*')
+          .eq('id', budget.customer_id)
+          .maybeSingle();
+        if (freshCustomer) customer = { ...(customer || {}), ...freshCustomer };
+      }
+      if (!hasPhone() && budget.customer_code) {
+        const { data: byCode } = await supabase
+          .from('customers')
+          .select('*')
+          .eq('code', budget.customer_code)
+          .maybeSingle();
+        if (byCode) customer = { ...(customer || {}), ...byCode };
+      }
+      if (!hasPhone() && budget.customer_name) {
+        const { data: byName } = await supabase
+          .from('customers')
+          .select('*')
+          .eq('name', budget.customer_name)
+          .maybeSingle();
+        if (byName) customer = { ...(customer || {}), ...byName };
+      }
       setSelectedCustomer(customer || { name: budget.customer_name, code: budget.customer_code });
       setCustomerWhatsapp(customer?.whatsapp || customer?.phone || '');
       if (budget.budget_items) {
@@ -455,11 +480,20 @@ export default function BudgetManager({ onBack, initialBudget, openNew, onUpdate
     };
   });
 
+  const persistCustomerWhatsapp = async () => {
+    if (!selectedCustomer?.id) return;
+    const current = selectedCustomer.phone || selectedCustomer.whatsapp || '';
+    if (!customerWhatsapp || customerWhatsapp === current) return;
+    await updateCustomer(selectedCustomer.id, { phone: customerWhatsapp });
+    setSelectedCustomer(prev => ({ ...prev, phone: customerWhatsapp }));
+  };
+
   const handleSaveBudget = async () => {
     if (!selectedCustomer) { toast.error('Selecione um cliente'); return; }
     if (items.length === 0) { toast.error('Adicione pelo menos um produto'); return; }
     if (!buildPaymentMethodToSave()) { toast.error('Selecione a forma de pagamento'); return; }
     if (!paymentStatus) { toast.error('Selecione o status de pagamento'); return; }
+    await persistCustomerWhatsapp();
 
     const budgetPayload = {
       customer_id: selectedCustomer.id || null,
@@ -507,6 +541,8 @@ export default function BudgetManager({ onBack, initialBudget, openNew, onUpdate
     if (saleType !== 'presencial' && !selectedCustomer) { toast.error('Selecione um cliente'); return; }
     if (items.length === 0) { toast.error('Adicione pelo menos um produto'); return; }
     if (!paymentMethod) { toast.error('Selecione a forma de pagamento'); return; }
+
+    await persistCustomerWhatsapp();
 
     const customerForSale = selectedCustomer || { id: null, name: 'GERAL', code: null };
 
