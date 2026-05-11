@@ -695,42 +695,6 @@ export default function BudgetManager({ onBack, initialBudget, openNew, onUpdate
     }
   };
 
-  const handleSendWhatsapp = () => {
-    const raw = customerWhatsapp || selectedCustomer?.phone || selectedCustomer?.whatsapp || budgetData?.customers?.phone || budgetData?.customers?.whatsapp || '';
-    const number = raw.replace(/\D/g, '');
-    if (!number) {
-      toast.error('Número de WhatsApp não informado');
-      return;
-    }
-
-    const date = budgetData?.created_at
-      ? new Date(budgetData.created_at).toLocaleDateString('pt-BR')
-      : new Date().toLocaleDateString('pt-BR');
-
-    const itemsText = items
-      .map(item => `• ${item.product?.name} x${item.quantity} = R$ ${(parseFloat(item.unit_price) * item.quantity).toFixed(2)}`)
-      .join('\n');
-
-    const lines = [
-      `*Orçamento LimpLeve*`,
-      ``,
-      `Cliente: ${selectedCustomer?.name}`,
-      `Data: ${date}`,
-      ``,
-      `*Pedido:*`,
-      itemsText,
-      ``,
-      `*Total: R$ ${calculateTotal().toFixed(2)}*`,
-    ];
-
-    if (deliveryAddress) lines.push(``, `Endereço: ${deliveryAddress}`);
-    if (paymentMethod) lines.push(`Pagamento: ${paymentMethod}`);
-
-    const message = encodeURIComponent(lines.join('\n'));
-    const fullNumber = number.startsWith('55') ? number : `55${number}`;
-    window.open(`https://wa.me/${fullNumber}?text=${message}`, '_blank');
-  };
-
   const handleSendRomaneioWhatsapp = async () => {
     const raw = customerWhatsapp || selectedCustomer?.phone || selectedCustomer?.whatsapp || budgetData?.customers?.phone || budgetData?.customers?.whatsapp || '';
     const number = raw.replace(/\D/g, '');
