@@ -204,6 +204,236 @@
   box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
 }
 
+/* Botão editar discreto */
+.btn-edit-pick {
+  background: none;
+  border: 1.5px solid #94a3b8;
+  border-radius: 8px;
+  width: 38px;
+  height: 38px;
+  font-size: 14px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.2s;
+  color: #64748b;
+}
+
+.btn-edit-pick:hover {
+  background: #f1f5f9;
+  border-color: #64748b;
+}
+
+/* Overlay do formulário de edição (fase 2, após PIN validado) */
+.pick-edit-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.55);
+  z-index: 1000;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 20px;
+}
+
+.pick-edit-modal {
+  background: #fff;
+  border-radius: 16px;
+  padding: 28px 24px;
+  width: 100%;
+  max-width: 560px;
+  max-height: 80vh;
+  overflow-y: auto;
+  box-shadow: 0 20px 60px rgba(0,0,0,0.25);
+}
+
+.pick-edit-title {
+  font-size: 18px;
+  font-weight: 700;
+  color: #1e293b;
+  text-align: center;
+  margin-bottom: 4px;
+}
+
+.pick-edit-subtitle {
+  font-size: 13px;
+  color: #64748b;
+  text-align: center;
+  margin-bottom: 20px;
+}
+
+.pick-edit-loading {
+  text-align: center;
+  padding: 24px 0;
+  color: #64748b;
+  font-size: 14px;
+}
+
+/* Tabela de itens editáveis */
+.edit-items-table {
+  border: 1px solid #e2e8f0;
+  border-radius: 8px;
+  overflow: hidden;
+  font-size: 13px;
+}
+
+.edit-items-header,
+.edit-items-row {
+  display: grid;
+  grid-template-columns: 1fr 70px 80px 80px 32px;
+  align-items: center;
+  gap: 6px;
+  padding: 8px 10px;
+}
+
+.edit-items-header {
+  background: #f1f5f9;
+  font-size: 11px;
+  font-weight: 700;
+  text-transform: uppercase;
+  color: #64748b;
+  letter-spacing: 0.4px;
+}
+
+.edit-items-row {
+  border-top: 1px solid #eee;
+}
+
+.edit-items-row:nth-child(even) { background: #fafafa; }
+
+.ei-col-name { overflow: hidden; }
+.ei-product-name {
+  font-size: 13px;
+  font-weight: 600;
+  color: #1e293b;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.ei-col-num { text-align: center; }
+
+.ei-input {
+  width: 100%;
+  border: 1px solid #e2e8f0;
+  border-radius: 6px;
+  padding: 5px 6px;
+  font-size: 13px;
+  text-align: center;
+  box-sizing: border-box;
+}
+
+.ei-input:focus {
+  outline: none;
+  border-color: #3b82f6;
+}
+
+.ei-total {
+  font-weight: 700;
+  color: #1e3c72;
+  font-size: 12px;
+}
+
+.ei-rm-btn {
+  background: none;
+  border: none;
+  color: #ef4444;
+  font-size: 14px;
+  cursor: pointer;
+  padding: 2px;
+  border-radius: 4px;
+  line-height: 1;
+}
+
+.ei-rm-btn:hover { background: #fee2e2; }
+
+.edit-items-total {
+  display: flex;
+  justify-content: space-between;
+  padding: 8px 10px;
+  background: #f8fafc;
+  border-top: 2px solid #e2e8f0;
+  font-size: 13px;
+  font-weight: 700;
+  color: #1e3c72;
+}
+
+/* Formulário de edição */
+.pick-edit-field {
+  margin-bottom: 14px;
+}
+
+.pick-edit-field label {
+  display: block;
+  font-size: 13px;
+  font-weight: 600;
+  color: #475569;
+  margin-bottom: 4px;
+}
+
+.pick-edit-field .required {
+  color: #ef4444;
+}
+
+.pick-edit-field input,
+.pick-edit-field textarea {
+  width: 100%;
+  padding: 10px 12px;
+  border: 1.5px solid #e2e8f0;
+  border-radius: 8px;
+  font-size: 14px;
+  color: #1e293b;
+  box-sizing: border-box;
+  font-family: inherit;
+}
+
+.pick-edit-field input:focus,
+.pick-edit-field textarea:focus {
+  outline: none;
+  border-color: #3b82f6;
+}
+
+.pick-edit-field textarea {
+  resize: vertical;
+}
+
+.pick-edit-actions {
+  display: flex;
+  gap: 10px;
+  margin-top: 18px;
+}
+
+.pick-edit-cancel {
+  flex: 1;
+  padding: 11px;
+  border: 1.5px solid #e2e8f0;
+  border-radius: 8px;
+  background: none;
+  font-size: 14px;
+  font-weight: 600;
+  color: #64748b;
+  cursor: pointer;
+}
+
+.pick-edit-cancel:hover { background: #f8fafc; }
+
+.pick-edit-save {
+  flex: 2;
+  padding: 11px;
+  border: none;
+  border-radius: 8px;
+  background: #1e3c72;
+  color: white;
+  font-size: 14px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background 0.2s;
+}
+
+.pick-edit-save:hover:not(:disabled) { background: #2a5298; }
+.pick-edit-save:disabled { opacity: 0.55; cursor: not-allowed; }
+
 /* Responsive */
 @media (max-width: 768px) {
   .picking-item {

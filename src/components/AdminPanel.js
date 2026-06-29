@@ -48,12 +48,13 @@ export default function AdminPanel() {
   const [historyDays, setHistoryDays] = useState(7);
   const [expandedDay, setExpandedDay] = useState(null);
 
-  // Função de scroll suave customizada
   const smoothScrollToTop = () => {
     const currentScroll = window.pageYOffset || document.documentElement.scrollTop;
-    if (currentScroll > 0) {
+    if (currentScroll > 1) {
       window.requestAnimationFrame(smoothScrollToTop);
       window.scrollTo(0, currentScroll - currentScroll / 8);
+    } else {
+      window.scrollTo(0, 0);
     }
   };
 

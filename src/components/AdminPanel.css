@@ -741,12 +741,11 @@
 }
 
 .products-table tbody tr {
-  transition: background-color 0.3s ease, transform 0.2s ease;
+  transition: background-color 0.2s ease;
 }
 
 .products-table tbody tr:hover {
-  background-color: #f8f9fa;
-  transform: scale(1.005);
+  background-color: #f0f4f8;
 }
 
 .products-table tbody tr.unavailable {

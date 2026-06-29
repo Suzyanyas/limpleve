@@ -60,7 +60,6 @@ export default function BudgetManager({ onBack, initialBudget, openNew, onUpdate
   const [creatingCustomer, setCreatingCustomer] = useState(null); // null | { name, whatsapp }
   const [hasPicking, setHasPicking] = useState(false);
   const [hasRoute, setHasRoute] = useState(false);
-  const [autoSendMode, setAutoSendMode] = useState(false);
   const finalizarBtnRef = useRef(null);
   const productNameInputRef = useRef(null);
 
@@ -69,17 +68,6 @@ export default function BudgetManager({ onBack, initialBudget, openNew, onUpdate
       setTimeout(() => finalizarBtnRef.current?.focus(), 50);
     }
   }, [postSaleModal]);
-
-  useEffect(() => {
-    if (autoSendMode && view === 'romaneio') {
-      setTimeout(async () => {
-        await handleSendRomaneioWhatsapp();
-        setAutoSendMode(false);
-        setView('detail');
-      }, 800);
-    }
-  // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [autoSendMode, view]);
 
   useEffect(() => {
     loadData();
@@ -695,54 +683,36 @@ export default function BudgetManager({ onBack, initialBudget, openNew, onUpdate
     }
   };
 
-  const handleSendRomaneioWhatsapp = async () => {
-    const raw = customerWhatsapp || selectedCustomer?.phone || selectedCustomer?.whatsapp || budgetData?.customers?.phone || budgetData?.customers?.whatsapp || '';
-    const number = raw.replace(/\D/g, '');
-    if (!number) {
-      toast.error('Número de WhatsApp não informado');
+  const handleDownloadRomaneio = async () => {
+    const element = document.querySelector('.receipt-whatsapp');
+    if (!element) {
+      toast.error('Elemento não encontrado para captura');
       return;
     }
 
-    const receipt = document.querySelector('.receipt-whatsapp') || document.querySelector('.receipt');
-    if (!receipt) {
-      toast.error('Romaneio não encontrado para captura');
-      return;
-    }
-
-    const loadingToast = toast.loading('Enviando romaneio...');
+    const loadingToast = toast.loading('Gerando imagem...');
 
     try {
-      const canvas = await html2canvas(receipt, { scale: 2, useCORS: true, allowTaint: true, backgroundColor: '#ffffff', logging: false });
-      const imageBase64 = canvas.toDataURL('image/png').split(',')[1];
-      const fullNumber = number.length <= 11 ? `55${number}` : number;
-
-      const itemsText = items
-        .map(item => `• ${item.product?.name} x${item.quantity} - R$ ${(parseFloat(item.unit_price) * item.quantity).toFixed(2)}`)
-        .join('\n');
-
-      const caption = [
-        itemsText,
-        ``,
-        `*Total: R$ ${calculateTotal().toFixed(2)}*`,
-      ].join('\n');
-
-      const response = await fetch('https://palma-lyolytic-legalistically.ngrok-free.dev/webhook/romaneio-whatsapp', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          number: fullNumber,
-          imageBase64,
-          caption,
-        }),
+      const canvas = await html2canvas(element, {
+        scale: 1,
+        useCORS: true,
+        backgroundColor: '#ffffff',
+        width: 1080,
       });
 
-      if (response.ok) {
-        toast.success('Romaneio enviado via WhatsApp!', { id: loadingToast });
-      } else {
-        throw new Error('Erro na resposta do servidor');
-      }
+      const link = document.createElement('a');
+      const customerName = (selectedCustomer?.name || budgetData?.customer_name || 'romaneio')
+        .toLowerCase()
+        .replace(/\s+/g, '-')
+        .replace(/[^a-z0-9-]/g, '');
+      const dateISO = new Date().toISOString().slice(0, 10);
+      link.download = `romaneio-${customerName}-${dateISO}.jpg`;
+      link.href = canvas.toDataURL('image/jpeg', 0.92);
+      link.click();
+
+      toast.success('Imagem baixada! Partilhe manualmente.', { id: loadingToast });
     } catch {
-      toast.error('Erro ao enviar romaneio', { id: loadingToast });
+      toast.error('Erro ao gerar imagem do romaneio', { id: loadingToast });
     }
   };
 
@@ -999,9 +969,9 @@ export default function BudgetManager({ onBack, initialBudget, openNew, onUpdate
               <span className="action-icon">✏️</span>
               <span>Editar</span>
             </button>
-            <button className="detail-action-btn whatsapp" onClick={() => { setAutoSendMode(true); setView('romaneio'); }}>
-              <span className="action-icon">📱</span>
-              <span>Enviar para Cliente</span>
+            <button className="detail-action-btn whatsapp" onClick={() => setView('romaneio')}>
+              <span className="action-icon">📥</span>
+              <span>Baixar Romaneio</span>
             </button>
             <button className="detail-action-btn approve" onClick={handleApprove}>
               <span className="action-icon">✅</span>
@@ -1080,11 +1050,6 @@ export default function BudgetManager({ onBack, initialBudget, openNew, onUpdate
 
     return (
       <div className="budget-manager romaneio-view">
-        {autoSendMode && (
-          <div style={{ position: 'fixed', inset: 0, background: 'rgba(255,255,255,0.85)', zIndex: 9999, display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 18, fontWeight: 600 }}>
-            Enviando romaneio...
-          </div>
-        )}
         {/* Barra de navegação - não imprime */}
         <div className="form-breadcrumb no-print">
           <button className="breadcrumb-back" onClick={() => setView(budgetData?.status === 'confirmed' ? 'form' : 'detail')}>←</button>
@@ -1200,90 +1165,81 @@ export default function BudgetManager({ onBack, initialBudget, openNew, onUpdate
             ) : null}
           </div>
 
-          {/* Card para envio via WhatsApp - posicionado fora da tela */}
+          {/* Layout WhatsApp 1080px dinâmico — oculto da tela, capturado como JPG */}
           <div className="receipt-whatsapp" aria-hidden="true">
+            {/* Header: logo + data */}
             <div className="rw-header">
               <img src="/images/logo-limpleve.png" alt="LimpLeve" className="rw-logo" />
               <div className="rw-date">{dateStr}</div>
             </div>
 
-            <div className="rw-customer">
-              <div className="rw-customer-label">Cliente</div>
-              <div className="rw-customer-name">{(selectedCustomer?.name || '').toUpperCase()}</div>
-            </div>
-
+            {/* Itens */}
             <div className="rw-items">
-              <div className="rw-items-header">
-                <span className="rw-col-name">Produto</span>
-                <span className="rw-col-qty">Qtd</span>
-                <span className="rw-col-unit">Unit.</span>
-                <span className="rw-col-total">Total</span>
-              </div>
               {items.length > 0 ? items.map((item, i) => {
                 const qty = parseFloat(item.quantity || 1);
                 const unit = parseFloat(item.unit_price || 0);
                 const total = qty * unit;
                 return (
                   <div key={i} className="rw-item">
-                    <span className="rw-col-name">{item.product?.name || 'Produto'}</span>
-                    <span className="rw-col-qty">{qty}</span>
-                    <span className="rw-col-unit">R$ {unit.toFixed(2)}</span>
-                    <span className="rw-col-total">R$ {total.toFixed(2)}</span>
+                    <div className="rw-item-left">
+                      <span className="rw-item-qty">{qty}x</span>
+                      <span className="rw-item-name">{item.product?.name || 'Produto'}</span>
+                    </div>
+                    <div className="rw-item-right">
+                      <span className="rw-item-unit">R$ {unit.toFixed(2)}/un</span>
+                      <span className="rw-item-total">R$ {total.toFixed(2)}</span>
+                    </div>
                   </div>
                 );
-              }) : null}
+              }) : (
+                <div className="rw-item">
+                  <div className="rw-item-left">
+                    <span className="rw-item-name">Nenhum produto</span>
+                  </div>
+                </div>
+              )}
             </div>
 
+            {/* Total */}
             <div className="rw-total-box">
               <span className="rw-total-label">TOTAL</span>
               <span className="rw-total-value">R$ {calculateTotal().toFixed(2)}</span>
             </div>
 
-            {paymentMethod && (
-              <div className="rw-info-row">
-                <span className="rw-info-label">Pagamento:</span>
-                <span className="rw-info-value">{formatPaymentMethodPlain()}</span>
+            {/* Info cliente */}
+            <div className="rw-info-box">
+              <div className="rw-info-nome">
+                NOME: {(selectedCustomer?.name || budgetData?.customer_name || '').toUpperCase()}
               </div>
-            )}
-
-            {paymentStatus === 'parcial' && (
-              <div className="rw-info-row">
-                <span className="rw-info-label">Restante:</span>
-                <span className="rw-info-value rw-pending">R$ {Math.max(0, calculateTotal() - (parseFloat(entradaValue) || 0)).toFixed(2)} na entrega</span>
-              </div>
-            )}
-
-            {paymentStatus === 'a_receber' && (
-              <div className="rw-info-row">
-                <span className="rw-info-label">Status:</span>
-                <span className="rw-info-value rw-pending">A RECEBER</span>
-              </div>
-            )}
-
-            {deliveryAddress && (
-              <div className="rw-info-block">
-                <div className="rw-info-label">Endereço de entrega</div>
-                <div className="rw-info-value">{deliveryAddress}</div>
-              </div>
-            )}
-
-            {notes && (
-              <div className="rw-info-block">
-                <div className="rw-info-label">Observação</div>
-                <div className="rw-info-value">{notes}</div>
-              </div>
-            )}
-
-            <div className="rw-footer">
-              <div className="rw-footer-title">Segue orçamento 📝</div>
-              <div className="rw-footer-text">Confira se todos os itens solicitados estão inclusos para que possamos fechar seu pedido! 🤝🏻</div>
+              {deliveryAddress && (
+                <div className="rw-info-row-txt">ENDEREÇO: {deliveryAddress}</div>
+              )}
+              {paymentMethod && (
+                <div className="rw-info-row-txt">PAGAMENTO: {formatPaymentMethodPlain()}</div>
+              )}
+              {paymentStatus === 'parcial' && (
+                <div className="rw-info-restante">
+                  RESTANTE: R$ {Math.max(0, calculateTotal() - (parseFloat(entradaValue) || 0)).toFixed(2)} na entrega
+                </div>
+              )}
+              {paymentStatus === 'a_receber' && (
+                <div className="rw-info-restante">
+                  A RECEBER: R$ {calculateTotal().toFixed(2)}
+                </div>
+              )}
+              {notes && (
+                <div className="rw-info-row-txt" style={{ marginTop: 8 }}>OBS: {notes}</div>
+              )}
             </div>
+
+            {/* Rodapé */}
+            <div className="rw-footer">Limp Leve • limpleve.com.br</div>
           </div>
 
           {/* Botões de ação - não imprime */}
           <div className="romaneio-actions no-print">
             <button className="btn-print" onClick={handlePrint}>Imprimir</button>
-            <button className="btn-whatsapp" onClick={handleSendRomaneioWhatsapp}>WhatsApp</button>
+            <button className="btn-download-png" onClick={handleDownloadRomaneio}>Baixar Imagem</button>
             <button className="btn-route" onClick={handleCreateRoute}>Criar Rota</button>
           </div>
         </div>

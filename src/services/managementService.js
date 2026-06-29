@@ -310,6 +310,34 @@ export const deletePickingOrder = async (id) => {
   }
 };
 
+export const updatePickingOrder = async (id, fields) => {
+  try {
+    const { data, error } = await supabase
+      .from('picking')
+      .update(fields)
+      .eq('id', id)
+      .select();
+    if (error) throw error;
+    return { success: true, data };
+  } catch (error) {
+    console.error('Erro ao atualizar separação:', error);
+    return { success: false, error };
+  }
+};
+
+export const createPickingAudit = async (auditData) => {
+  try {
+    const { error } = await supabase
+      .from('picking_audit')
+      .insert([auditData]);
+    if (error) throw error;
+    return { success: true };
+  } catch (error) {
+    console.error('Erro ao gravar auditoria:', error);
+    return { success: false, error };
+  }
+};
+
 // ============================================
 // ROTAS DE ENTREGA
 // ============================================
