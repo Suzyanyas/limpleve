@@ -668,12 +668,11 @@
   font-size: 0.9rem;
   font-weight: 600;
   box-shadow: 0 2px 6px rgba(0, 0, 0, 0.1);
-  transition: all 0.2s ease;
+  transition: box-shadow 0.2s ease;
   cursor: default;
 }
 
 .stat-badge:hover {
-  transform: translateY(-1px);
   box-shadow: 0 3px 10px rgba(0, 0, 0, 0.15);
 }
 
@@ -801,7 +800,7 @@
   border-radius: 6px;
   cursor: pointer;
   font-size: 1.2rem;
-  transition: transform 0.2s, background-color 0.2s;
+  transition: background-color 0.2s;
 }
 
 .btn-edit {
@@ -810,7 +809,6 @@
 
 .btn-edit:hover {
   background: #e0a800;
-  transform: scale(1.1);
 }
 
 .btn-toggle {
@@ -819,7 +817,6 @@
 
 .btn-toggle:hover {
   background: #138496;
-  transform: scale(1.1);
 }
 
 .btn-delete {
@@ -828,7 +825,6 @@
 
 .btn-delete:hover {
   background: #c82333;
-  transform: scale(1.1);
 }
 
 /* Paginação */
@@ -872,7 +868,6 @@
 .pagination-button:hover:not(:disabled) {
   background: #304D73;
   color: white;
-  transform: translateY(-2px);
 }
 
 .pagination-button:disabled {
@@ -904,7 +899,6 @@
 .pagination-number:hover {
   border-color: #304D73;
   color: #304D73;
-  transform: scale(1.1);
 }
 
 .pagination-number.active {
@@ -1061,7 +1055,7 @@
   cursor: pointer;
   font-size: 1rem;
   font-weight: 600;
-  transition: transform 0.2s, background-color 0.2s;
+  transition: background-color 0.2s;
   display: flex;
   align-items: center;
   justify-content: center;
