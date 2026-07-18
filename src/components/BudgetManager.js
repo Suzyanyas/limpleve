@@ -16,7 +16,7 @@ import {
   getOpenSession,
   createCashTransaction
 } from '../services/managementService';
-import { getAllProducts, createProduct } from '../services/productService';
+import { getAllProducts } from '../services/productService';
 import { supabase } from '../supabaseClient';
 import CashManager, { CashStatusBar } from './CashManager';
 import PinGate from './PinGate';
@@ -303,22 +303,8 @@ export default function BudgetManager({ onBack, initialBudget, openNew, onUpdate
         p => p.name?.toLowerCase() === trimmedName.toLowerCase()
       );
 
-      let savedProduct = existing;
-
-      if (!existing) {
-        // Salva no banco silenciosamente
-        const result = await createProduct({
-          name: trimmedName,
-          price,
-        });
-        if (result.success && result.data?.[0]) {
-          savedProduct = result.data[0];
-          setProducts(prev => [...prev, savedProduct]);
-        } else {
-          // Usa localmente mesmo sem salvar
-          savedProduct = { id: 'manual_' + Date.now(), name: trimmedName, price };
-        }
-      }
+      // Item avulso nunca vira produto do catálogo público — só entra no orçamento.
+      const savedProduct = existing || { id: 'manual_' + Date.now(), name: trimmedName, price };
 
       productToAdd = {
         product: savedProduct,
@@ -350,7 +336,7 @@ export default function BudgetManager({ onBack, initialBudget, openNew, onUpdate
       total_price: 0
     });
     setProductFilter('');
-    toast.success('Produto adicionado!');
+    toast.success('Item adicionado ao orçamento!');
     setTimeout(() => productNameInputRef.current?.focus(), 50);
   };
 

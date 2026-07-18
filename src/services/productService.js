@@ -50,6 +50,25 @@ export const getAvailableProducts = async () => {
   }
 };
 
+// Calcula o próximo id inteiro disponível (não reaproveita as posições
+// decimais entre produtos, apenas continua a sequência no topo da lista)
+export const getNextProductId = async () => {
+  try {
+    const { data, error } = await supabase
+      .from('products')
+      .select('id')
+      .order('id', { ascending: false })
+      .limit(1);
+
+    if (error) throw error;
+    const maxId = data?.[0]?.id ?? 0;
+    return Math.floor(maxId) + 1;
+  } catch (error) {
+    console.error('Erro ao calcular próximo id de produto:', error);
+    return null;
+  }
+};
+
 // Criar novo produto
 export const createProduct = async (product) => {
   try {
