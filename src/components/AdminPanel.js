@@ -7,7 +7,7 @@ import {
   deleteProduct,
   toggleProductAvailability
 } from '../services/productService';
-import { getOverviewStats, getDailyHistory } from '../services/managementService';
+import { getOverviewStats, getDailyHistory, getPaymentMethodReport, PAYMENT_CATEGORIES } from '../services/managementService';
 import ManagementDashboard from './ManagementDashboard';
 import CustomerManager from './CustomerManager';
 import AdminLogin from './AdminLogin';
@@ -47,6 +47,10 @@ export default function AdminPanel() {
   const [dailyLoading, setDailyLoading] = useState(false);
   const [historyDays, setHistoryDays] = useState(7);
   const [expandedDay, setExpandedDay] = useState(null);
+  const [paymentReportMode, setPaymentReportMode] = useState('diario');
+  const [paymentReportBuckets, setPaymentReportBuckets] = useState([]);
+  const [paymentReportLoading, setPaymentReportLoading] = useState(false);
+  const [mistoModalData, setMistoModalData] = useState(null); // null | { titulo, itens }
 
   const smoothScrollToTop = () => {
     const currentScroll = window.pageYOffset || document.documentElement.scrollTop;
@@ -93,6 +97,7 @@ export default function AdminPanel() {
         setStatsLoading(false);
       });
       loadDailyHistory(historyDays);
+      loadPaymentReport(paymentReportMode);
     }
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [activeTab, session]);
@@ -110,6 +115,149 @@ export default function AdminPanel() {
     loadDailyHistory(days);
   };
 
+  // Chave local 'YYYY-MM-DD' para uma data (evita problemas de fuso ao comparar com Date puro)
+  const dayKey = (date) => `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, '0')}-${String(date.getDate()).padStart(2, '0')}`;
+
+  // Segunda-feira da semana da data informada
+  const startOfWeek = (date) => {
+    const d = new Date(date);
+    d.setHours(0, 0, 0, 0);
+    const diffToMonday = (d.getDay() + 6) % 7; // domingo=0 -> 6, segunda=1 -> 0, ...
+    d.setDate(d.getDate() - diffToMonday);
+    return d;
+  };
+
+  const emptyCategoryTotals = () => PAYMENT_CATEGORIES.reduce((acc, cat) => ({ ...acc, [cat]: 0 }), { total: 0 });
+
+  const loadPaymentReport = async (mode) => {
+    setPaymentReportLoading(true);
+    try {
+      const today = new Date();
+      today.setHours(0, 0, 0, 0);
+      const endDate = new Date(today);
+      endDate.setDate(endDate.getDate() + 1); // exclusivo
+
+      let startDate;
+      let buckets; // [{ key, label }] na ordem em que serão exibidos (mais recente primeiro)
+
+      if (mode === 'diario') {
+        startDate = new Date(today);
+        startDate.setDate(startDate.getDate() - 6);
+        buckets = [];
+        for (let i = 0; i < 7; i++) {
+          const d = new Date(today);
+          d.setDate(d.getDate() - i);
+          buckets.push({ key: dayKey(d), label: formatDayLabel(dayKey(d)) });
+        }
+      } else if (mode === 'semanal') {
+        const currentWeekStart = startOfWeek(today);
+        startDate = new Date(currentWeekStart);
+        startDate.setDate(startDate.getDate() - 7 * 5); // últimas 6 semanas
+        buckets = [];
+        for (let i = 0; i < 6; i++) {
+          const weekStart = new Date(currentWeekStart);
+          weekStart.setDate(weekStart.getDate() - 7 * i);
+          const weekEnd = new Date(weekStart);
+          weekEnd.setDate(weekEnd.getDate() + 6);
+          buckets.push({
+            key: `week-${dayKey(weekStart)}`,
+            label: `${weekStart.toLocaleDateString('pt-BR', { day: '2-digit', month: '2-digit' })} - ${weekEnd.toLocaleDateString('pt-BR', { day: '2-digit', month: '2-digit' })}`,
+            rangeStart: weekStart,
+            rangeEnd: weekEnd
+          });
+        }
+      } else {
+        const currentMonthStart = new Date(today.getFullYear(), today.getMonth(), 1);
+        startDate = new Date(currentMonthStart);
+        startDate.setMonth(startDate.getMonth() - 5); // últimos 6 meses
+        buckets = [];
+        for (let i = 0; i < 6; i++) {
+          const monthStart = new Date(currentMonthStart.getFullYear(), currentMonthStart.getMonth() - i, 1);
+          buckets.push({
+            key: `month-${monthStart.getFullYear()}-${String(monthStart.getMonth() + 1).padStart(2, '0')}`,
+            label: monthStart.toLocaleDateString('pt-BR', { month: 'short', year: 'numeric' }),
+            monthIndex: monthStart.getMonth(),
+            year: monthStart.getFullYear()
+          });
+        }
+      }
+
+      const { porDia, mistoDetalhe } = await getPaymentMethodReport(startDate, endDate);
+
+      const pertenceAoBucket = (dateKey, bucket) => {
+        const [y, m, d] = dateKey.split('-').map(Number);
+        const data = new Date(y, m - 1, d);
+        if (mode === 'diario') return dateKey === bucket.key;
+        if (mode === 'semanal') return data >= bucket.rangeStart && data <= bucket.rangeEnd;
+        return data.getFullYear() === bucket.year && data.getMonth() === bucket.monthIndex;
+      };
+
+      const filled = buckets.map(bucket => {
+        const totals = emptyCategoryTotals();
+        Object.values(porDia).forEach(dia => {
+          if (pertenceAoBucket(dia.date, bucket)) {
+            PAYMENT_CATEGORIES.forEach(cat => { totals[cat] += dia[cat] || 0; });
+            totals.total += dia.total || 0;
+          }
+        });
+        const detalhe = mistoDetalhe.filter(item => pertenceAoBucket(item.dateKey, bucket));
+        return { key: bucket.key, label: bucket.label, ...totals, mistoDetalhe: detalhe };
+      });
+
+      setPaymentReportBuckets(filled);
+    } catch (error) {
+      console.error('Erro ao carregar relatório por forma de pagamento:', error);
+      toast.error('Erro ao carregar relatório por forma de pagamento');
+    } finally {
+      setPaymentReportLoading(false);
+    }
+  };
+
+  const handlePaymentReportModeChange = (mode) => {
+    setPaymentReportMode(mode);
+    loadPaymentReport(mode);
+  };
+
+  const openMistoModal = (titulo, itens) => {
+    if (!itens || itens.length === 0) return;
+    setMistoModalData({ titulo, itens });
+  };
+
+  const formatMistoDateTime = (isoString) => {
+    const d = new Date(isoString);
+    const data = d.toLocaleDateString('pt-BR', { timeZone: 'America/Sao_Paulo' });
+    const hora = d.toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit', timeZone: 'America/Sao_Paulo' });
+    return `${data} às ${hora}`;
+  };
+
+  const toTitleCase = (str) => (str || '')
+    .toLowerCase()
+    .split(' ')
+    .map(w => w ? w[0].toUpperCase() + w.slice(1) : w)
+    .join(' ');
+
+  const formatBRL = (valor) => `R$ ${(parseFloat(valor) || 0).toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
+
+  const PAYMENT_METHOD_LABELS = {
+    dinheiro: 'Dinheiro', pix: 'PIX',
+    cartao_debito: 'Débito', cartao_credito: 'Crédito',
+    boleto: 'Boleto'
+  };
+
+  const formatPaymentMethodSummary = (paymentMethod) => {
+    if (!paymentMethod) return null;
+    if (paymentMethod.startsWith('misto|')) return 'Misto';
+    return PAYMENT_METHOD_LABELS[paymentMethod] || paymentMethod;
+  };
+
+  const PAYMENT_CATEGORY_CLASS = {
+    'Dinheiro': 'dinheiro',
+    'PIX': 'pix',
+    'Cartão': 'cartao',
+    'Boleto': 'boleto',
+    'Misto não identificado': 'misto'
+  };
+
   const formatDayLabel = (dateStr) => {
     const [year, month, day] = dateStr.split('-').map(Number);
     const d = new Date(year, month - 1, day);
@@ -119,7 +267,7 @@ export default function AdminPanel() {
     yesterday.setDate(yesterday.getDate() - 1);
     if (d.getTime() === today.getTime()) return 'Hoje';
     if (d.getTime() === yesterday.getTime()) return 'Ontem';
-    return d.toLocaleDateString('pt-BR', { weekday: 'short', day: '2-digit', month: '2-digit' });
+    return d.toLocaleDateString('pt-BR', { weekday: 'short', day: '2-digit', month: '2-digit', timeZone: 'America/Sao_Paulo' });
   };
 
   const loadProducts = async () => {
@@ -830,6 +978,35 @@ export default function AdminPanel() {
         />
       )}
 
+      {/* Modal de detalhe das transações "Misto não identificado" */}
+      {mistoModalData && (
+        <div className="cash-modal-overlay" onClick={() => setMistoModalData(null)}>
+          <div className="cash-modal payment-detail-modal" onClick={e => e.stopPropagation()}>
+            <div className="cash-modal-title">{mistoModalData.titulo}</div>
+            <div className="payment-detail-list">
+              {mistoModalData.itens.map((item, idx) => (
+                <div key={`${item.id}-${idx}`} className="payment-detail-item">
+                  <div className="payment-detail-item-header">
+                    <div className="payment-detail-item-when">
+                      {item.customer_name && (
+                        <span className="payment-detail-item-customer">{toTitleCase(item.customer_name)}</span>
+                      )}
+                      <span className="payment-detail-item-datetime">{formatMistoDateTime(item.created_at)}</span>
+                    </div>
+                    <span className="payment-detail-item-total">Total: {formatBRL(item.valor)}</span>
+                  </div>
+                  <div className="payment-detail-item-forma">{item.forma_pagamento || '(sem forma de pagamento registrada)'}</div>
+                  <div className="payment-detail-item-diff">Diferença não identificada: {formatBRL(item.diferenca)}</div>
+                </div>
+              ))}
+            </div>
+            <button className="cash-modal-cancel" style={{ marginTop: 16, width: '100%' }} onClick={() => setMistoModalData(null)}>
+              Fechar
+            </button>
+          </div>
+        </div>
+      )}
+
       {/* Conteúdo da Aba de Dashboard */}
       {activeTab === 'stats' && (
         <div className="tab-content stats-tab">
@@ -992,8 +1169,13 @@ export default function AdminPanel() {
                                 <span className="daily-order-type">
                                   {b.sale_type === 'online' ? 'Online' : 'Presencial'}
                                 </span>
+                                {formatPaymentMethodSummary(b.payment_method) && (
+                                  <span className="daily-order-payment">
+                                    {formatPaymentMethodSummary(b.payment_method)}
+                                  </span>
+                                )}
                                 <span className="daily-order-time">
-                                  {new Date(b.created_at).toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' })}
+                                  {new Date(b.created_at).toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit', timeZone: 'America/Sao_Paulo' })}
                                 </span>
                                 <span className="daily-order-total">
                                   R$ {parseFloat(b.total || 0).toFixed(2)}
@@ -1015,6 +1197,108 @@ export default function AdminPanel() {
                     </div>
                   ))}
                 </div>
+              )}
+
+              {/* Vendas por Forma de Pagamento */}
+              <div className="payment-report-header">
+                <h2 className="stats-section-title">Vendas por Forma de Pagamento</h2>
+                <div className="daily-period-tabs">
+                  {[
+                    { key: 'diario', label: 'Diário' },
+                    { key: 'semanal', label: 'Semanal' },
+                    { key: 'mensal', label: 'Mensal' }
+                  ].map(opt => (
+                    <button
+                      key={opt.key}
+                      className={`period-tab ${paymentReportMode === opt.key ? 'active' : ''}`}
+                      onClick={() => handlePaymentReportModeChange(opt.key)}
+                    >
+                      {opt.label}
+                    </button>
+                  ))}
+                </div>
+              </div>
+
+              {paymentReportLoading ? (
+                <div className="stats-loading">Carregando relatório...</div>
+              ) : paymentReportBuckets.every(b => b.total === 0) ? (
+                <p className="stats-empty">Nenhuma venda no período.</p>
+              ) : (
+                <>
+                  {/* Cards de resumo do período atual (hoje / semana atual / mês atual) */}
+                  <div className="payment-summary-cards">
+                    {(() => {
+                      const currentBucket = paymentReportBuckets[0];
+                      return PAYMENT_CATEGORIES.map(cat => {
+                        const total = currentBucket ? (currentBucket[cat] || 0) : 0;
+                        if (cat === 'Misto não identificado' && total === 0) return null;
+                        const isMisto = cat === 'Misto não identificado';
+                        const CardTag = isMisto ? 'button' : 'div';
+                        return (
+                          <CardTag
+                            key={cat}
+                            className={`payment-card ${PAYMENT_CATEGORY_CLASS[cat]}${isMisto ? ' payment-card-clickable' : ''}`}
+                            {...(isMisto ? {
+                              onClick: () => openMistoModal(
+                                `Misto não identificado (${currentBucket.label})`,
+                                currentBucket.mistoDetalhe
+                              )
+                            } : {})}
+                          >
+                            <div className="payment-card-info">
+                              <span className="payment-card-value">{formatBRL(total)}</span>
+                              <span className="payment-card-label">{cat}{isMisto ? ' (ver detalhe)' : ''}</span>
+                            </div>
+                          </CardTag>
+                        );
+                      });
+                    })()}
+                  </div>
+
+                  {/* Comparativo por período */}
+                  <div className="payment-period-list">
+                    {paymentReportBuckets.map(bucket => (
+                      <div key={bucket.key} className="payment-period-row">
+                        <div className="payment-period-header">
+                          <span className="payment-period-label">{bucket.label}</span>
+                          <span className="payment-period-total">{formatBRL(bucket.total)}</span>
+                        </div>
+                        <div className="payment-bar-bg">
+                          {bucket.total > 0 && PAYMENT_CATEGORIES.map(cat => (
+                            bucket[cat] > 0 && (
+                              <div
+                                key={cat}
+                                className={`payment-bar-segment ${PAYMENT_CATEGORY_CLASS[cat]}`}
+                                style={{ width: `${(bucket[cat] / bucket.total) * 100}%` }}
+                                title={`${cat}: ${formatBRL(bucket[cat])}`}
+                              />
+                            )
+                          ))}
+                        </div>
+                        {bucket.total > 0 && (
+                          <div className="payment-period-breakdown">
+                            {PAYMENT_CATEGORIES.map(cat => {
+                              if (!(bucket[cat] > 0)) return null;
+                              const isMisto = cat === 'Misto não identificado';
+                              const ItemTag = isMisto ? 'button' : 'span';
+                              return (
+                                <ItemTag
+                                  key={cat}
+                                  className={`payment-breakdown-item ${PAYMENT_CATEGORY_CLASS[cat]}${isMisto ? ' payment-breakdown-clickable' : ''}`}
+                                  {...(isMisto ? {
+                                    onClick: () => openMistoModal(`Misto não identificado (${bucket.label})`, bucket.mistoDetalhe)
+                                  } : {})}
+                                >
+                                  {isMisto ? 'Misto' : cat}: {formatBRL(bucket[cat])}
+                                </ItemTag>
+                              );
+                            })}
+                          </div>
+                        )}
+                      </div>
+                    ))}
+                  </div>
+                </>
               )}
             </>
           )}

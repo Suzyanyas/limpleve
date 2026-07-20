@@ -60,6 +60,8 @@ export default function BudgetManager({ onBack, initialBudget, openNew, onUpdate
   const [creatingCustomer, setCreatingCustomer] = useState(null); // null | { name, whatsapp }
   const [hasPicking, setHasPicking] = useState(false);
   const [hasRoute, setHasRoute] = useState(false);
+  const [trocoSaving, setTrocoSaving] = useState(false);
+  const [trocoOnlineLancadoValor, setTrocoOnlineLancadoValor] = useState(null);
   const finalizarBtnRef = useRef(null);
   const productNameInputRef = useRef(null);
 
@@ -80,6 +82,31 @@ export default function BudgetManager({ onBack, initialBudget, openNew, onUpdate
     const data = await getTodayBudgets();
     setBudgets(data);
     setBudgetsLoading(false);
+  };
+
+  const handleLancarTrocoOnline = async () => {
+    setTrocoSaving(true);
+    const session = await getOpenSession();
+    if (!session) {
+      toast.error('Abra o caixa antes de lançar o troco do online');
+      setTrocoSaving(false);
+      return;
+    }
+    const troco = parseFloat(trocoRecebido) - calculateTotal();
+    const result = await createCashTransaction({
+      session_id: session.id,
+      tipo: 'despesa',
+      valor: troco,
+      categoria_despesa: 'Troco Online',
+      observacao: 'Troco do online',
+    });
+    if (result.success) {
+      toast.success('Troco do online lançado como despesa!');
+      setTrocoOnlineLancadoValor(troco.toFixed(2));
+    } else {
+      toast.error('Erro ao lançar troco');
+    }
+    setTrocoSaving(false);
   };
 
   const resetForm = () => {
@@ -1641,6 +1668,20 @@ export default function BudgetManager({ onBack, initialBudget, openNew, onUpdate
                     : `Faltam R$ ${(calculateTotal() - parseFloat(trocoRecebido)).toFixed(2)}`}
                 </div>
               )}
+              {saleType === 'online' && parseFloat(trocoRecebido) >= calculateTotal() && (() => {
+                const trocoAtual = (parseFloat(trocoRecebido) - calculateTotal()).toFixed(2);
+                const jaLancado = trocoOnlineLancadoValor === trocoAtual;
+                return (
+                  <button
+                    type="button"
+                    className="btn-troco-online"
+                    onClick={handleLancarTrocoOnline}
+                    disabled={trocoSaving || jaLancado}
+                  >
+                    {jaLancado ? '✓ Lançado' : trocoSaving ? 'Lançando...' : '🧾 Lançar como despesa'}
+                  </button>
+                );
+              })()}
             </div>
           )}
 
@@ -1901,6 +1942,7 @@ export default function BudgetManager({ onBack, initialBudget, openNew, onUpdate
           </div>
         </div>
       )}
+
     </div>
   );
 }

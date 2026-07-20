@@ -493,6 +493,15 @@ export const updateBudgetStatus = async (budgetId, status) => {
 // HISTÓRICO DIÁRIO (para o dashboard)
 // ============================================
 
+// Extrai a chave 'YYYY-MM-DD' de uma data no calendário de São Paulo, independente
+// do fuso horário configurado no navegador/sistema de quem está com o painel aberto.
+const spDateKey = (date) => new Intl.DateTimeFormat('en-CA', {
+  timeZone: 'America/Sao_Paulo',
+  year: 'numeric',
+  month: '2-digit',
+  day: '2-digit'
+}).format(date);
+
 export const getDailyHistory = async (days = 30) => {
   try {
     const since = new Date();
@@ -502,7 +511,7 @@ export const getDailyHistory = async (days = 30) => {
     const { data, error } = await supabase
       .from('budgets')
       .select(`
-        id, customer_name, total, status, sale_type, payment_status, created_at,
+        id, customer_name, total, status, sale_type, payment_status, payment_method, created_at,
         budget_items(product_name, quantity, total_price)
       `)
       .gte('created_at', since.toISOString())
@@ -510,11 +519,10 @@ export const getDailyHistory = async (days = 30) => {
 
     if (error) throw error;
 
-    // Agrupa por data local
+    // Agrupa por data no calendário de São Paulo (independente do fuso do navegador)
     const grouped = {};
     (data || []).forEach(b => {
-      const d = new Date(b.created_at);
-      const key = `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`;
+      const key = spDateKey(new Date(b.created_at));
       if (!grouped[key]) grouped[key] = { date: key, budgets: [], revenue: 0, count: 0, cancelled: 0 };
       grouped[key].budgets.push(b);
       if (b.status === 'cancelled') {
@@ -529,6 +537,109 @@ export const getDailyHistory = async (days = 30) => {
   } catch (error) {
     console.error('Erro ao buscar histórico diário:', error);
     return [];
+  }
+};
+
+// ============================================
+// RELATÓRIO DE VENDAS POR FORMA DE PAGAMENTO
+// ============================================
+
+export const PAYMENT_CATEGORIES = ['Dinheiro', 'PIX', 'Cartão', 'Boleto', 'Misto não identificado'];
+
+// Separa uma forma_pagamento (simples ou "misto|forma:valor|...") em categorias do relatório.
+// Débito e Crédito são somados como "Cartão". Se a soma das partes do misto não bater
+// com o valor real da transação, a diferença cai em "Misto não identificado" (não some dinheiro).
+const parseFormaPagamento = (forma, valor) => {
+  const valorNum = parseFloat(valor) || 0;
+
+  if (!forma) return [{ categoria: 'Misto não identificado', valor: valorNum }];
+
+  if (forma.startsWith('misto|')) {
+    const partes = forma.replace('misto|', '').split('|');
+    const valores = { dinheiro: 0, pix: 0, cartao: 0 };
+    partes.forEach(p => {
+      const [chave, val] = p.split(':');
+      if (chave in valores) valores[chave] = parseFloat(val) || 0;
+    });
+
+    // O campo "dinheiro" do misto guarda o valor BRUTO entregue em espécie (BudgetManager
+    // permite dinheiro > parte necessária e calcula troco - ver o checador "soma > total = troco ok"
+    // em BudgetManager.js). Isso pode deixar a soma das partes maior que cash_transactions.valor
+    // (que é o total líquido do pedido). Esse excesso é sempre troco, e o troco só existe na
+    // parte em dinheiro — por isso é ela que absorve a diferença, nunca "Misto não identificado".
+    const somaPartes = valores.dinheiro + valores.pix + valores.cartao;
+    const excesso = Math.max(0, somaPartes - valorNum);
+    valores.dinheiro = Math.max(0, valores.dinheiro - excesso);
+
+    const resultado = [
+      { categoria: 'Dinheiro', valor: valores.dinheiro },
+      { categoria: 'PIX', valor: valores.pix },
+      { categoria: 'Cartão', valor: valores.cartao }
+    ];
+
+    // Sobra real: dinheiro recebido que nenhuma parte identificada cobre (ex.: soma < valor).
+    // Nunca deve ficar negativo aqui — se ficar, é uma inconsistência de dados fora do troco
+    // normal (ex.: troco maior que a própria parte em dinheiro), e preferimos logar a investigar
+    // a esconder dinheiro do relatório.
+    const somaAjustada = valores.dinheiro + valores.pix + valores.cartao;
+    const sobra = valorNum - somaAjustada;
+    if (sobra < -0.01) {
+      console.warn('Relatório de pagamento: sobra negativa inesperada em transação misto', { forma, valor, sobra });
+    }
+    if (sobra > 0.01) {
+      resultado.push({ categoria: 'Misto não identificado', valor: sobra });
+    }
+    return resultado;
+  }
+
+  const categoria = forma === 'dinheiro' ? 'Dinheiro'
+    : forma === 'pix' ? 'PIX'
+    : (forma === 'cartao_debito' || forma === 'cartao_credito') ? 'Cartão'
+    : forma === 'boleto' ? 'Boleto'
+    : 'Misto não identificado';
+  return [{ categoria, valor: valorNum }];
+};
+
+// Retorna totais por forma de pagamento agrupados por dia (chave 'YYYY-MM-DD', calendário SP),
+// com base no dinheiro efetivamente recebido em cash_transactions (tipo = 'venda').
+export const getPaymentMethodReport = async (startDate, endDate) => {
+  try {
+    const { data, error } = await supabase
+      .from('cash_transactions')
+      .select('id, valor, forma_pagamento, created_at, budgets(customer_name)')
+      .eq('tipo', 'venda')
+      .gte('created_at', startDate.toISOString())
+      .lt('created_at', endDate.toISOString());
+    if (error) throw error;
+
+    const porDia = {};
+    const mistoDetalhe = [];
+    (data || []).forEach(tx => {
+      const key = spDateKey(new Date(tx.created_at));
+      if (!porDia[key]) {
+        porDia[key] = PAYMENT_CATEGORIES.reduce((acc, cat) => ({ ...acc, [cat]: 0 }), { date: key, total: 0 });
+      }
+      parseFormaPagamento(tx.forma_pagamento, tx.valor).forEach(({ categoria, valor }) => {
+        porDia[key][categoria] += valor;
+        porDia[key].total += valor;
+        if (categoria === 'Misto não identificado' && valor > 0.01) {
+          mistoDetalhe.push({
+            id: tx.id,
+            forma_pagamento: tx.forma_pagamento,
+            valor: parseFloat(tx.valor) || 0,
+            diferenca: valor,
+            dateKey: key,
+            created_at: tx.created_at,
+            customer_name: tx.budgets?.customer_name || null
+          });
+        }
+      });
+    });
+
+    return { porDia, mistoDetalhe };
+  } catch (error) {
+    console.error('Erro ao buscar relatório por forma de pagamento:', error);
+    return { porDia: {}, mistoDetalhe: [] };
   }
 };
 

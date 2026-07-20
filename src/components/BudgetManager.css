@@ -524,6 +524,24 @@
   border-color: #304D73;
 }
 
+.btn-troco-online {
+  width: 100%;
+  margin-top: 10px;
+  padding: 12px 14px;
+  border: 1.5px dashed #d99a2b;
+  border-radius: 10px;
+  background: #fff8ec;
+  color: #a86b0e;
+  font-weight: 700;
+  font-size: 0.85rem;
+  cursor: pointer;
+  transition: background 0.2s;
+}
+
+.btn-troco-online:hover {
+  background: #fdeecb;
+}
+
 .form-section label,
 .section-label {
   display: block;

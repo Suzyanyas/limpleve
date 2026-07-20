@@ -1429,6 +1429,225 @@
   margin-top: 0;
 }
 
+/* Vendas por Forma de Pagamento */
+.payment-report-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 12px;
+  margin-top: 32px;
+}
+
+.payment-report-header .stats-section-title {
+  margin: 0;
+}
+
+.payment-summary-cards {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
+  gap: 14px;
+  margin: 20px 0;
+}
+
+.payment-card {
+  border-radius: 14px;
+  padding: 16px 18px;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  color: #fff;
+  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.07);
+}
+
+.payment-card.dinheiro { background: linear-gradient(135deg, #1a7a4a, #27ae60); }
+.payment-card.pix      { background: linear-gradient(135deg, #0e7490, #06b6d4); }
+.payment-card.cartao   { background: linear-gradient(135deg, #6d28d9, #8b5cf6); }
+.payment-card.boleto   { background: linear-gradient(135deg, #b45309, #d97706); }
+.payment-card.misto    { background: linear-gradient(135deg, #b91c1c, #dc2626); }
+
+.payment-card-clickable {
+  border: none;
+  cursor: pointer;
+  text-align: left;
+  font: inherit;
+  transition: transform 0.15s ease, box-shadow 0.15s ease;
+}
+
+.payment-card-clickable:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 14px rgba(0, 0, 0, 0.18);
+}
+
+.payment-card-info {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.payment-card-value {
+  font-size: 1.15rem;
+  font-weight: 700;
+  line-height: 1.1;
+}
+
+.payment-card-label {
+  font-size: 0.75rem;
+  opacity: 0.85;
+}
+
+.payment-period-list {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+}
+
+.payment-period-row {
+  background: #fff;
+  border: 1.5px solid #e4eaf2;
+  border-radius: 10px;
+  padding: 14px 16px;
+}
+
+.payment-period-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 8px;
+}
+
+.payment-period-label {
+  font-weight: 700;
+  font-size: 0.9rem;
+  color: #304D73;
+}
+
+.payment-period-total {
+  font-weight: 700;
+  font-size: 0.95rem;
+  color: #304D73;
+}
+
+.payment-bar-bg {
+  display: flex;
+  height: 10px;
+  background: #eef2f7;
+  border-radius: 6px;
+  overflow: hidden;
+}
+
+.payment-bar-segment {
+  height: 100%;
+  transition: width 0.6s ease;
+}
+
+.payment-bar-segment.dinheiro { background: #27ae60; }
+.payment-bar-segment.pix      { background: #06b6d4; }
+.payment-bar-segment.cartao   { background: #8b5cf6; }
+.payment-bar-segment.boleto   { background: #d97706; }
+.payment-bar-segment.misto    { background: #dc2626; }
+
+.payment-period-breakdown {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  margin-top: 8px;
+}
+
+.payment-breakdown-item {
+  font-size: 0.78rem;
+  font-weight: 600;
+  color: #5a6a82;
+  background: none;
+  border: none;
+  padding: 0;
+  font-family: inherit;
+}
+
+.payment-breakdown-item.misto { color: #b91c1c; }
+
+.payment-breakdown-item:not(:first-child)::before {
+  content: '·';
+  margin-right: 10px;
+  color: #c3cbd6;
+}
+
+.payment-breakdown-clickable {
+  cursor: pointer;
+  text-decoration: underline;
+  text-underline-offset: 2px;
+}
+
+.payment-breakdown-clickable:hover {
+  opacity: 0.8;
+}
+
+/* Modal de detalhe das transações "Misto não identificado" */
+.payment-detail-modal {
+  max-width: 480px;
+}
+
+.payment-detail-list {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  max-height: 50vh;
+  overflow-y: auto;
+}
+
+.payment-detail-item {
+  border: 1.5px solid #f0d0d0;
+  background: #fff7f7;
+  border-radius: 10px;
+  padding: 10px 12px;
+}
+
+.payment-detail-item-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  gap: 10px;
+  margin-bottom: 4px;
+}
+
+.payment-detail-item-when {
+  display: flex;
+  flex-direction: column;
+  gap: 1px;
+}
+
+.payment-detail-item-customer {
+  font-weight: 700;
+  font-size: 0.88rem;
+  color: #304D73;
+}
+
+.payment-detail-item-datetime {
+  font-size: 0.75rem;
+  color: #888;
+}
+
+.payment-detail-item-total {
+  font-size: 0.85rem;
+  font-weight: 600;
+  color: #333;
+}
+
+.payment-detail-item-forma {
+  font-family: monospace;
+  font-size: 0.8rem;
+  color: #555;
+  word-break: break-all;
+  margin-bottom: 4px;
+}
+
+.payment-detail-item-diff {
+  font-size: 0.8rem;
+  font-weight: 700;
+  color: #b91c1c;
+}
+
+
 .daily-period-tabs {
   display: flex;
   gap: 6px;
@@ -1617,6 +1836,14 @@
   padding: 1px 7px;
   border-radius: 8px;
   color: #3a5a9a;
+  font-weight: 500;
+}
+
+.daily-order-payment {
+  background: #f0faf4;
+  padding: 1px 7px;
+  border-radius: 8px;
+  color: #1a7a4a;
   font-weight: 500;
 }
 
