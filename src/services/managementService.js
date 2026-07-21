@@ -489,6 +489,21 @@ export const updateBudgetStatus = async (budgetId, status) => {
   }
 };
 
+export const updateBudgetManterOrcamento = async (budgetId, manterOrcamento) => {
+  try {
+    const { error } = await supabase
+      .from('budgets')
+      .update({ manter_orcamento: manterOrcamento })
+      .eq('id', budgetId);
+
+    if (error) throw error;
+    return { success: true };
+  } catch (error) {
+    console.error('Erro ao atualizar manter_orcamento do orçamento:', error);
+    return { success: false, error };
+  }
+};
+
 // ============================================
 // HISTÓRICO DIÁRIO (para o dashboard)
 // ============================================
@@ -657,7 +672,7 @@ export const getTodayBudgets = async () => {
   const all = await getAllBudgets();
   const todayStart = getTodayStart();
   return all.filter(b =>
-    new Date(b.created_at) >= todayStart &&
+    (new Date(b.created_at) >= todayStart || b.manter_orcamento) &&
     b.status !== 'delivered' &&
     b.status !== 'cancelled'
   );
@@ -856,6 +871,33 @@ export const createCashTransaction = async (transaction) => {
     return { success: true, data };
   } catch (error) {
     console.error('Erro ao criar transação:', error);
+    return { success: false, error };
+  }
+};
+
+export const confirmBudgetPayment = async ({ budgetId, valor, formaPagamento, saleType, observacao }) => {
+  try {
+    const session = await getOpenSession();
+    await createCashTransaction({
+      session_id: session?.id || null,
+      budget_id: budgetId,
+      tipo: 'venda',
+      valor,
+      forma_pagamento: formaPagamento,
+      sale_type: saleType,
+      payment_status: 'pago',
+      observacao,
+    });
+
+    const { error } = await supabase
+      .from('budgets')
+      .update({ payment_status: 'pago' })
+      .eq('id', budgetId);
+    if (error) throw error;
+
+    return { success: true, hadSession: !!session };
+  } catch (error) {
+    console.error('Erro ao confirmar pagamento do orçamento:', error);
     return { success: false, error };
   }
 };

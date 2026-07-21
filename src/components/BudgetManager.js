@@ -1,6 +1,7 @@
 import { useState, useEffect, useRef } from 'react';
 import html2canvas from 'html2canvas';
 import toast from 'react-hot-toast';
+import { FaThumbtack } from 'react-icons/fa';
 import {
   getAllCustomers,
   getTodayBudgets,
@@ -9,18 +10,28 @@ import {
   createBudget,
   updateBudget,
   updateBudgetStatus,
+  updateBudgetManterOrcamento,
   deleteBudget,
   getBudgetById,
   createPickingOrder,
   createDeliveryRoute,
   getOpenSession,
-  createCashTransaction
+  createCashTransaction,
+  confirmBudgetPayment
 } from '../services/managementService';
 import { getAllProducts } from '../services/productService';
 import { supabase } from '../supabaseClient';
 import CashManager, { CashStatusBar } from './CashManager';
 import PinGate from './PinGate';
 import './BudgetManager.css';
+
+const CONFIRM_PAYMENT_LABELS = {
+  dinheiro: '💵 Dinheiro',
+  pix: '📱 PIX',
+  cartao_debito: '💳 Débito',
+  cartao_credito: '💳 Crédito',
+  boleto: 'Boleto',
+};
 
 export default function BudgetManager({ onBack, initialBudget, openNew, onUpdate, onApproved }) {
   const [view, setView] = useState((initialBudget || openNew) ? 'form' : 'list'); // list, form, detail, romaneio, caixa
@@ -48,9 +59,14 @@ export default function BudgetManager({ onBack, initialBudget, openNew, onUpdate
   const [entradaValue, setEntradaValue] = useState('');
   const [entradaMethod, setEntradaMethod] = useState('dinheiro');
   const [saleType, setSaleType] = useState('presencial');
+  const [hasDelivery, setHasDelivery] = useState(false);
   const [mistoValues, setMistoValues] = useState({ dinheiro: '', pix: '', cartao: '' });
   const [trocoRecebido, setTrocoRecebido] = useState('');
   const [notes, setNotes] = useState('');
+  const [manterOrcamento, setManterOrcamento] = useState(false);
+  const [paymentConfirmModal, setPaymentConfirmModal] = useState(false);
+  const [confirmPaymentForm, setConfirmPaymentForm] = useState('dinheiro');
+  const [confirmingPayment, setConfirmingPayment] = useState(false);
   const [customerWhatsapp, setCustomerWhatsapp] = useState('');
   const [customerFilter, setCustomerFilter] = useState('');
   const [productFilter, setProductFilter] = useState('');
@@ -121,9 +137,11 @@ export default function BudgetManager({ onBack, initialBudget, openNew, onUpdate
     setEntradaValue('');
     setEntradaMethod('dinheiro');
     setSaleType('presencial');
+    setHasDelivery(false);
     setMistoValues({ dinheiro: '', pix: '', cartao: '' });
     setTrocoRecebido('');
     setNotes('');
+    setManterOrcamento(false);
     setCreatingCustomer(null);
   };
 
@@ -146,7 +164,9 @@ export default function BudgetManager({ onBack, initialBudget, openNew, onUpdate
       }
       setPaymentStatus(budget.payment_status || 'pago');
       setSaleType(budget.sale_type || 'presencial');
+      setHasDelivery((budget.sale_type || 'presencial') === 'presencial' && !!(budget.delivery_address || '').trim());
       setNotes(budget.notes || '');
+      setManterOrcamento(!!budget.manter_orcamento);
       const local = customers.find(c => c.id === budget.customer_id);
       const joined = budget.customers;
       let customer = (local || joined) ? { ...(local || {}), ...(joined || {}) } : null;
@@ -502,13 +522,14 @@ export default function BudgetManager({ onBack, initialBudget, openNew, onUpdate
       customer_code: selectedCustomer.code || null,
       total: calculateTotal(),
       status: 'draft',
-      delivery_address: saleType === 'online' ? deliveryAddress : '',
+      delivery_address: (saleType === 'online' || (saleType === 'presencial' && hasDelivery)) ? deliveryAddress : '',
       payment_method: buildPaymentMethodToSave(),
       sale_type: saleType,
       payment_status: paymentStatus,
       entrada_valor: paymentStatus === 'parcial' ? parseFloat(entradaValue) || 0 : null,
       entrada_method: paymentStatus === 'parcial' ? entradaMethod : null,
-      notes: notes
+      notes: notes,
+      manter_orcamento: manterOrcamento
     };
 
     const itemsToSave = buildItemsToSave();
@@ -542,6 +563,7 @@ export default function BudgetManager({ onBack, initialBudget, openNew, onUpdate
     if (saleType !== 'presencial' && !selectedCustomer) { toast.error('Selecione um cliente'); return; }
     if (items.length === 0) { toast.error('Adicione pelo menos um produto'); return; }
     if (!paymentMethod) { toast.error('Selecione a forma de pagamento'); return; }
+    if (saleType === 'presencial' && hasDelivery && !deliveryAddress.trim()) { toast.error('Preencha o endereço de entrega'); return; }
 
     await persistCustomerWhatsapp();
 
@@ -554,13 +576,14 @@ export default function BudgetManager({ onBack, initialBudget, openNew, onUpdate
       customer_code: customerForSale.code || null,
       total: calculateTotal(),
       status: 'confirmed',
-      delivery_address: saleType === 'online' ? deliveryAddress : '',
+      delivery_address: (saleType === 'online' || (saleType === 'presencial' && hasDelivery)) ? deliveryAddress : '',
       payment_method: buildPaymentMethodToSave(),
       sale_type: saleType,
       payment_status: paymentStatus,
       entrada_valor: paymentStatus === 'parcial' ? parseFloat(entradaValue) || 0 : null,
       entrada_method: paymentStatus === 'parcial' ? entradaMethod : null,
-      notes: notes
+      notes: notes,
+      manter_orcamento: manterOrcamento
     };
     const itemsToSave = buildItemsToSave();
     let savedBudget = budgetData;
@@ -638,7 +661,7 @@ export default function BudgetManager({ onBack, initialBudget, openNew, onUpdate
   const handleApprove = async () => {
     if (!budgetData) return;
 
-    if (saleType === 'online' && !deliveryAddress.trim()) {
+    if ((saleType === 'online' || (saleType === 'presencial' && hasDelivery)) && !deliveryAddress.trim()) {
       toast.error('Preencha o endereço de entrega antes de aprovar');
       setView('form');
       return;
@@ -815,9 +838,41 @@ export default function BudgetManager({ onBack, initialBudget, openNew, onUpdate
     }
   };
 
+  const handleConfirmBudgetPayment = async () => {
+    if (!budgetData) return;
+    setConfirmingPayment(true);
+
+    const total = calculateTotal();
+    const valor = budgetData.payment_status === 'parcial'
+      ? Math.max(0, total - parseFloat(budgetData.entrada_valor || 0))
+      : total;
+
+    const result = await confirmBudgetPayment({
+      budgetId: budgetData.id,
+      valor,
+      formaPagamento: confirmPaymentForm,
+      saleType: budgetData.sale_type || 'presencial',
+      observacao: `${budgetData.customer_name} — pagamento confirmado`,
+    });
+
+    if (result.success) {
+      if (!result.hadSession) toast('Pagamento registrado sem turno aberto', { icon: '⚠️' });
+      toast.success('Pagamento confirmado!');
+      setBudgetData(prev => ({ ...prev, payment_status: 'pago' }));
+      setPaymentStatus('pago');
+      setPaymentConfirmModal(false);
+      onUpdate && onUpdate();
+    } else {
+      toast.error('Erro ao confirmar pagamento');
+    }
+    setConfirmingPayment(false);
+  };
+
   if (view === 'list') {
     const statusLabel = { draft: 'Rascunho', confirmed: 'Aprovado', delivered: 'Entregue', cancelled: 'Cancelado' };
     const statusClass = { draft: 'st-draft', confirmed: 'st-confirmed', delivered: 'st-delivered', cancelled: 'st-cancelled' };
+    const todayStart = new Date();
+    todayStart.setHours(0, 0, 0, 0);
 
     return (
       <div className="budget-manager">
@@ -854,22 +909,53 @@ export default function BudgetManager({ onBack, initialBudget, openNew, onUpdate
                 </div>
                 <div className="bli-right">
                   <span className="bli-total">R$ {parseFloat(b.total).toFixed(2)}</span>
+                  {b.manter_orcamento && new Date(b.created_at) < todayStart && (
+                    <button
+                      className="bli-pinned"
+                      title="Clique para desfixar"
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        updateBudgetManterOrcamento(b.id, false).then(r => {
+                          if (r.success) { toast.success('Orçamento desfixado'); loadBudgetsList(); }
+                          else toast.error('Erro ao desfixar orçamento');
+                        });
+                      }}
+                    >
+                      Fixado
+                    </button>
+                  )}
                   <span className={`bli-status ${statusClass[b.status] || 'st-draft'}`}>
                     {statusLabel[b.status] || b.status}
                   </span>
-                  <button
-                    className="bli-delete"
-                    title="Excluir"
-                    onClick={(e) => {
-                      e.stopPropagation();
-                      if (window.confirm(`Excluir orçamento de ${b.customer_name}?`)) {
-                        deleteBudget(b.id).then(r => {
-                          if (r.success) { toast.success('Excluído!'); loadBudgetsList(); onUpdate && onUpdate(); }
-                          else toast.error('Erro ao excluir');
+                  <div className="bli-icon-row">
+                    <button
+                      className={`bli-pin-toggle ${b.manter_orcamento ? 'active' : ''}`}
+                      title={b.manter_orcamento ? 'Clique para desmarcar "Manter orçamento"' : 'Clique para marcar "Manter orçamento"'}
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        const novoValor = !b.manter_orcamento;
+                        updateBudgetManterOrcamento(b.id, novoValor).then(r => {
+                          if (r.success) { toast.success(novoValor ? 'Orçamento marcado para manter' : 'Orçamento desmarcado'); loadBudgetsList(); }
+                          else toast.error('Erro ao atualizar orçamento');
                         });
-                      }
-                    }}
-                  >🗑️</button>
+                      }}
+                    >
+                      <FaThumbtack size={13} />
+                    </button>
+                    <button
+                      className="bli-delete"
+                      title="Excluir"
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        if (window.confirm(`Excluir orçamento de ${b.customer_name}?`)) {
+                          deleteBudget(b.id).then(r => {
+                            if (r.success) { toast.success('Excluído!'); loadBudgetsList(); onUpdate && onUpdate(); }
+                            else toast.error('Erro ao excluir');
+                          });
+                        }
+                      }}
+                    >🗑️</button>
+                  </div>
                 </div>
               </div>
             ))}
@@ -1048,6 +1134,53 @@ export default function BudgetManager({ onBack, initialBudget, openNew, onUpdate
             )}
             {hasPicking && <span className="badge-already">📦 Em Separação</span>}
             {hasRoute && <span className="badge-already">📍 Rota criada</span>}
+            {(budgetData?.payment_status === 'a_receber' || budgetData?.payment_status === 'parcial') && !hasRoute && (
+              <button
+                className="detail-action-btn pay"
+                onClick={() => { setConfirmPaymentForm('dinheiro'); setPaymentConfirmModal(true); }}
+              >
+                <span className="action-icon">💰</span>
+                <span>Marcar como Pago</span>
+              </button>
+            )}
+          </div>
+        )}
+
+        {paymentConfirmModal && (
+          <div className="rm-modal-overlay" onClick={() => setPaymentConfirmModal(false)}>
+            <div className="rm-modal" onClick={e => e.stopPropagation()}>
+              <div className="rm-modal-title">💰 Confirmar pagamento</div>
+              <div className="rm-modal-customer">{budgetData?.customer_name}</div>
+              <div className="rm-modal-valor">
+                R$ {(budgetData?.payment_status === 'parcial'
+                  ? Math.max(0, calculateTotal() - parseFloat(budgetData?.entrada_valor || 0))
+                  : calculateTotal()
+                ).toFixed(2)}
+              </div>
+              <div className="rm-modal-label">
+                {budgetData?.payment_status === 'parcial' ? 'Valor restante a receber' : 'Valor total a receber'}
+              </div>
+
+              <div className="rm-modal-section-label">Forma de pagamento</div>
+              <div className="rm-payment-options">
+                {Object.entries(CONFIRM_PAYMENT_LABELS).map(([key, label]) => (
+                  <button
+                    key={key}
+                    className={`rm-payment-btn ${confirmPaymentForm === key ? 'active' : ''}`}
+                    onClick={() => setConfirmPaymentForm(key)}
+                  >
+                    {label}
+                  </button>
+                ))}
+              </div>
+
+              <div className="rm-modal-actions">
+                <button className="rm-btn-cancel" onClick={() => setPaymentConfirmModal(false)}>Cancelar</button>
+                <button className="rm-btn-confirm" onClick={handleConfirmBudgetPayment} disabled={confirmingPayment}>
+                  {confirmingPayment ? 'Registrando...' : '✓ Confirmar recebimento'}
+                </button>
+              </div>
+            </div>
           </div>
         )}
       </div>
@@ -1126,6 +1259,9 @@ export default function BudgetManager({ onBack, initialBudget, openNew, onUpdate
               <div className="receipt-total">R$ {calculateTotal().toFixed(2)}</div>
               {paymentMethod && (
                 <div className="rf-value"><span style={{ fontWeight: 700 }}>Forma de Pagamento: </span>{formatPaymentMethodPlain()}</div>
+              )}
+              {paymentStatus === 'pago' && (
+                <div className="rf-value" style={{ fontWeight: 700, color: '#16a34a' }}>Status: PAGO</div>
               )}
               {paymentStatus === 'pago' && (paymentMethod === 'dinheiro' || (paymentMethod === 'misto' && parseFloat(mistoValues.dinheiro) > 0)) && parseFloat(trocoRecebido) > 0 && (
                 <>
@@ -1229,6 +1365,9 @@ export default function BudgetManager({ onBack, initialBudget, openNew, onUpdate
               )}
               {paymentMethod && (
                 <div className="rw-info-row-txt">PAGAMENTO: {formatPaymentMethodPlain()}</div>
+              )}
+              {paymentStatus === 'pago' && (
+                <div className="rw-info-row-txt" style={{ fontWeight: 700, color: '#16a34a' }}>STATUS: PAGO</div>
               )}
               {paymentStatus === 'parcial' && (
                 <div className="rw-info-restante">
@@ -1604,15 +1743,31 @@ export default function BudgetManager({ onBack, initialBudget, openNew, onUpdate
             <button
               type="button"
               className={`sale-type-btn ${saleType === 'online' ? 'active' : ''}`}
-              onClick={() => setSaleType('online')}
+              onClick={() => { setSaleType('online'); setHasDelivery(false); }}
             >
               📱 Online
             </button>
           </div>
         </div>
 
-        {/* Endereço — só obrigatório se online */}
-        {saleType === 'online' && (
+        {/* Entrega — presencial é opcional, online é sempre entrega */}
+        {saleType === 'presencial' && (
+          <div className="form-section">
+            <label className="delivery-check-label">
+              <input
+                type="checkbox"
+                checked={hasDelivery}
+                onChange={(e) => {
+                  setHasDelivery(e.target.checked);
+                  if (!e.target.checked) setDeliveryAddress('');
+                }}
+              />
+              Essa venda tem entrega?
+            </label>
+          </div>
+        )}
+
+        {(saleType === 'online' || (saleType === 'presencial' && hasDelivery)) && (
           <div className="form-section">
             <label className="section-label">Endereço de entrega</label>
             <textarea
@@ -1621,6 +1776,7 @@ export default function BudgetManager({ onBack, initialBudget, openNew, onUpdate
               onChange={(e) => setDeliveryAddress(e.target.value)}
               placeholder="Rua, número, bairro..."
               rows={2}
+              autoFocus={saleType === 'presencial'}
             />
           </div>
         )}
@@ -1839,6 +1995,21 @@ export default function BudgetManager({ onBack, initialBudget, openNew, onUpdate
             placeholder="Informações adicionais para o romaneio..."
             rows={2}
           />
+        </div>
+
+        {/* Manter orçamento */}
+        <div className="form-section">
+          <label className="manter-orcamento-check">
+            <input
+              type="checkbox"
+              checked={manterOrcamento}
+              onChange={(e) => setManterOrcamento(e.target.checked)}
+            />
+            <span>Manter orçamento</span>
+          </label>
+          <span className="manter-orcamento-hint">
+            Orçamentos que demoram pra aprovar não somem da lista no dia seguinte.
+          </span>
         </div>
 
         {/* Botões de ação */}

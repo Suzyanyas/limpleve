@@ -4,8 +4,7 @@ import {
   getTodayDeliveryRoutes,
   updateDeliveryRouteStatus,
   updateBudgetStatus,
-  getOpenSession,
-  createCashTransaction
+  confirmBudgetPayment
 } from '../services/managementService';
 import './RouteManager.css';
 
@@ -93,19 +92,15 @@ export default function RouteManager({ onBack, onUpdate }) {
     const budget = route.budgets;
 
     // Lança no caixa
-    const session = await getOpenSession();
-    await createCashTransaction({
-      session_id: session?.id || null,
-      budget_id: budget?.id || null,
-      tipo: 'venda',
+    const result = await confirmBudgetPayment({
+      budgetId: budget?.id || null,
       valor: valorRestante,
-      forma_pagamento: paymentForm,
-      sale_type: 'online',
-      payment_status: 'pago',
+      formaPagamento: paymentForm,
+      saleType: 'online',
       observacao: `${route.customer_name} — recebimento na entrega`,
     });
 
-    if (!session) {
+    if (result.success && !result.hadSession) {
       toast('Pagamento registrado sem turno aberto', { icon: '⚠️' });
     }
 
