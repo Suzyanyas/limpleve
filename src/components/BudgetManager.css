@@ -104,6 +104,15 @@
   padding: 0 16px 16px;
 }
 
+.detail-actions-row {
+  display: flex;
+  gap: 10px;
+}
+
+.detail-actions-row .detail-action-btn {
+  flex: 1;
+}
+
 .detail-action-btn {
   display: flex;
   align-items: center;
@@ -164,6 +173,10 @@
 
 .detail-action-btn.edit {
   background: linear-gradient(135deg, #64748b 0%, #475569 100%);
+}
+
+.detail-action-btn.download {
+  background: linear-gradient(135deg, #6366f1 0%, #4f46e5 100%);
 }
 
 .detail-action-btn.approve {
@@ -289,8 +302,27 @@
 }
 
 /* ── Lista de orçamentos ── */
-.btn-new-budget {
+.btn-quick-expense {
   margin-left: auto;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  background: transparent;
+  color: rgba(255, 255, 255, 0.8);
+  border: 1.5px solid rgba(255, 255, 255, 0.3);
+  border-radius: 8px;
+  padding: 7px 12px;
+  font-size: 0.78rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background 0.2s;
+}
+
+.btn-quick-expense:hover {
+  background: rgba(255, 255, 255, 0.12);
+}
+
+.btn-new-budget {
   background: rgba(255, 255, 255, 0.2);
   color: white;
   border: 1.5px solid rgba(255, 255, 255, 0.5);

@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import toast from 'react-hot-toast';
 import {
   getTodayPickingOrders,
@@ -9,6 +9,7 @@ import {
   createPickingAudit,
   getAppPin,
 } from '../services/managementService';
+import { getAllProducts } from '../services/productService';
 import { supabase } from '../supabaseClient';
 import './PickingManager.css';
 
@@ -33,6 +34,19 @@ export default function PickingManager({ onBack, onUpdate, onOpenBudget }) {
   const [editNotes, setEditNotes] = useState('');
   const [editReason, setEditReason] = useState('');
   const [saving, setSaving] = useState(false);
+
+  // Troca de produto / adição de item (Catálogo ou Manual)
+  const [products, setProducts] = useState([]);
+  const [changingProductIdx, setChangingProductIdx] = useState(null); // índice do item cujo produto está sendo trocado
+  const [productSearchTerm, setProductSearchTerm] = useState('');
+  const [addMode, setAddMode] = useState('manual'); // 'catalog' | 'manual'
+  const [newProductSearchTerm, setNewProductSearchTerm] = useState('');
+  const [newSelectedProduct, setNewSelectedProduct] = useState(null);
+  const [newManualName, setNewManualName] = useState('');
+  const [newManualPrice, setNewManualPrice] = useState('');
+  const [newQty, setNewQty] = useState(1);
+  const skipRenameRef = useRef(false);
+  const addItemNameInputRef = useRef(null);
 
   // Valores originais para auditoria
   const [origItems, setOrigItems] = useState([]);
@@ -118,6 +132,14 @@ export default function PickingManager({ onBack, onUpdate, onOpenBudget }) {
     setEditPayment('');
     setEditNotes('');
     setEditReason('');
+    setChangingProductIdx(null);
+    setProductSearchTerm('');
+    setAddMode('manual');
+    setNewProductSearchTerm('');
+    setNewSelectedProduct(null);
+    setNewManualName('');
+    setNewManualPrice('');
+    setNewQty(1);
   };
 
   const closeEditModal = () => {
@@ -169,10 +191,12 @@ export default function PickingManager({ onBack, onUpdate, onOpenBudget }) {
     if (!order.budget_id) return;
     setBudgetLoading(true);
     try {
-      const [{ data: items }, { data: budget }] = await Promise.all([
+      const [{ data: items }, { data: budget }, catalogProducts] = await Promise.all([
         supabase.from('budget_items').select('*').eq('budget_id', order.budget_id),
         supabase.from('budgets').select('delivery_address, payment_method, notes').eq('id', order.budget_id).single(),
+        getAllProducts(),
       ]);
+      setProducts(catalogProducts || []);
 
       const itemsCopy = (items || []).map(i => ({ ...i }));
       setEditItems(itemsCopy);
@@ -206,13 +230,82 @@ export default function PickingManager({ onBack, onUpdate, onOpenBudget }) {
     setEditItems(prev => prev.filter((_, i) => i !== idx));
   };
 
+  const handleChangeItemProduct = (idx, product) => {
+    skipRenameRef.current = true;
+    setEditItems(prev => prev.map((item, i) => {
+      if (i !== idx) return item;
+      const qty = parseFloat(item.quantity) || 0;
+      const unit = parseFloat(product.price) || 0;
+      return {
+        ...item,
+        product_id: product.id,
+        product_name: product.name,
+        unit_price: unit,
+        total_price: qty * unit,
+      };
+    }));
+    setChangingProductIdx(null);
+    setProductSearchTerm('');
+  };
+
+  const filteredCatalogProducts = (term) => {
+    const t = term.trim().toLowerCase();
+    if (!t) return products.slice(0, 20);
+    return products.filter(p => p.name?.toLowerCase().includes(t)).slice(0, 20);
+  };
+
+  const handleAddNewItem = () => {
+    const qty = parseFloat(newQty) || 0;
+    if (qty <= 0) {
+      toast.error('Quantidade deve ser maior que zero');
+      return;
+    }
+
+    let product_id = null;
+    let product_name = '';
+    let unit_price = 0;
+
+    if (addMode === 'manual') {
+      if (!newManualName.trim()) {
+        toast.error('Digite o nome do produto');
+        return;
+      }
+      if (!newManualPrice || parseFloat(newManualPrice) <= 0) {
+        toast.error('Digite um preço válido');
+        return;
+      }
+      product_name = newManualName.trim();
+      unit_price = parseFloat(newManualPrice);
+    } else {
+      if (!newSelectedProduct) {
+        toast.error('Selecione um produto do catálogo');
+        return;
+      }
+      product_id = newSelectedProduct.id;
+      product_name = newSelectedProduct.name;
+      unit_price = parseFloat(newSelectedProduct.price) || 0;
+    }
+
+    setEditItems(prev => [...prev, {
+      product_id,
+      product_name,
+      quantity: qty,
+      unit_price,
+      total_price: qty * unit_price,
+    }]);
+
+    setNewManualName('');
+    setNewManualPrice('');
+    setNewSelectedProduct(null);
+    setNewProductSearchTerm('');
+    setNewQty(1);
+    toast.success('Item adicionado');
+    setTimeout(() => addItemNameInputRef.current?.focus(), 50);
+  };
+
   // ── Salvar ───────────────────────────────────────────────────────
 
   const handleEditSave = async () => {
-    if (!editReason.trim()) {
-      toast.error('Preencha o motivo da alteração');
-      return;
-    }
     if (!editModal) return;
     setSaving(true);
 
@@ -230,15 +323,28 @@ export default function PickingManager({ onBack, onUpdate, onOpenBudget }) {
         await supabase.from('budget_items').delete().eq('id', id);
       }
 
-      // Itens actualizados
+      // Itens atualizados ou novos (sem id ainda não existem em budget_items)
       for (const item of editItems) {
         const qty = parseFloat(item.quantity) || 0;
         const unit = parseFloat(item.unit_price) || 0;
-        await supabase.from('budget_items').update({
-          quantity: qty,
-          unit_price: unit,
-          total_price: qty * unit,
-        }).eq('id', item.id);
+        if (item.id) {
+          await supabase.from('budget_items').update({
+            product_id: item.product_id,
+            product_name: item.product_name,
+            quantity: qty,
+            unit_price: unit,
+            total_price: qty * unit,
+          }).eq('id', item.id);
+        } else {
+          await supabase.from('budget_items').insert({
+            budget_id: budgetId,
+            product_id: item.product_id,
+            product_name: item.product_name,
+            quantity: qty,
+            unit_price: unit,
+            total_price: qty * unit,
+          });
+        }
       }
 
       // Recalcula total e actualiza budget
@@ -411,57 +517,189 @@ export default function PickingManager({ onBack, onUpdate, onOpenBudget }) {
             ) : (
               <>
                 {/* Tabela de itens */}
-                {editItems.length > 0 && (
-                  <div className="pick-edit-field">
-                    <label>Itens do pedido</label>
-                    <div className="edit-items-table">
-                      <div className="edit-items-header">
-                        <span className="ei-col-name">Produto</span>
-                        <span className="ei-col-num">Qtd</span>
-                        <span className="ei-col-num">Preço/un</span>
-                        <span className="ei-col-num">Total</span>
-                        <span className="ei-col-rm" />
-                      </div>
-                      {editItems.map((item, idx) => {
-                        const total = (parseFloat(item.quantity) || 0) * (parseFloat(item.unit_price) || 0);
-                        return (
-                          <div key={item.id} className="edit-items-row">
-                            <span className="ei-col-name ei-product-name">
-                              {item.product_name || item.product?.name || '—'}
-                            </span>
-                            <input
-                              className="ei-col-num ei-input"
-                              type="number"
-                              min="0"
-                              step="1"
-                              value={item.quantity}
-                              onChange={e => handleItemChange(idx, 'quantity', e.target.value)}
-                            />
-                            <input
-                              className="ei-col-num ei-input"
-                              type="number"
-                              min="0"
-                              step="0.01"
-                              value={item.unit_price}
-                              onChange={e => handleItemChange(idx, 'unit_price', e.target.value)}
-                            />
-                            <span className="ei-col-num ei-total">R$ {total.toFixed(2)}</span>
-                            <button
-                              className="ei-col-rm ei-rm-btn"
-                              onClick={() => handleRemoveItem(idx)}
-                              title="Remover item"
-                            >✕</button>
+                <div className="pick-edit-field">
+                  <label>Itens do pedido</label>
+                  <div className="edit-items-table">
+                    <div className="edit-items-header">
+                      <span className="ei-col-name">Produto</span>
+                      <span className="ei-col-num">Qtd</span>
+                      <span className="ei-col-num">Preço/un</span>
+                      <span className="ei-col-num">Total</span>
+                      <span className="ei-col-rm" />
+                    </div>
+                    {editItems.map((item, idx) => {
+                      const total = (parseFloat(item.quantity) || 0) * (parseFloat(item.unit_price) || 0);
+                      return (
+                        <div key={item.id ?? `new-${idx}`} className="edit-items-row">
+                          <div className="ei-col-name">
+                            {changingProductIdx === idx ? (
+                              <div className="ei-product-select">
+                                <input
+                                  autoFocus
+                                  type="text"
+                                  className="ei-product-search"
+                                  value={productSearchTerm}
+                                  onChange={e => setProductSearchTerm(e.target.value)}
+                                  onBlur={() => {
+                                    const term = productSearchTerm;
+                                    setTimeout(() => {
+                                      if (skipRenameRef.current) {
+                                        skipRenameRef.current = false;
+                                      } else if (term.trim()) {
+                                        setEditItems(prev => prev.map((it, i) =>
+                                          i === idx ? { ...it, product_name: term.trim() } : it));
+                                      }
+                                      setChangingProductIdx(null);
+                                      setProductSearchTerm('');
+                                    }, 150);
+                                  }}
+                                  placeholder="Buscar produto no catálogo ou digite um nome..."
+                                />
+                                <div className="ei-product-dropdown">
+                                  {filteredCatalogProducts(productSearchTerm).map(p => (
+                                    <div
+                                      key={p.id}
+                                      className="ei-product-dropdown-item"
+                                      onMouseDown={() => handleChangeItemProduct(idx, p)}
+                                    >
+                                      {p.name} - R$ {parseFloat(p.price).toFixed(2)}
+                                    </div>
+                                  ))}
+                                  {filteredCatalogProducts(productSearchTerm).length === 0 && (
+                                    <div className="ei-product-dropdown-empty">Nenhum produto encontrado</div>
+                                  )}
+                                </div>
+                              </div>
+                            ) : (
+                              <span
+                                className="ei-product-name ei-product-name-editable"
+                                onClick={() => { setChangingProductIdx(idx); setProductSearchTerm(''); }}
+                                title="Clique para trocar o produto"
+                              >
+                                {item.product_name || item.product?.name || '—'} ✏️
+                              </span>
+                            )}
                           </div>
-                        );
-                      })}
-                      <div className="edit-items-total">
-                        <span>Novo total:</span>
-                        <span>R$ {editItems.reduce((s, i) =>
-                          s + (parseFloat(i.quantity) || 0) * (parseFloat(i.unit_price) || 0), 0).toFixed(2)}</span>
+                          <input
+                            className="ei-col-num ei-input"
+                            type="number"
+                            min="0"
+                            step="1"
+                            value={item.quantity}
+                            onChange={e => handleItemChange(idx, 'quantity', e.target.value)}
+                          />
+                          <input
+                            className="ei-col-num ei-input"
+                            type="number"
+                            min="0"
+                            step="0.01"
+                            value={item.unit_price}
+                            onChange={e => handleItemChange(idx, 'unit_price', e.target.value)}
+                          />
+                          <span className="ei-col-num ei-total">R$ {total.toFixed(2)}</span>
+                          <button
+                            className="ei-col-rm ei-rm-btn"
+                            onClick={() => handleRemoveItem(idx)}
+                            title="Remover item"
+                          >✕</button>
+                        </div>
+                      );
+                    })}
+
+                    {/* Adicionar novo item */}
+                    <div className="ei-add-row">
+                      <div className="ei-add-mode-toggle">
+                        <button
+                          type="button"
+                          className={`ei-add-toggle-btn ${addMode === 'catalog' ? 'active' : ''}`}
+                          onClick={() => setAddMode('catalog')}
+                        >📦 Catálogo</button>
+                        <button
+                          type="button"
+                          className={`ei-add-toggle-btn ${addMode === 'manual' ? 'active' : ''}`}
+                          onClick={() => setAddMode('manual')}
+                        >✏️ Manual</button>
+                      </div>
+                      <div className="ei-add-fields">
+                        {addMode === 'manual' ? (
+                          <input
+                            ref={addItemNameInputRef}
+                            type="text"
+                            className="ei-add-name"
+                            value={newManualName}
+                            onChange={e => setNewManualName(e.target.value)}
+                            placeholder="Nome do produto..."
+                          />
+                        ) : (
+                          <div className="ei-product-select ei-add-name">
+                            <input
+                              ref={addItemNameInputRef}
+                              type="text"
+                              value={newSelectedProduct ? newSelectedProduct.name : newProductSearchTerm}
+                              onChange={e => {
+                                setNewSelectedProduct(null);
+                                setNewProductSearchTerm(e.target.value);
+                              }}
+                              placeholder="Buscar produto no catálogo..."
+                            />
+                            {!newSelectedProduct && (
+                              <div className="ei-product-dropdown">
+                                {filteredCatalogProducts(newProductSearchTerm).map(p => (
+                                  <div
+                                    key={p.id}
+                                    className="ei-product-dropdown-item"
+                                    onMouseDown={() => {
+                                      setNewSelectedProduct(p);
+                                      setNewProductSearchTerm('');
+                                    }}
+                                  >
+                                    {p.name} - R$ {parseFloat(p.price).toFixed(2)}
+                                  </div>
+                                ))}
+                                {filteredCatalogProducts(newProductSearchTerm).length === 0 && (
+                                  <div className="ei-product-dropdown-empty">Nenhum produto encontrado</div>
+                                )}
+                              </div>
+                            )}
+                          </div>
+                        )}
+                        <input
+                          type="number"
+                          className="ei-add-qty"
+                          min="1"
+                          step="1"
+                          value={newQty}
+                          onChange={e => setNewQty(e.target.value)}
+                          onBlur={() => { if (addMode === 'catalog' && newSelectedProduct) handleAddNewItem(); }}
+                          placeholder="Qtd"
+                        />
+                        {addMode === 'manual' && (
+                          <input
+                            type="number"
+                            className="ei-add-price"
+                            min="0"
+                            step="0.01"
+                            value={newManualPrice}
+                            onChange={e => setNewManualPrice(e.target.value)}
+                            onBlur={() => { if (newManualName.trim() && newManualPrice) handleAddNewItem(); }}
+                            placeholder="Preço"
+                          />
+                        )}
+                        <button
+                          type="button"
+                          className="ei-add-btn"
+                          onClick={handleAddNewItem}
+                        >+ Adicionar</button>
                       </div>
                     </div>
+
+                    <div className="edit-items-total">
+                      <span>Novo total:</span>
+                      <span>R$ {editItems.reduce((s, i) =>
+                        s + (parseFloat(i.quantity) || 0) * (parseFloat(i.unit_price) || 0), 0).toFixed(2)}</span>
+                    </div>
                   </div>
-                )}
+                </div>
 
                 {/* Endereço */}
                 <div className="pick-edit-field">
@@ -498,13 +736,12 @@ export default function PickingManager({ onBack, onUpdate, onOpenBudget }) {
 
                 {/* Motivo */}
                 <div className="pick-edit-field">
-                  <label>Motivo da alteração <span className="required">*</span></label>
+                  <label>Motivo da alteração</label>
                   <textarea
                     value={editReason}
                     onChange={e => setEditReason(e.target.value)}
-                    placeholder="Descreva o motivo desta alteração..."
+                    placeholder="Descreva o motivo desta alteração (opcional)..."
                     rows={3}
-                    required
                   />
                 </div>
 
@@ -513,7 +750,7 @@ export default function PickingManager({ onBack, onUpdate, onOpenBudget }) {
                   <button
                     className="pick-edit-save"
                     onClick={handleEditSave}
-                    disabled={saving || !editReason.trim()}
+                    disabled={saving}
                   >
                     {saving ? 'Salvando...' : '💾 Salvar'}
                   </button>

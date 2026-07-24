@@ -1,6 +1,22 @@
 import { useState, useEffect, useRef } from 'react';
 import toast from 'react-hot-toast';
 import {
+  FaSearch,
+  FaTags,
+  FaFilter,
+  FaCheckCircle,
+  FaTimesCircle,
+  FaEdit,
+  FaEye,
+  FaEyeSlash,
+  FaTrash,
+  FaPlus,
+  FaSave,
+  FaUpload,
+  FaLink,
+  FaFolderOpen
+} from 'react-icons/fa';
+import {
   getAllProducts,
   createProduct,
   updateProduct,
@@ -15,6 +31,9 @@ import PinGate from './PinGate';
 import PinSettings from './PinSettings';
 import { supabase } from '../supabaseClient';
 import './AdminPanel.css';
+
+const PRODUCT_IMAGE_PLACEHOLDER =
+  "data:image/svg+xml;charset=UTF-8,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Crect width='100' height='100' fill='%23e0e0e0'/%3E%3Cpath d='M30 65 L45 45 L58 58 L70 40 L80 65 Z' fill='%23bbb'/%3E%3Ccircle cx='38' cy='35' r='7' fill='%23bbb'/%3E%3C/svg%3E";
 
 export default function AdminPanel() {
   const [session, setSession] = useState(undefined); // undefined = verificando, null = não logado
@@ -41,6 +60,7 @@ export default function AdminPanel() {
   const [productsPerPage, setProductsPerPage] = useState(10);
   const [imagePreview, setImagePreview] = useState('');
   const [uploadMethod, setUploadMethod] = useState('upload'); // 'url' ou 'upload'
+  const [uploadingImage, setUploadingImage] = useState(false);
   const [overviewStats, setOverviewStats] = useState(null);
   const [statsLoading, setStatsLoading] = useState(false);
   const [dailyHistory, setDailyHistory] = useState([]);
@@ -52,15 +72,17 @@ export default function AdminPanel() {
   const [paymentReportLoading, setPaymentReportLoading] = useState(false);
   const [mistoModalData, setMistoModalData] = useState(null); // null | { titulo, itens }
 
-  const smoothScrollToTop = () => {
-    const currentScroll = window.pageYOffset || document.documentElement.scrollTop;
-    if (currentScroll > 1) {
-      window.requestAnimationFrame(smoothScrollToTop);
-      window.scrollTo(0, currentScroll - currentScroll / 8);
-    } else {
-      window.scrollTo(0, 0);
-    }
+  const handleImageError = (e) => {
+    e.target.onerror = null;
+    e.target.src = PRODUCT_IMAGE_PLACEHOLDER;
   };
+
+  useEffect(() => {
+    document.body.style.overflow = showForm ? 'hidden' : '';
+    return () => {
+      document.body.style.overflow = '';
+    };
+  }, [showForm]);
 
   useEffect(() => {
     supabase.auth.getSession().then(({ data: { session } }) => {
@@ -295,26 +317,26 @@ export default function AdminPanel() {
     if (editingProduct) {
       const result = await updateProduct(editingProduct.id, productData);
       if (result.success) {
-        toast.success('✅ Produto atualizado com sucesso!', {
+        toast.success('Produto atualizado com sucesso!', {
           duration: 3000,
           position: 'top-right',
         });
         loadProducts();
         resetForm();
       } else {
-        toast.error('❌ Erro ao atualizar: ' + result.error.message);
+        toast.error('Erro ao atualizar: ' + result.error.message);
       }
     } else {
       const result = await createProduct(productData);
       if (result.success) {
-        toast.success('✅ Produto criado com sucesso!', {
+        toast.success('Produto criado com sucesso!', {
           duration: 3000,
           position: 'top-right',
         });
         loadProducts();
         resetForm();
       } else {
-        toast.error('❌ Erro ao criar: ' + result.error.message);
+        toast.error('Erro ao criar: ' + result.error.message);
       }
     }
   };
@@ -329,64 +351,58 @@ export default function AdminPanel() {
     setShowForm(true);
     setImagePreview(product.image);
     setUploadMethod('upload');
-    
-    // Scroll suave para o topo onde está o formulário
-    setTimeout(() => {
-      smoothScrollToTop();
-    }, 100);
   };
 
-  const handleImageUpload = (e) => {
+  const handleImageUpload = async (e) => {
     const files = Array.from(e.target.files);
-    if (files.length > 0) {
-      const imagePaths = [];
-      const previews = [];
-      let processedCount = 0;
+    if (files.length === 0) return;
 
-      files.forEach((file, index) => {
-        // Validar tipo de arquivo
-        if (!file.type.startsWith('image/')) {
-          toast.error(`Arquivo ${file.name} não é uma imagem válida`);
-          return;
+    const validFiles = files.filter((file) => {
+      // Validar tipo de arquivo
+      if (!file.type.startsWith('image/')) {
+        toast.error(`Arquivo ${file.name} não é uma imagem válida`);
+        return false;
+      }
+      // Validar tamanho (máx 5MB)
+      if (file.size > 5 * 1024 * 1024) {
+        toast.error(`${file.name} deve ter no máximo 5MB`);
+        return false;
+      }
+      return true;
+    });
+    if (validFiles.length === 0) return;
+
+    setUploadingImage(true);
+    try {
+      const uploaded = [];
+      for (let index = 0; index < validFiles.length; index++) {
+        const file = validFiles[index];
+        const timestamp = Date.now() + index;
+        const fileName = `product-${timestamp}-${file.name.replace(/\s+/g, '-').toLowerCase()}`;
+        const filePath = `products/${fileName}`;
+
+        const { error: uploadError } = await supabase.storage.from('assets').upload(filePath, file);
+        if (uploadError) {
+          toast.error(`Erro ao enviar ${file.name}: ${uploadError.message}`);
+          continue;
         }
 
-        // Validar tamanho (máx 5MB)
-        if (file.size > 5 * 1024 * 1024) {
-          toast.error(`${file.name} deve ter no máximo 5MB`);
-          return;
-        }
+        const { data } = supabase.storage.from('assets').getPublicUrl(filePath);
+        uploaded.push({ url: data.publicUrl, name: fileName });
+      }
 
-        // Criar preview
-        const reader = new FileReader();
-        reader.onloadend = () => {
-          previews.push(reader.result);
-          
-          // Gerar nome do arquivo
-          const timestamp = Date.now() + index;
-          const fileName = `product-${timestamp}-${file.name.replace(/\s+/g, '-').toLowerCase()}`;
-          const imagePath = `/images/products/${fileName}`;
-          imagePaths.push({ path: imagePath, name: fileName });
-          
-          processedCount++;
-          
-          // Quando todas as imagens forem processadas
-          if (processedCount === files.length) {
-            // Primeira imagem como principal
-            setImagePreview(previews[0]);
-            setFormData({ 
-              ...formData, 
-              image: imagePaths[0].path,
-              images: imagePaths
-            });
-            
-            const fileNames = imagePaths.map(img => img.name).join(', ');
-            toast.success(`⚠️ ${files.length} imagem(ns) selecionada(s). Salve manualmente na pasta public/images/products/ com os nomes: ${fileNames}`, {
-              duration: 10000
-            });
-          }
-        };
-        reader.readAsDataURL(file);
-      });
+      if (uploaded.length > 0) {
+        // Primeira imagem como principal
+        setImagePreview(uploaded[0].url);
+        setFormData((prev) => ({
+          ...prev,
+          image: uploaded[0].url,
+          images: uploaded
+        }));
+        toast.success(`${uploaded.length} imagem(ns) enviada(s) com sucesso!`);
+      }
+    } finally {
+      setUploadingImage(false);
     }
   };
 
@@ -395,14 +411,32 @@ export default function AdminPanel() {
     setImagePreview(url);
   };
 
+  const handleRemoveImage = async () => {
+    const currentImage = formData.image;
+    setFormData((prev) => ({ ...prev, image: '' }));
+    setImagePreview('');
+
+    if (currentImage && currentImage.startsWith('https://') && currentImage.includes('supabase.co/storage')) {
+      const marker = '/assets/';
+      const markerIndex = currentImage.indexOf(marker);
+      if (markerIndex !== -1) {
+        const filePath = currentImage.substring(markerIndex + marker.length);
+        const { error } = await supabase.storage.from('assets').remove([filePath]);
+        if (error) {
+          toast.error('Erro ao remover imagem do armazenamento: ' + error.message);
+        }
+      }
+    }
+  };
+
   const handleDelete = async (id) => {
     if (window.confirm('Tem certeza que deseja deletar este produto?')) {
       const result = await deleteProduct(id);
       if (result.success) {
-        toast.success('🗑️ Produto deletado com sucesso!');
+        toast.success('Produto deletado com sucesso!');
         loadProducts();
       } else {
-        toast.error('❌ Erro ao deletar: ' + result.error.message);
+        toast.error('Erro ao deletar: ' + result.error.message);
       }
     }
   };
@@ -410,7 +444,7 @@ export default function AdminPanel() {
   const handleToggleAvailability = async (id, currentStatus) => {
     const result = await toggleProductAvailability(id, !currentStatus);
     if (result.success) {
-      toast.success(!currentStatus ? '✅ Produto disponível' : '❌ Produto indisponível');
+      toast.success(!currentStatus ? 'Produto disponível' : 'Produto indisponível');
       loadProducts();
     } else {
       toast.error('Erro ao alterar disponibilidade: ' + result.error.message);
@@ -540,7 +574,16 @@ export default function AdminPanel() {
       {activeTab === 'products' && (
         <div className="tab-content">
           {showForm && (
-        <div className="product-form-container">
+        <div className="product-modal-overlay" onClick={resetForm}>
+        <div className="product-modal" onClick={(e) => e.stopPropagation()}>
+          <button
+            type="button"
+            className="product-modal-close"
+            onClick={resetForm}
+            aria-label="Fechar"
+          >
+            ✕
+          </button>
           <h2>{editingProduct ? 'Editar Produto' : 'Novo Produto'}</h2>
           <form onSubmit={handleSubmit} className="product-form">
             <div className="form-row">
@@ -577,14 +620,14 @@ export default function AdminPanel() {
                     className={`method-tab ${uploadMethod === 'upload' ? 'active' : ''}`}
                     onClick={() => setUploadMethod('upload')}
                   >
-                    📤 Fazer Upload da Img
+                    <FaUpload size={12} /> Fazer Upload da Img
                   </button>
                   <button
                     type="button"
                     className={`method-tab ${uploadMethod === 'url' ? 'active' : ''}`}
                     onClick={() => setUploadMethod('url')}
                   >
-                    🔗 URL
+                    <FaLink size={12} /> URL
                   </button>
                 </div>
 
@@ -609,9 +652,10 @@ export default function AdminPanel() {
                       id="image-upload"
                       className="file-input"
                       multiple
+                      disabled={uploadingImage}
                     />
                     <label htmlFor="image-upload" className="file-label">
-                      📁 Escolher Imagens
+                      {uploadingImage ? 'Enviando...' : <><FaFolderOpen size={12} /> Escolher Imagens</>}
                     </label>
                     {formData.images && formData.images.length > 0 && (
                       <div className="file-names">
@@ -628,6 +672,15 @@ export default function AdminPanel() {
                 {imagePreview && (
                   <div className="image-preview">
                     <img src={imagePreview} alt="Preview" />
+                    {formData.image && (
+                      <button
+                        type="button"
+                        className="btn-remove-image"
+                        onClick={handleRemoveImage}
+                      >
+                        <FaTrash size={12} /> Remover imagem
+                      </button>
+                    )}
                   </div>
                 )}
               </div>
@@ -674,16 +727,16 @@ export default function AdminPanel() {
               <label>
                 <input
                   type="checkbox"
-                  checked={formData.isAvailable}
-                  onChange={(e) => setFormData({ ...formData, isAvailable: e.target.checked })}
+                  checked={!formData.isAvailable}
+                  onChange={(e) => setFormData({ ...formData, isAvailable: !e.target.checked })}
                 />
-                Produto Disponível
+                Produto Indisponível
               </label>
             </div>
 
             <div className="form-actions">
               <button type="submit" className="btn-submit">
-                {editingProduct ? '💾 Atualizar' : '➕ Criar'} Produto
+                {editingProduct ? <><FaSave size={12} /> Atualizar</> : <><FaPlus size={12} /> Criar</>} Produto
               </button>
               <button type="button" onClick={resetForm} className="btn-cancel">
                 Cancelar
@@ -691,11 +744,12 @@ export default function AdminPanel() {
             </div>
           </form>
         </div>
+        </div>
       )}
 
       <div className="admin-filters">
         <div className="filter-group">
-          <label>🔍 Buscar:</label>
+          <label><FaSearch size={12} /> Buscar:</label>
           <input
             type="text"
             placeholder="Nome ou ID do produto..."
@@ -705,7 +759,7 @@ export default function AdminPanel() {
         </div>
 
         <div className="filter-group">
-          <label>📁 Categoria:</label>
+          <label><FaTags size={12} /> Categoria:</label>
           <select value={filterCategory} onChange={(e) => setFilterCategory(e.target.value)}>
             <option value="all">Todas</option>
             {categories.map(cat => (
@@ -715,7 +769,7 @@ export default function AdminPanel() {
         </div>
 
         <div className="filter-group">
-          <label>✅ Disponibilidade:</label>
+          <label><FaFilter size={12} /> Disponibilidade:</label>
           <select value={filterAvailability} onChange={(e) => setFilterAvailability(e.target.value)}>
             <option value="all">Todos</option>
             <option value="available">Disponíveis</option>
@@ -743,21 +797,14 @@ export default function AdminPanel() {
         </div>
       </div>
 
-      {!showForm && (
-        <div className="add-product-section">
-          <button 
-            className="btn-add-product"
-            onClick={() => {
-              setShowForm(true);
-              setTimeout(() => {
-                smoothScrollToTop();
-              }, 100);
-            }}
-          >
-            ➕ Adicionar Produto
-          </button>
-        </div>
-      )}
+      <div className="add-product-section">
+        <button
+          className="btn-add-product"
+          onClick={() => setShowForm(true)}
+        >
+<FaPlus size={12} /> Adicionar Produto
+        </button>
+      </div>
 
       <div className="products-table-container">
         <table className="products-table">
@@ -777,7 +824,12 @@ export default function AdminPanel() {
               <tr key={product.id} className={!product.isAvailable ? 'unavailable' : ''}>
                 <td>{product.id}</td>
                 <td>
-                  <img src={product.image} alt={product.name} className="product-thumb" />
+                  <img
+                    src={product.image || PRODUCT_IMAGE_PLACEHOLDER}
+                    alt={product.name}
+                    className="product-thumb"
+                    onError={handleImageError}
+                  />
                 </td>
                 <td>
                   <div className="product-name">{product.name}</div>
@@ -791,7 +843,7 @@ export default function AdminPanel() {
                 <td>R$ {product.price.toFixed(2)}</td>
                 <td>
                   <span className={`status-badge ${product.isAvailable ? 'available' : 'unavailable'}`}>
-                    {product.isAvailable ? '✅ Disponível' : '❌ Indisponível'}
+                    {product.isAvailable ? <><FaCheckCircle size={12} /> Disponível</> : <><FaTimesCircle size={12} /> Indisponível</>}
                   </span>
                 </td>
                 <td>
@@ -801,21 +853,21 @@ export default function AdminPanel() {
                       className="btn-edit"
                       title="Editar"
                     >
-                      ✏️
+                      <FaEdit size={13} />
                     </button>
                     <button
                       onClick={() => handleToggleAvailability(product.id, product.isAvailable)}
                       className="btn-toggle"
                       title={product.isAvailable ? 'Marcar como indisponível' : 'Marcar como disponível'}
                     >
-                      {product.isAvailable ? '👁️' : '👁️‍🗨️'}
+                      {product.isAvailable ? <FaEye size={13} /> : <FaEyeSlash size={13} />}
                     </button>
                     <button
                       onClick={() => handleDelete(product.id)}
                       className="btn-delete"
                       title="Deletar"
                     >
-                      🗑️
+                      <FaTrash size={13} />
                     </button>
                   </div>
                 </td>
@@ -831,7 +883,11 @@ export default function AdminPanel() {
           <div key={product.id} className={`product-card-mobile ${!product.isAvailable ? 'unavailable' : ''}`}>
             <div className="product-card-header">
               <div className="product-card-image">
-                <img src={product.image} alt={product.name} />
+                <img
+                  src={product.image || PRODUCT_IMAGE_PLACEHOLDER}
+                  alt={product.name}
+                  onError={handleImageError}
+                />
               </div>
               <div className="product-card-info">
                 <div className="product-card-id">ID: {product.id}</div>
@@ -857,7 +913,7 @@ export default function AdminPanel() {
                 <div className="product-card-detail-label">Status</div>
                 <div className="product-card-detail-value">
                   <span className={`status-badge ${product.isAvailable ? 'available' : 'unavailable'}`}>
-                    {product.isAvailable ? '✅ Disponível' : '❌ Indisponível'}
+                    {product.isAvailable ? <><FaCheckCircle size={12} /> Disponível</> : <><FaTimesCircle size={12} /> Indisponível</>}
                   </span>
                 </div>
               </div>
@@ -869,21 +925,21 @@ export default function AdminPanel() {
                 className="btn-edit"
                 title="Editar"
               >
-                ✏️ Editar
+                <FaEdit size={13} /> Editar
               </button>
               <button
                 onClick={() => handleToggleAvailability(product.id, product.isAvailable)}
                 className="btn-toggle"
                 title={product.isAvailable ? 'Marcar como indisponível' : 'Marcar como disponível'}
               >
-                {product.isAvailable ? '👁️ Ocultar' : '👁️ Mostrar'}
+                {product.isAvailable ? <><FaEyeSlash size={13} /> Ocultar</> : <><FaEye size={13} /> Mostrar</>}
               </button>
               <button
                 onClick={() => handleDelete(product.id)}
                 className="btn-delete"
                 title="Deletar"
               >
-                🗑️ Deletar
+                <FaTrash size={13} /> Deletar
               </button>
             </div>
           </div>

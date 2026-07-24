@@ -348,6 +348,132 @@
 
 .ei-rm-btn:hover { background: #fee2e2; }
 
+/* Troca de produto (item existente) */
+.ei-product-name-editable {
+  cursor: pointer;
+  border-bottom: 1px dashed #94a3b8;
+}
+
+.ei-product-name-editable:hover { color: #1e3c72; }
+
+.ei-product-select {
+  position: relative;
+}
+
+.ei-product-select input,
+.ei-product-search {
+  width: 100%;
+  border: 1px solid #3b82f6;
+  border-radius: 6px;
+  padding: 5px 6px;
+  font-size: 13px;
+  box-sizing: border-box;
+}
+
+.ei-product-select input:focus,
+.ei-product-search:focus { outline: none; }
+
+.ei-product-dropdown {
+  position: absolute;
+  top: 100%;
+  left: 0;
+  right: 0;
+  z-index: 20;
+  background: #fff;
+  border: 1px solid #e2e8f0;
+  border-radius: 6px;
+  box-shadow: 0 8px 20px rgba(0,0,0,0.15);
+  max-height: 160px;
+  overflow-y: auto;
+  margin-top: 2px;
+}
+
+.ei-product-dropdown-item {
+  padding: 7px 10px;
+  font-size: 13px;
+  cursor: pointer;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.ei-product-dropdown-item:hover { background: #f1f5f9; }
+
+.ei-product-dropdown-empty {
+  padding: 7px 10px;
+  font-size: 12px;
+  color: #94a3b8;
+}
+
+/* Adicionar novo item */
+.ei-add-row {
+  padding: 10px;
+  border-top: 1px dashed #cbd5e1;
+  background: #f8fafc;
+}
+
+.ei-add-mode-toggle {
+  display: flex;
+  gap: 6px;
+  margin-bottom: 8px;
+}
+
+.ei-add-toggle-btn {
+  padding: 4px 10px;
+  border: 1.5px solid #e2e8f0;
+  border-radius: 6px;
+  background: #fff;
+  font-size: 12px;
+  font-weight: 600;
+  color: #64748b;
+  cursor: pointer;
+}
+
+.ei-add-toggle-btn.active {
+  border-color: #1e3c72;
+  background: #1e3c72;
+  color: #fff;
+}
+
+.ei-add-fields {
+  display: grid;
+  grid-template-columns: 1fr 60px 70px auto;
+  gap: 6px;
+  align-items: center;
+}
+
+.ei-add-name,
+.ei-add-qty,
+.ei-add-price {
+  border: 1px solid #e2e8f0;
+  border-radius: 6px;
+  padding: 6px 8px;
+  font-size: 13px;
+  box-sizing: border-box;
+  width: 100%;
+}
+
+.ei-add-btn {
+  grid-column: 1 / -1;
+  padding: 8px;
+  border: none;
+  border-radius: 6px;
+  background: #1e3c72;
+  color: #fff;
+  font-size: 13px;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.ei-add-btn:hover { background: #2a5298; }
+
+@media (max-width: 480px) {
+  .ei-add-fields {
+    grid-template-columns: 1fr 1fr;
+  }
+  .ei-add-name { grid-column: 1 / -1; }
+}
+
 .edit-items-total {
   display: flex;
   justify-content: space-between;

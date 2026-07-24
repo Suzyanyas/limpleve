@@ -824,6 +824,84 @@ export default function BudgetManager({ onBack, initialBudget, openNew, onUpdate
     window.print();
   };
 
+  const renderReceiptWhatsapp = () => {
+    const dateStr = new Date().toLocaleDateString('pt-BR', { day: '2-digit', month: '2-digit' });
+    return (
+      <div className="receipt-whatsapp" aria-hidden="true">
+        {/* Header: logo + data */}
+        <div className="rw-header">
+          <img src="/images/logo-limpleve.png" alt="LimpLeve" className="rw-logo" />
+          <div className="rw-date">{dateStr}</div>
+        </div>
+
+        {/* Itens */}
+        <div className="rw-items">
+          {items.length > 0 ? items.map((item, i) => {
+            const qty = parseFloat(item.quantity || 1);
+            const unit = parseFloat(item.unit_price || 0);
+            const total = qty * unit;
+            return (
+              <div key={i} className="rw-item">
+                <div className="rw-item-left">
+                  <span className="rw-item-qty">{qty}x</span>
+                  <span className="rw-item-name">{item.product?.name || 'Produto'}</span>
+                </div>
+                <div className="rw-item-right">
+                  <span className="rw-item-unit">R$ {unit.toFixed(2)}/un</span>
+                  <span className="rw-item-total">R$ {total.toFixed(2)}</span>
+                </div>
+              </div>
+            );
+          }) : (
+            <div className="rw-item">
+              <div className="rw-item-left">
+                <span className="rw-item-name">Nenhum produto</span>
+              </div>
+            </div>
+          )}
+        </div>
+
+        {/* Total */}
+        <div className="rw-total-box">
+          <span className="rw-total-label">TOTAL</span>
+          <span className="rw-total-value">R$ {calculateTotal().toFixed(2)}</span>
+        </div>
+
+        {/* Info cliente */}
+        <div className="rw-info-box">
+          <div className="rw-info-nome">
+            NOME: {(selectedCustomer?.name || budgetData?.customer_name || '').toUpperCase()}
+          </div>
+          {deliveryAddress && (
+            <div className="rw-info-row-txt">ENDEREÇO: {deliveryAddress}</div>
+          )}
+          {paymentMethod && (
+            <div className="rw-info-row-txt">PAGAMENTO: {formatPaymentMethodPlain()}</div>
+          )}
+          {paymentStatus === 'pago' && (
+            <div className="rw-info-row-txt" style={{ fontWeight: 700, color: '#16a34a' }}>STATUS: PAGO</div>
+          )}
+          {paymentStatus === 'parcial' && (
+            <div className="rw-info-restante">
+              RESTANTE: R$ {Math.max(0, calculateTotal() - (parseFloat(entradaValue) || 0)).toFixed(2)} na entrega
+            </div>
+          )}
+          {paymentStatus === 'a_receber' && (
+            <div className="rw-info-restante">
+              A RECEBER: R$ {calculateTotal().toFixed(2)}
+            </div>
+          )}
+          {notes && (
+            <div className="rw-info-row-txt" style={{ marginTop: 8 }}>OBS: {notes}</div>
+          )}
+        </div>
+
+        {/* Rodapé */}
+        <div className="rw-footer">Limp Leve • limpleve.com.br</div>
+      </div>
+    );
+  };
+
   const handleCreateRoute = async () => {
     const customerName = budgetData?.customer_name || selectedCustomer?.name;
     const customerCode = budgetData?.customer_code || selectedCustomer?.code;
@@ -949,6 +1027,9 @@ export default function BudgetManager({ onBack, initialBudget, openNew, onUpdate
           <nav className="breadcrumb-nav">
             <span className="breadcrumb-current">Orçamentos</span>
           </nav>
+          <button type="button" className="btn-quick-expense" onClick={handleOpenQuickExpense} title="Lançar despesa rápida">
+            <FaReceipt size={12} /> Despesa
+          </button>
           <button className="btn-new-budget" onClick={() => { resetForm(); setView('form'); }}>
             + Novo
           </button>
@@ -1036,6 +1117,45 @@ export default function BudgetManager({ onBack, initialBudget, openNew, onUpdate
             onUnlock={() => { setShowPinGate(false); setView('caixa'); }}
             onClose={() => setShowPinGate(false)}
           />
+        )}
+
+        {showQuickExpenseModal && (
+          <div className="cash-modal-overlay" onClick={() => setShowQuickExpenseModal(false)}>
+            <div className="cash-modal" onClick={e => e.stopPropagation()}>
+              <div className="cash-modal-title"><FaReceipt size={14} /> Lançar despesa rápida</div>
+              <div className="cash-modal-field">
+                <label>Valor</label>
+                <input
+                  type="number"
+                  placeholder="R$ 0,00"
+                  min="0"
+                  step="0.01"
+                  value={quickExpenseValor}
+                  onChange={e => setQuickExpenseValor(e.target.value)}
+                  autoFocus
+                />
+              </div>
+              <div className="cash-modal-field">
+                <label>Observação / motivo</label>
+                <textarea
+                  rows={2}
+                  placeholder="Ex: Compra de sacola"
+                  value={quickExpenseObs}
+                  onChange={e => setQuickExpenseObs(e.target.value)}
+                />
+              </div>
+              <div className="cash-modal-actions">
+                <button className="cash-modal-cancel" onClick={() => setShowQuickExpenseModal(false)}>Cancelar</button>
+                <button
+                  className="cash-modal-confirm"
+                  onClick={handleConfirmQuickExpense}
+                  disabled={quickExpenseSaving}
+                >
+                  {quickExpenseSaving ? 'Salvando...' : 'Confirmar'}
+                </button>
+              </div>
+            </div>
+          </div>
         )}
       </div>
     );
@@ -1132,21 +1252,24 @@ export default function BudgetManager({ onBack, initialBudget, openNew, onUpdate
         {!isConfirmed ? (
           /* Ações do orçamento em rascunho */
           <div className="detail-actions">
-            <button className="detail-action-btn edit" onClick={() => setView('form')}>
-              <span className="action-icon">✏️</span>
-              <span>Editar</span>
-            </button>
-            <button className="detail-action-btn whatsapp" onClick={() => setView('romaneio')}>
-              <span className="action-icon">📥</span>
-              <span>Baixar Romaneio</span>
-            </button>
+            <div className="detail-actions-row">
+              <button className="detail-action-btn edit" onClick={() => setView('form')}>
+                <span>Editar</span>
+              </button>
+              <button className="detail-action-btn delete" onClick={handleDeleteBudget}>
+                <span>Excluir</span>
+              </button>
+            </div>
+            <div className="detail-actions-row">
+              <button className="detail-action-btn whatsapp" onClick={() => setView('romaneio')}>
+                <span>Baixar Romaneio</span>
+              </button>
+              <button className="detail-action-btn download" onClick={handleDownloadRomaneio}>
+                <span>Baixar Imagem</span>
+              </button>
+            </div>
             <button className="detail-action-btn approve" onClick={handleApprove}>
-              <span className="action-icon">✅</span>
               <span>Cliente Aprovou</span>
-            </button>
-            <button className="detail-action-btn delete" onClick={handleDeleteBudget}>
-              <span className="action-icon">🗑️</span>
-              <span>Excluir</span>
             </button>
           </div>
         ) : (
@@ -1251,6 +1374,8 @@ export default function BudgetManager({ onBack, initialBudget, openNew, onUpdate
             </div>
           </div>
         )}
+
+        {renderReceiptWhatsapp()}
       </div>
     );
   }
@@ -1383,83 +1508,11 @@ export default function BudgetManager({ onBack, initialBudget, openNew, onUpdate
           </div>
 
           {/* Layout WhatsApp 1080px dinâmico — oculto da tela, capturado como JPG */}
-          <div className="receipt-whatsapp" aria-hidden="true">
-            {/* Header: logo + data */}
-            <div className="rw-header">
-              <img src="/images/logo-limpleve.png" alt="LimpLeve" className="rw-logo" />
-              <div className="rw-date">{dateStr}</div>
-            </div>
-
-            {/* Itens */}
-            <div className="rw-items">
-              {items.length > 0 ? items.map((item, i) => {
-                const qty = parseFloat(item.quantity || 1);
-                const unit = parseFloat(item.unit_price || 0);
-                const total = qty * unit;
-                return (
-                  <div key={i} className="rw-item">
-                    <div className="rw-item-left">
-                      <span className="rw-item-qty">{qty}x</span>
-                      <span className="rw-item-name">{item.product?.name || 'Produto'}</span>
-                    </div>
-                    <div className="rw-item-right">
-                      <span className="rw-item-unit">R$ {unit.toFixed(2)}/un</span>
-                      <span className="rw-item-total">R$ {total.toFixed(2)}</span>
-                    </div>
-                  </div>
-                );
-              }) : (
-                <div className="rw-item">
-                  <div className="rw-item-left">
-                    <span className="rw-item-name">Nenhum produto</span>
-                  </div>
-                </div>
-              )}
-            </div>
-
-            {/* Total */}
-            <div className="rw-total-box">
-              <span className="rw-total-label">TOTAL</span>
-              <span className="rw-total-value">R$ {calculateTotal().toFixed(2)}</span>
-            </div>
-
-            {/* Info cliente */}
-            <div className="rw-info-box">
-              <div className="rw-info-nome">
-                NOME: {(selectedCustomer?.name || budgetData?.customer_name || '').toUpperCase()}
-              </div>
-              {deliveryAddress && (
-                <div className="rw-info-row-txt">ENDEREÇO: {deliveryAddress}</div>
-              )}
-              {paymentMethod && (
-                <div className="rw-info-row-txt">PAGAMENTO: {formatPaymentMethodPlain()}</div>
-              )}
-              {paymentStatus === 'pago' && (
-                <div className="rw-info-row-txt" style={{ fontWeight: 700, color: '#16a34a' }}>STATUS: PAGO</div>
-              )}
-              {paymentStatus === 'parcial' && (
-                <div className="rw-info-restante">
-                  RESTANTE: R$ {Math.max(0, calculateTotal() - (parseFloat(entradaValue) || 0)).toFixed(2)} na entrega
-                </div>
-              )}
-              {paymentStatus === 'a_receber' && (
-                <div className="rw-info-restante">
-                  A RECEBER: R$ {calculateTotal().toFixed(2)}
-                </div>
-              )}
-              {notes && (
-                <div className="rw-info-row-txt" style={{ marginTop: 8 }}>OBS: {notes}</div>
-              )}
-            </div>
-
-            {/* Rodapé */}
-            <div className="rw-footer">Limp Leve • limpleve.com.br</div>
-          </div>
+          {renderReceiptWhatsapp()}
 
           {/* Botões de ação - não imprime */}
           <div className="romaneio-actions no-print">
             <button className="btn-print" onClick={handlePrint}>Imprimir</button>
-            <button className="btn-download-png" onClick={handleDownloadRomaneio}>Baixar Imagem</button>
             <button className="btn-route" onClick={handleCreateRoute}>Criar Rota</button>
           </div>
         </div>
@@ -1477,21 +1530,12 @@ export default function BudgetManager({ onBack, initialBudget, openNew, onUpdate
           <span className="breadcrumb-sep">›</span>
           <span className="breadcrumb-current">{budgetData ? 'Editar' : 'Novo'}</span>
         </nav>
+        <button type="button" className="btn-quick-expense" onClick={handleOpenQuickExpense} title="Lançar despesa rápida">
+          <FaReceipt size={12} /> Despesa
+        </button>
       </div>
 
       <div className="budget-form">
-        {/* Despesa rápida */}
-        <div className="form-section" style={{ paddingBottom: 0 }}>
-          <button
-            type="button"
-            className="cash-action-btn despesa"
-            style={{ width: '100%' }}
-            onClick={handleOpenQuickExpense}
-          >
-            <FaReceipt size={14} /> Lançar despesa rápida
-          </button>
-        </div>
-
         {/* Cliente */}
         <div className="form-section">
           <label className="section-label">Cliente</label>
@@ -2131,45 +2175,6 @@ export default function BudgetManager({ onBack, initialBudget, openNew, onUpdate
           onUnlock={() => { setShowPinGate(false); setView('caixa'); }}
           onClose={() => setShowPinGate(false)}
         />
-      )}
-
-      {showQuickExpenseModal && (
-        <div className="cash-modal-overlay" onClick={() => setShowQuickExpenseModal(false)}>
-          <div className="cash-modal" onClick={e => e.stopPropagation()}>
-            <div className="cash-modal-title"><FaReceipt size={14} /> Lançar despesa rápida</div>
-            <div className="cash-modal-field">
-              <label>Valor</label>
-              <input
-                type="number"
-                placeholder="R$ 0,00"
-                min="0"
-                step="0.01"
-                value={quickExpenseValor}
-                onChange={e => setQuickExpenseValor(e.target.value)}
-                autoFocus
-              />
-            </div>
-            <div className="cash-modal-field">
-              <label>Observação / motivo</label>
-              <textarea
-                rows={2}
-                placeholder="Ex: Compra de sacola"
-                value={quickExpenseObs}
-                onChange={e => setQuickExpenseObs(e.target.value)}
-              />
-            </div>
-            <div className="cash-modal-actions">
-              <button className="cash-modal-cancel" onClick={() => setShowQuickExpenseModal(false)}>Cancelar</button>
-              <button
-                className="cash-modal-confirm"
-                onClick={handleConfirmQuickExpense}
-                disabled={quickExpenseSaving}
-              >
-                {quickExpenseSaving ? 'Salvando...' : 'Confirmar'}
-              </button>
-            </div>
-          </div>
-        </div>
       )}
 
       {postSaleModal && (
