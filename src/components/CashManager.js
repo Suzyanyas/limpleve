@@ -1,5 +1,6 @@
 import { useState, useEffect, useCallback } from 'react';
 import toast from 'react-hot-toast';
+import { FaReceipt } from 'react-icons/fa';
 import {
   getOpenSession,
   openCashSession,
@@ -325,7 +326,7 @@ export default function CashManager({ onBack }) {
           <div className="cash-quick-actions">
             <button className="cash-action-btn reforco" onClick={() => setModal('reforco')}>💵 Reforço</button>
             <button className="cash-action-btn sangria" onClick={() => setModal('sangria')}>💸 Sangria</button>
-            <button className="cash-action-btn despesa" onClick={() => setModal('despesa')}>🧾 Despesa</button>
+            <button className="cash-action-btn despesa" onClick={() => setModal('despesa')}><FaReceipt size={13} /> Despesa</button>
             <button className="cash-action-btn fechar" onClick={() => { setCedulas(EMPTY_CEDULAS); setView('fechamento'); }}>🔒 Fechar</button>
           </div>
 
@@ -478,7 +479,7 @@ export default function CashManager({ onBack }) {
           <div className="cash-modal" onClick={e => e.stopPropagation()}>
             <div className="cash-modal-title">
               {modal === 'sangria' ? '💸 Registrar Sangria'
-                : modal === 'despesa' ? '🧾 Registrar Despesa'
+                : modal === 'despesa' ? <><FaReceipt size={14} /> Registrar Despesa</>
                 : '💵 Reforço de Caixa'}
             </div>
             {modal === 'reforco' ? (

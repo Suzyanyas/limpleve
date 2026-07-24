@@ -1,7 +1,7 @@
 import { useState, useEffect, useRef } from 'react';
 import html2canvas from 'html2canvas';
 import toast from 'react-hot-toast';
-import { FaThumbtack } from 'react-icons/fa';
+import { FaThumbtack, FaReceipt } from 'react-icons/fa';
 import {
   getAllCustomers,
   getTodayBudgets,
@@ -10,6 +10,7 @@ import {
   createBudget,
   updateBudget,
   updateBudgetStatus,
+  updateBudgetPaymentStatus,
   updateBudgetManterOrcamento,
   deleteBudget,
   getBudgetById,
@@ -67,6 +68,7 @@ export default function BudgetManager({ onBack, initialBudget, openNew, onUpdate
   const [paymentConfirmModal, setPaymentConfirmModal] = useState(false);
   const [confirmPaymentForm, setConfirmPaymentForm] = useState('dinheiro');
   const [confirmingPayment, setConfirmingPayment] = useState(false);
+  const [generatingSale, setGeneratingSale] = useState(false);
   const [customerWhatsapp, setCustomerWhatsapp] = useState('');
   const [customerFilter, setCustomerFilter] = useState('');
   const [productFilter, setProductFilter] = useState('');
@@ -78,6 +80,10 @@ export default function BudgetManager({ onBack, initialBudget, openNew, onUpdate
   const [hasRoute, setHasRoute] = useState(false);
   const [trocoSaving, setTrocoSaving] = useState(false);
   const [trocoOnlineLancadoValor, setTrocoOnlineLancadoValor] = useState(null);
+  const [showQuickExpenseModal, setShowQuickExpenseModal] = useState(false);
+  const [quickExpenseValor, setQuickExpenseValor] = useState('');
+  const [quickExpenseObs, setQuickExpenseObs] = useState('');
+  const [quickExpenseSaving, setQuickExpenseSaving] = useState(false);
   const finalizarBtnRef = useRef(null);
   const productNameInputRef = useRef(null);
 
@@ -123,6 +129,49 @@ export default function BudgetManager({ onBack, initialBudget, openNew, onUpdate
       toast.error('Erro ao lançar troco');
     }
     setTrocoSaving(false);
+  };
+
+  const handleOpenQuickExpense = async () => {
+    const session = await getOpenSession();
+    if (!session) {
+      toast.error('Abra o caixa antes de lançar uma despesa');
+      return;
+    }
+    setQuickExpenseValor('');
+    setQuickExpenseObs('');
+    setShowQuickExpenseModal(true);
+  };
+
+  const handleConfirmQuickExpense = async () => {
+    const valor = parseFloat(quickExpenseValor);
+    if (!valor || valor <= 0) {
+      toast.error('Informe um valor válido');
+      return;
+    }
+    setQuickExpenseSaving(true);
+    const session = await getOpenSession();
+    if (!session) {
+      toast.error('Abra o caixa antes de lançar uma despesa');
+      setQuickExpenseSaving(false);
+      setShowQuickExpenseModal(false);
+      return;
+    }
+    const result = await createCashTransaction({
+      session_id: session.id,
+      tipo: 'despesa',
+      valor,
+      categoria_despesa: 'Despesa rápida',
+      observacao: quickExpenseObs.trim() || 'Despesa rápida',
+    });
+    if (result.success) {
+      toast.success('Despesa lançada!');
+      setShowQuickExpenseModal(false);
+      setQuickExpenseValor('');
+      setQuickExpenseObs('');
+    } else {
+      toast.error('Erro ao lançar despesa');
+    }
+    setQuickExpenseSaving(false);
   };
 
   const resetForm = () => {
@@ -560,11 +609,21 @@ export default function BudgetManager({ onBack, initialBudget, openNew, onUpdate
   };
 
   const handleGenerateSale = async () => {
+    if (generatingSale) return;
     if (saleType !== 'presencial' && !selectedCustomer) { toast.error('Selecione um cliente'); return; }
     if (items.length === 0) { toast.error('Adicione pelo menos um produto'); return; }
     if (!paymentMethod) { toast.error('Selecione a forma de pagamento'); return; }
     if (saleType === 'presencial' && hasDelivery && !deliveryAddress.trim()) { toast.error('Preencha o endereço de entrega'); return; }
 
+    setGeneratingSale(true);
+    try {
+      await handleGenerateSaleInner();
+    } finally {
+      setGeneratingSale(false);
+    }
+  };
+
+  const handleGenerateSaleInner = async () => {
     await persistCustomerWhatsapp();
 
     const customerForSale = selectedCustomer || { id: null, name: 'GERAL', code: null };
@@ -623,7 +682,7 @@ export default function BudgetManager({ onBack, initialBudget, openNew, onUpdate
       const valorLancado = paymentStatus === 'parcial'
         ? parseFloat(entradaValue) || 0
         : calculateTotal();
-      await createCashTransaction({
+      const txResult = await createCashTransaction({
         session_id: session?.id || null,
         budget_id: savedBudget.id,
         tipo: 'venda',
@@ -635,7 +694,16 @@ export default function BudgetManager({ onBack, initialBudget, openNew, onUpdate
         entrada_method: paymentStatus === 'parcial' ? entradaMethod : null,
         observacao: customerForSale.name
       });
-      toast.success(session ? 'Venda registrada no caixa!' : 'Venda registrada (sem turno aberto)');
+
+      if (!txResult.success) {
+        // Venda foi salva, mas o dinheiro não entrou no caixa — reverte pra a_receber
+        // pra não ficar marcado como pago sem transação correspondente.
+        await updateBudgetPaymentStatus(savedBudget.id, 'a_receber');
+        setBudgetData(prev => ({ ...prev, payment_status: 'a_receber' }));
+        toast.error('Venda salva, mas houve erro ao lançar no caixa. Pagamento marcado como pendente — confirme manualmente depois.');
+      } else {
+        toast.success(session ? 'Venda registrada no caixa!' : 'Venda registrada (sem turno aberto)');
+      }
     }
 
     onUpdate && onUpdate();
@@ -1412,6 +1480,18 @@ export default function BudgetManager({ onBack, initialBudget, openNew, onUpdate
       </div>
 
       <div className="budget-form">
+        {/* Despesa rápida */}
+        <div className="form-section" style={{ paddingBottom: 0 }}>
+          <button
+            type="button"
+            className="cash-action-btn despesa"
+            style={{ width: '100%' }}
+            onClick={handleOpenQuickExpense}
+          >
+            <FaReceipt size={14} /> Lançar despesa rápida
+          </button>
+        </div>
+
         {/* Cliente */}
         <div className="form-section">
           <label className="section-label">Cliente</label>
@@ -1834,7 +1914,7 @@ export default function BudgetManager({ onBack, initialBudget, openNew, onUpdate
                     onClick={handleLancarTrocoOnline}
                     disabled={trocoSaving || jaLancado}
                   >
-                    {jaLancado ? '✓ Lançado' : trocoSaving ? 'Lançando...' : '🧾 Lançar como despesa'}
+                    {jaLancado ? '✓ Lançado' : trocoSaving ? 'Lançando...' : <><FaReceipt size={13} /> Lançar como despesa</>}
                   </button>
                 );
               })()}
@@ -2032,9 +2112,9 @@ export default function BudgetManager({ onBack, initialBudget, openNew, onUpdate
           <button
             className="btn-primary btn-generate-sale"
             onClick={handleGenerateSale}
-            disabled={items.length === 0 || !paymentMethod}
+            disabled={items.length === 0 || !paymentMethod || generatingSale}
           >
-            ✅ Gerar Venda
+            {generatingSale ? 'Gerando...' : '✅ Gerar Venda'}
           </button>
         </div>
 
@@ -2051,6 +2131,45 @@ export default function BudgetManager({ onBack, initialBudget, openNew, onUpdate
           onUnlock={() => { setShowPinGate(false); setView('caixa'); }}
           onClose={() => setShowPinGate(false)}
         />
+      )}
+
+      {showQuickExpenseModal && (
+        <div className="cash-modal-overlay" onClick={() => setShowQuickExpenseModal(false)}>
+          <div className="cash-modal" onClick={e => e.stopPropagation()}>
+            <div className="cash-modal-title"><FaReceipt size={14} /> Lançar despesa rápida</div>
+            <div className="cash-modal-field">
+              <label>Valor</label>
+              <input
+                type="number"
+                placeholder="R$ 0,00"
+                min="0"
+                step="0.01"
+                value={quickExpenseValor}
+                onChange={e => setQuickExpenseValor(e.target.value)}
+                autoFocus
+              />
+            </div>
+            <div className="cash-modal-field">
+              <label>Observação / motivo</label>
+              <textarea
+                rows={2}
+                placeholder="Ex: Compra de sacola"
+                value={quickExpenseObs}
+                onChange={e => setQuickExpenseObs(e.target.value)}
+              />
+            </div>
+            <div className="cash-modal-actions">
+              <button className="cash-modal-cancel" onClick={() => setShowQuickExpenseModal(false)}>Cancelar</button>
+              <button
+                className="cash-modal-confirm"
+                onClick={handleConfirmQuickExpense}
+                disabled={quickExpenseSaving}
+              >
+                {quickExpenseSaving ? 'Salvando...' : 'Confirmar'}
+              </button>
+            </div>
+          </div>
+        </div>
       )}
 
       {postSaleModal && (

@@ -489,6 +489,21 @@ export const updateBudgetStatus = async (budgetId, status) => {
   }
 };
 
+export const updateBudgetPaymentStatus = async (budgetId, paymentStatus) => {
+  try {
+    const { error } = await supabase
+      .from('budgets')
+      .update({ payment_status: paymentStatus })
+      .eq('id', budgetId);
+
+    if (error) throw error;
+    return { success: true };
+  } catch (error) {
+    console.error('Erro ao atualizar payment_status do orçamento:', error);
+    return { success: false, error };
+  }
+};
+
 export const updateBudgetManterOrcamento = async (budgetId, manterOrcamento) => {
   try {
     const { error } = await supabase
@@ -878,7 +893,8 @@ export const createCashTransaction = async (transaction) => {
 export const confirmBudgetPayment = async ({ budgetId, valor, formaPagamento, saleType, observacao }) => {
   try {
     const session = await getOpenSession();
-    await createCashTransaction({
+
+    const txResult = await createCashTransaction({
       session_id: session?.id || null,
       budget_id: budgetId,
       tipo: 'venda',
@@ -888,17 +904,20 @@ export const confirmBudgetPayment = async ({ budgetId, valor, formaPagamento, sa
       payment_status: 'pago',
       observacao,
     });
+    if (!txResult.success) {
+      throw new Error('falha ao registrar no caixa');
+    }
 
     const { error } = await supabase
       .from('budgets')
       .update({ payment_status: 'pago' })
       .eq('id', budgetId);
-    if (error) throw error;
+    if (error) throw new Error('pagamento registrado no caixa, mas falha ao atualizar o orçamento');
 
     return { success: true, hadSession: !!session };
   } catch (error) {
     console.error('Erro ao confirmar pagamento do orçamento:', error);
-    return { success: false, error };
+    return { success: false, error: error.message || 'erro desconhecido' };
   }
 };
 

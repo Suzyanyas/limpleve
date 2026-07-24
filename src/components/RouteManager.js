@@ -100,11 +100,17 @@ export default function RouteManager({ onBack, onUpdate }) {
       observacao: `${route.customer_name} — recebimento na entrega`,
     });
 
-    if (result.success && !result.hadSession) {
+    if (!result.success) {
+      toast.error(`Erro ao confirmar pagamento (${result.error || 'erro desconhecido'}) — a entrega NÃO foi concluída. Tente novamente.`);
+      setSaving(false);
+      return;
+    }
+
+    if (!result.hadSession) {
       toast('Pagamento registrado sem turno aberto', { icon: '⚠️' });
     }
 
-    // Conclui a entrega
+    // Conclui a entrega (só chega aqui se o pagamento foi confirmado)
     await concluirEntrega(route);
     setPaymentModal(null);
     setSaving(false);
