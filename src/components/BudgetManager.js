@@ -1,7 +1,7 @@
 import { useState, useEffect, useRef } from 'react';
 import html2canvas from 'html2canvas';
 import toast from 'react-hot-toast';
-import { FaThumbtack, FaReceipt } from 'react-icons/fa';
+import { FaThumbtack, FaReceipt, FaEdit, FaTrash, FaPrint, FaDownload, FaBoxOpen } from 'react-icons/fa';
 import {
   getAllCustomers,
   getTodayBudgets,
@@ -1278,9 +1278,11 @@ export default function BudgetManager({ onBack, initialBudget, openNew, onUpdate
           <div className="detail-actions">
             <div className="detail-actions-row">
               <button className="detail-action-btn edit" onClick={() => setView('form')}>
+                <FaEdit className="action-icon" size={16} />
                 <span>Editar</span>
               </button>
               <button className="detail-action-btn delete" onClick={() => setShowDeletePinGate(true)}>
+                <FaTrash className="action-icon" size={16} />
                 <span>Excluir</span>
               </button>
             </div>
@@ -1300,11 +1302,11 @@ export default function BudgetManager({ onBack, initialBudget, openNew, onUpdate
                   setView('romaneio');
                 }}
               >
-                <span className="action-icon">🖨️</span>
+                <FaPrint className="action-icon" size={18} />
                 <span>Imprimir Romaneio</span>
               </button>
               <button className="detail-action-btn download" onClick={handleDownloadRomaneio}>
-                <span className="action-icon">⬇️</span>
+                <FaDownload className="action-icon" size={18} />
                 <span>Baixar Imagem</span>
               </button>
             </div>
@@ -1319,7 +1321,7 @@ export default function BudgetManager({ onBack, initialBudget, openNew, onUpdate
                   handleSendToPicking();
                 }}
               >
-                <span className="action-icon">📦</span>
+                <FaBoxOpen className="action-icon" size={18} />
                 <span>Enviar para Separação</span>
               </button>
             )}
