@@ -37,6 +37,7 @@ const CONFIRM_PAYMENT_LABELS = {
 export default function BudgetManager({ onBack, initialBudget, openNew, onUpdate, onApproved }) {
   const [view, setView] = useState((initialBudget || openNew) ? 'form' : 'list'); // list, form, detail, romaneio, caixa
   const [showPinGate, setShowPinGate] = useState(false);
+  const [showDeletePinGate, setShowDeletePinGate] = useState(false);
   const [postSaleModal, setPostSaleModal] = useState(null); // { budget } após venda presencial
   const [budgets, setBudgets] = useState([]);
   const [budgetsLoading, setBudgetsLoading] = useState(false);
@@ -1275,24 +1276,38 @@ export default function BudgetManager({ onBack, initialBudget, openNew, onUpdate
         ) : (
           /* Ações do romaneio aprovado */
           <div className="detail-actions">
+            <div className="detail-actions-row">
+              <button className="detail-action-btn edit" onClick={() => setView('form')}>
+                <span>Editar</span>
+              </button>
+              <button className="detail-action-btn delete" onClick={() => setShowDeletePinGate(true)}>
+                <span>Excluir</span>
+              </button>
+            </div>
             {(!budgetData?.payment_method || !budgetData?.payment_status) && (
               <div className="payment-required-alert">
                 ⚠️ Preencha a <strong>forma de pagamento</strong> e o <strong>status do pagamento</strong> para continuar.
               </div>
             )}
-            <button
-              className="detail-action-btn romaneio"
-              onClick={() => {
-                if (!budgetData?.payment_method || !budgetData?.payment_status) {
-                  toast.error('Preencha a forma e o status de pagamento antes de imprimir o romaneio');
-                  return;
-                }
-                setView('romaneio');
-              }}
-            >
-              <span className="action-icon">🖨️</span>
-              <span>Imprimir Romaneio</span>
-            </button>
+            <div className="detail-actions-row">
+              <button
+                className="detail-action-btn romaneio"
+                onClick={() => {
+                  if (!budgetData?.payment_method || !budgetData?.payment_status) {
+                    toast.error('Preencha a forma e o status de pagamento antes de imprimir o romaneio');
+                    return;
+                  }
+                  setView('romaneio');
+                }}
+              >
+                <span className="action-icon">🖨️</span>
+                <span>Imprimir Romaneio</span>
+              </button>
+              <button className="detail-action-btn download" onClick={handleDownloadRomaneio}>
+                <span className="action-icon">⬇️</span>
+                <span>Baixar Imagem</span>
+              </button>
+            </div>
             {!hasPicking && (
               <button
                 className="detail-action-btn picking"
@@ -1376,6 +1391,13 @@ export default function BudgetManager({ onBack, initialBudget, openNew, onUpdate
         )}
 
         {renderReceiptWhatsapp()}
+
+        {showDeletePinGate && (
+          <PinGate
+            onUnlock={() => { setShowDeletePinGate(false); handleDeleteBudget(); }}
+            onClose={() => setShowDeletePinGate(false)}
+          />
+        )}
       </div>
     );
   }
@@ -2144,15 +2166,13 @@ export default function BudgetManager({ onBack, initialBudget, openNew, onUpdate
           >
             Cancelar
           </button>
-          {saleType !== 'presencial' && (
-            <button
-              className="btn-primary btn-save-draft"
-              onClick={handleSaveBudget}
-              disabled={!selectedCustomer || items.length === 0}
-            >
-              {budgetData ? 'Salvar Alterações' : 'Salvar Orçamento'}
-            </button>
-          )}
+          <button
+            className="btn-primary btn-save-draft"
+            onClick={handleSaveBudget}
+            disabled={!selectedCustomer || items.length === 0}
+          >
+            {budgetData ? 'Salvar Alterações' : 'Salvar Orçamento'}
+          </button>
           <button
             className="btn-primary btn-generate-sale"
             onClick={handleGenerateSale}
