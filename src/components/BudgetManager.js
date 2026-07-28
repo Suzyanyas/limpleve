@@ -2260,6 +2260,45 @@ export default function BudgetManager({ onBack, initialBudget, openNew, onUpdate
         </div>
       )}
 
+      {showQuickExpenseModal && (
+          <div className="cash-modal-overlay" onClick={() => setShowQuickExpenseModal(false)}>
+            <div className="cash-modal" onClick={e => e.stopPropagation()}>
+              <div className="cash-modal-title"><FaReceipt size={14} /> Lançar despesa rápida</div>
+              <div className="cash-modal-field">
+                <label>Valor</label>
+                <input
+                  type="number"
+                  placeholder="R$ 0,00"
+                  min="0"
+                  step="0.01"
+                  value={quickExpenseValor}
+                  onChange={e => setQuickExpenseValor(e.target.value)}
+                  autoFocus
+                />
+              </div>
+              <div className="cash-modal-field">
+                <label>Observação / motivo</label>
+                <textarea
+                  rows={2}
+                  placeholder="Ex: Compra de sacola"
+                  value={quickExpenseObs}
+                  onChange={e => setQuickExpenseObs(e.target.value)}
+                />
+              </div>
+              <div className="cash-modal-actions">
+                <button className="cash-modal-cancel" onClick={() => setShowQuickExpenseModal(false)}>Cancelar</button>
+                <button
+                  className="cash-modal-confirm"
+                  onClick={handleConfirmQuickExpense}
+                  disabled={quickExpenseSaving}
+                >
+                  {quickExpenseSaving ? 'Salvando...' : 'Confirmar'}
+                </button>
+              </div>
+            </div>
+          </div>
+        )}
+
     </div>
   );
 }
