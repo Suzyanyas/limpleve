@@ -532,6 +532,11 @@ const spDateKey = (date) => new Intl.DateTimeFormat('en-CA', {
   day: '2-digit'
 }).format(date);
 
+const ceFortaleza = (date) => new Intl.DateTimeFormat('en-CA', {
+  timeZone: 'America/Fortaleza',
+  year: 'numeric', month: '2-digit', day: '2-digit',
+}).format(date);
+
 export const getDailyHistory = async (days = 30) => {
   try {
     const since = new Date();
@@ -813,7 +818,7 @@ export const getOverviewStats = async () => {
 
 export const getOpenSession = async () => {
   try {
-    const today = new Date().toISOString().split('T')[0];
+    const today = ceFortaleza(new Date());
     const { data, error } = await supabase
       .from('cash_sessions')
       .select('*')
@@ -832,7 +837,7 @@ export const getOpenSession = async () => {
 
 export const openCashSession = async (turno, saldo_inicial, saldo_inicial_detalhes) => {
   try {
-    const today = new Date().toISOString().split('T')[0];
+    const today = ceFortaleza(new Date());
     const { data, error } = await supabase
       .from('cash_sessions')
       .insert([{ turno, data: today, saldo_inicial, saldo_inicial_detalhes, status: 'aberto' }])
@@ -857,6 +862,39 @@ export const closeCashSession = async (sessionId, saldo_final) => {
   } catch (error) {
     console.error('Erro ao fechar caixa:', error);
     return { success: false, error };
+  }
+};
+
+export const updateFundoTarde = async (sessionId, fundo_proximo_turno, fundo_proximo_turno_detalhes) => {
+  try {
+    const { error } = await supabase
+      .from('cash_sessions')
+      .update({ fundo_proximo_turno, fundo_proximo_turno_detalhes })
+      .eq('id', sessionId);
+    if (error) throw error;
+    return { success: true };
+  } catch (error) {
+    console.error('Erro ao registrar fundo de troco:', error);
+    return { success: false, error };
+  }
+};
+
+export const getUltimoFundoTarde = async () => {
+  try {
+    const { data, error } = await supabase
+      .from('cash_sessions')
+      .select('fundo_proximo_turno, fundo_proximo_turno_detalhes')
+      .eq('turno', 'tarde')
+      .eq('status', 'fechado')
+      .not('fundo_proximo_turno', 'is', null)
+      .order('closed_at', { ascending: false })
+      .limit(1)
+      .maybeSingle();
+    if (error) throw error;
+    return data;
+  } catch (error) {
+    console.error('Erro ao buscar fundo de troco anterior:', error);
+    return null;
   }
 };
 
@@ -923,7 +961,7 @@ export const confirmBudgetPayment = async ({ budgetId, valor, formaPagamento, sa
 
 export const getTodaySessions = async () => {
   try {
-    const today = new Date().toISOString().split('T')[0];
+    const today = ceFortaleza(new Date());
     const { data, error } = await supabase
       .from('cash_sessions')
       .select('*')
@@ -951,9 +989,23 @@ export const deleteCashTransaction = async (id) => {
   }
 };
 
+export const updateCashSessionSaldoInicial = async (id, saldo_inicial, saldo_inicial_detalhes) => {
+  try {
+    const { error } = await supabase
+      .from('cash_sessions')
+      .update({ saldo_inicial, saldo_inicial_detalhes })
+      .eq('id', id);
+    if (error) throw error;
+    return { success: true };
+  } catch (error) {
+    console.error('Erro ao atualizar saldo inicial:', error);
+    return { success: false, error };
+  }
+};
+
 export const getTodayTransactions = async () => {
   try {
-    const today = new Date().toISOString().split('T')[0];
+    const today = ceFortaleza(new Date());
     const { data, error } = await supabase
       .from('cash_transactions')
       .select('*, cash_sessions(data)')

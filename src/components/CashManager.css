@@ -287,6 +287,7 @@
   grid-template-columns: repeat(3, 1fr);
   gap: 10px;
   margin-top: 14px;
+  align-items: start;
 }
 
 .cash-session-stat {
@@ -294,6 +295,11 @@
   border-radius: 10px;
   padding: 10px;
   text-align: center;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 4px;
 }
 
 .cash-session-stat-label {
@@ -560,6 +566,37 @@
 
 .diff-ok { color: #16a34a; font-weight: 800; }
 .diff-warn { color: #dc2626; font-weight: 800; }
+
+.saldo-chevron { transition: transform 0.2s ease; }
+.saldo-inicial-details[open] .saldo-chevron { transform: rotate(180deg); }
+
+.cedulas-pills {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 5px;
+  margin-top: 8px;
+  margin-bottom: 6px;
+}
+
+.cedula-pill {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  background: rgba(255,255,255,0.1);
+  border-radius: 6px;
+  padding: 3px 7px;
+}
+
+.cedula-pill-label {
+  font-size: 0.72rem;
+  font-weight: 600;
+  color: #e2e8f0;
+}
+
+.cedula-pill-qty {
+  font-size: 0.68rem;
+  color: #94a3b8;
+}
 
 .btn-close-cash {
   width: 100%;
