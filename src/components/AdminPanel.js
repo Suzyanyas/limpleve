@@ -1,4 +1,5 @@
 import { useState, useEffect, useRef } from 'react';
+import { useSearchParams } from 'react-router-dom';
 import toast from 'react-hot-toast';
 import {
   FaSearch,
@@ -14,7 +15,12 @@ import {
   FaSave,
   FaUpload,
   FaLink,
-  FaFolderOpen
+  FaFolderOpen,
+  FaChartLine,
+  FaBullseye,
+  FaStore,
+  FaGlobe,
+  FaClock
 } from 'react-icons/fa';
 import {
   getAllProducts,
@@ -23,8 +29,10 @@ import {
   deleteProduct,
   toggleProductAvailability
 } from '../services/productService';
-import { getOverviewStats, getDailyHistory, getPaymentMethodReport, PAYMENT_CATEGORIES } from '../services/managementService';
+import { getOverviewStats, getDailyHistory, getPaymentMethodReport, PAYMENT_CATEGORIES, updateBudgetStatus, confirmBudgetPayment } from '../services/managementService';
 import ManagementDashboard from './ManagementDashboard';
+import DeliveryHistory from './DeliveryHistory';
+import PendingPayments from './PendingPayments';
 import CustomerManager from './CustomerManager';
 import AdminLogin from './AdminLogin';
 import PinGate from './PinGate';
@@ -34,6 +42,9 @@ import './AdminPanel.css';
 
 const PRODUCT_IMAGE_PLACEHOLDER =
   "data:image/svg+xml;charset=UTF-8,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Crect width='100' height='100' fill='%23e0e0e0'/%3E%3Cpath d='M30 65 L45 45 L58 58 L70 40 L80 65 Z' fill='%23bbb'/%3E%3Ccircle cx='38' cy='35' r='7' fill='%23bbb'/%3E%3C/svg%3E";
+
+const MONTH_NAMES = ['janeiro','fevereiro','março','abril','maio','junho','julho','agosto','setembro','outubro','novembro','dezembro'];
+const currentMonthName = MONTH_NAMES[new Date().getMonth()];
 
 export default function AdminPanel() {
   const [session, setSession] = useState(undefined); // undefined = verificando, null = não logado
@@ -71,6 +82,9 @@ export default function AdminPanel() {
   const [paymentReportBuckets, setPaymentReportBuckets] = useState([]);
   const [paymentReportLoading, setPaymentReportLoading] = useState(false);
   const [mistoModalData, setMistoModalData] = useState(null); // null | { titulo, itens }
+  const [budgetDetailModal, setBudgetDetailModal] = useState(null); // null | budget object
+  const [budgetDetailLoading, setBudgetDetailLoading] = useState(false);
+  const [, setSearchParams] = useSearchParams();
 
   const handleImageError = (e) => {
     e.target.onerror = null;
@@ -500,6 +514,48 @@ export default function AdminPanel() {
   const handleLogout = async () => {
     await supabase.auth.signOut();
     toast.success('Sessão encerrada');
+  };
+
+  const handleBudgetConfirmPayment = async (b) => {
+    setBudgetDetailLoading(true);
+    const valor = b.payment_status === 'parcial'
+      ? Math.max(0, parseFloat(b.total || 0) - parseFloat(b.entrada_valor || 0))
+      : parseFloat(b.total || 0);
+    const result = await confirmBudgetPayment({
+      budgetId: b.id,
+      valor,
+      formaPagamento: b.payment_method || 'dinheiro',
+      saleType: b.sale_type || 'presencial',
+      observacao: `${b.customer_name} — confirmação via histórico`,
+    });
+    setBudgetDetailLoading(false);
+    if (result.success) {
+      toast.success('Recebimento confirmado!');
+      setBudgetDetailModal(prev => ({ ...prev, payment_status: 'pago' }));
+      loadDailyHistory(historyDays);
+    } else {
+      toast.error('Erro ao confirmar recebimento: ' + (result.error || ''));
+    }
+  };
+
+  const handleBudgetCancel = async (b) => {
+    if (!window.confirm(`Cancelar orçamento de ${b.customer_name}?`)) return;
+    setBudgetDetailLoading(true);
+    const result = await updateBudgetStatus(b.id, 'cancelled');
+    setBudgetDetailLoading(false);
+    if (result.success) {
+      toast.success('Orçamento cancelado!');
+      setBudgetDetailModal(prev => ({ ...prev, status: 'cancelled' }));
+      loadDailyHistory(historyDays);
+    } else {
+      toast.error('Erro ao cancelar orçamento');
+    }
+  };
+
+  const handleBudgetEdit = (b) => {
+    setBudgetDetailModal(null);
+    setActiveTab('management');
+    setSearchParams({ view: 'budgets', budgetId: String(b.id) });
   };
 
   if (session === undefined) {
@@ -1013,6 +1069,7 @@ export default function AdminPanel() {
               </div>
             </div>
           )}
+
         </div>
       )}
 
@@ -1070,102 +1127,102 @@ export default function AdminPanel() {
             <div className="stats-loading">Carregando estatísticas...</div>
           ) : (
             <>
-              <h2 className="stats-section-title">Visão Geral</h2>
+              <div className="stats-top-grid">
 
-              {/* Cards de resumo */}
-              <div className="overview-cards">
-                <div className="ov-card blue">
-                  <div className="ov-icon">📋</div>
-                  <div className="ov-info">
-                    <span className="ov-value">{overviewStats.monthCount}</span>
-                    <span className="ov-label">Vendas este mês</span>
-                  </div>
-                  <div className="ov-sub">{overviewStats.weekCount} nos últimos 7 dias</div>
-                </div>
-
-                <div className="ov-card green">
-                  <div className="ov-icon">💰</div>
-                  <div className="ov-info">
-                    <span className="ov-value">R$ {overviewStats.monthRevenue.toFixed(2)}</span>
-                    <span className="ov-label">Faturamento este mês</span>
-                  </div>
-                  <div className="ov-sub">Total geral: R$ {overviewStats.totalRevenue.toFixed(2)}</div>
-                </div>
-
-                <div className="ov-card purple">
-                  <div className="ov-icon">🎯</div>
-                  <div className="ov-info">
-                    <span className="ov-value">R$ {overviewStats.avgTicket.toFixed(2)}</span>
-                    <span className="ov-label">Ticket médio</span>
-                  </div>
-                  <div className="ov-sub">Por venda confirmada</div>
-                </div>
-
-                <div className="ov-card split">
-                  <div className="ov-split-item delivered">
-                    <span className="ov-split-value">{overviewStats.delivered}</span>
-                    <span className="ov-split-label">✅ Entregues</span>
-                  </div>
-                  <div className="ov-split-divider" />
-                  <div className="ov-split-item cancelled">
-                    <span className="ov-split-value">{overviewStats.cancelled}</span>
-                    <span className="ov-split-label">❌ Cancelados</span>
-                  </div>
-                </div>
-
-                <div className="ov-card split">
-                  <div className="ov-split-item delivered">
-                    <span className="ov-split-value">{overviewStats.presencial}</span>
-                    <span className="ov-split-label">Presencial</span>
-                  </div>
-                  <div className="ov-split-divider" />
-                  <div className="ov-split-item">
-                    <span className="ov-split-value">{overviewStats.online}</span>
-                    <span className="ov-split-label">Online</span>
-                  </div>
-                </div>
-
-                {overviewStats.pendingTotal > 0 && (
-                  <div className="ov-card orange">
-                    <div className="ov-icon">⏳</div>
+                {/* Coluna 1 — Métricas principais */}
+                <div className="overview-cards overview-cards--col">
+                  <div className="ov-card blue">
+                    <div className="ov-icon"><FaChartLine /></div>
                     <div className="ov-info">
-                      <span className="ov-value">R$ {overviewStats.pendingTotal.toFixed(2)}</span>
-                      <span className="ov-label">A receber</span>
+                      <div className="ov-combined-row">
+                        <div className="ov-combined-item">
+                          <span className="ov-value">{overviewStats.monthCount}</span>
+                          <span className="ov-label">Vendas em {currentMonthName}</span>
+                          <span className="ov-sub">{overviewStats.weekCount} nos últ. 7 dias</span>
+                        </div>
+                        <div className="ov-combined-divider" />
+                        <div className="ov-combined-item">
+                          <span className="ov-value">R$ {overviewStats.monthRevenue.toFixed(2)}</span>
+                          <span className="ov-label">Faturado em {currentMonthName}</span>
+                        </div>
+                      </div>
                     </div>
-                    <div className="ov-sub">Valores pendentes de cobrança</div>
                   </div>
-                )}
+
+                  <div className="ov-card purple">
+                    <div className="ov-icon"><FaBullseye /></div>
+                    <div className="ov-info">
+                      <span className="ov-value">R$ {overviewStats.avgTicket.toFixed(2)}</span>
+                      <span className="ov-label">Ticket médio</span>
+                    </div>
+                    <div className="ov-sub">Por venda confirmada</div>
+                  </div>
+                </div>
+
+                {/* Coluna 2 — Operacional */}
+                <div className="overview-cards overview-cards--col">
+                  <div className="ov-card split">
+                    <div className="ov-split-item delivered">
+                      <div className="ov-icon"><FaStore /></div>
+                      <span className="ov-split-value">{overviewStats.presencial}</span>
+                      <span className="ov-split-label">Presencial</span>
+                    </div>
+                    <div className="ov-split-divider" />
+                    <div className="ov-split-item">
+                      <div className="ov-icon"><FaGlobe /></div>
+                      <span className="ov-split-value">{overviewStats.online}</span>
+                      <span className="ov-split-label">Online</span>
+                    </div>
+                  </div>
+
+                  {overviewStats.pendingTotal > 0 && (
+                    <div className="ov-card orange">
+                      <div className="ov-icon"><FaClock /></div>
+                      <div className="ov-info">
+                        <span className="ov-value">R$ {overviewStats.pendingTotal.toFixed(2)}</span>
+                        <span className="ov-label">A receber</span>
+                      </div>
+                      <div className="ov-sub">Valores pendentes de cobrança</div>
+                    </div>
+                  )}
+                </div>
+
+                {/* Coluna 3 — Produtos Mais Vendidos */}
+                <div>
+                  <h2 className="stats-section-title">Produtos Mais Vendidos</h2>
+                  {overviewStats.topProducts.length === 0 ? (
+                    <p className="stats-empty">Nenhum dado de produtos ainda.</p>
+                  ) : (
+                    <div className="top-products">
+                      {overviewStats.topProducts.map((p, i) => {
+                        const max = overviewStats.topProducts[0].qty;
+                        const pct = Math.round((p.qty / max) * 100);
+                        return (
+                          <div key={p.name} className="top-product-row">
+                            <span className="tp-rank">#{i + 1}</span>
+                            <div className="tp-info">
+                              <div className="tp-header">
+                                <span className="tp-name">{p.name}</span>
+                                <span className="tp-qty">{p.qty} un.</span>
+                              </div>
+                              <div className="tp-bar-bg">
+                                <div className="tp-bar-fill" style={{width: `${pct}%`}} />
+                              </div>
+                            </div>
+                            <span className="tp-revenue">R$ {p.revenue.toFixed(2)}</span>
+                          </div>
+                        );
+                      })}
+                    </div>
+                  )}
+                </div>
+
               </div>
 
-              {/* Produtos mais vendidos */}
-              <h2 className="stats-section-title" style={{marginTop: '32px'}}>Produtos Mais Vendidos</h2>
-              {overviewStats.topProducts.length === 0 ? (
-                <p className="stats-empty">Nenhum dado de produtos ainda.</p>
-              ) : (
-                <div className="top-products">
-                  {overviewStats.topProducts.map((p, i) => {
-                    const max = overviewStats.topProducts[0].qty;
-                    const pct = Math.round((p.qty / max) * 100);
-                    return (
-                      <div key={p.name} className="top-product-row">
-                        <span className="tp-rank">#{i + 1}</span>
-                        <div className="tp-info">
-                          <div className="tp-header">
-                            <span className="tp-name">{p.name}</span>
-                            <span className="tp-qty">{p.qty} un.</span>
-                          </div>
-                          <div className="tp-bar-bg">
-                            <div className="tp-bar-fill" style={{width: `${pct}%`}} />
-                          </div>
-                        </div>
-                        <span className="tp-revenue">R$ {p.revenue.toFixed(2)}</span>
-                      </div>
-                    );
-                  })}
-                </div>
-              )}
+              <div className="stats-middle-grid">
 
               {/* Histórico por dia */}
+              <div>
               <div className="daily-history-header">
                 <h2 className="stats-section-title">Histórico por Dia</h2>
                 <div className="daily-period-tabs">
@@ -1200,6 +1257,9 @@ export default function AdminPanel() {
                         <div className="daily-day-right">
                           <span className="daily-day-count">{day.count} venda{day.count !== 1 ? 's' : ''}</span>
                           <span className="daily-day-revenue">R$ {day.revenue.toFixed(2)}</span>
+                          {day.aReceber > 0 && (
+                            <span className="daily-day-a-receber">A receber: R$ {day.aReceber.toFixed(2)}</span>
+                          )}
                           {day.cancelled > 0 && (
                             <span className="daily-day-cancelled">{day.cancelled} cancel.</span>
                           )}
@@ -1220,6 +1280,15 @@ export default function AdminPanel() {
                                     : b.status === 'draft' ? 'Rascunho'
                                     : b.status}
                                 </span>
+                                {b.payment_status === 'pago' && (
+                                  <span className="daily-order-ps ps-pago">Pago</span>
+                                )}
+                                {b.payment_status === 'a_receber' && (
+                                  <span className="daily-order-ps ps-a-receber">A receber</span>
+                                )}
+                                {b.payment_status === 'parcial' && (
+                                  <span className="daily-order-ps ps-parcial">Parcial</span>
+                                )}
                               </div>
                               <div className="daily-order-meta">
                                 <span className="daily-order-type">
@@ -1246,6 +1315,12 @@ export default function AdminPanel() {
                                   ))}
                                 </div>
                               )}
+                              <button
+                                className="budget-detail-modal-btn-view"
+                                onClick={() => setBudgetDetailModal(b)}
+                              >
+                                Ver orçamento
+                              </button>
                             </div>
                           ))}
                         </div>
@@ -1255,7 +1330,10 @@ export default function AdminPanel() {
                 </div>
               )}
 
+              </div>{/* fim coluna Histórico por Dia */}
+
               {/* Vendas por Forma de Pagamento */}
+              <div>
               <div className="payment-report-header">
                 <h2 className="stats-section-title">Vendas por Forma de Pagamento</h2>
                 <div className="daily-period-tabs">
@@ -1356,10 +1434,117 @@ export default function AdminPanel() {
                   </div>
                 </>
               )}
+              </div>{/* fim coluna Vendas por Forma de Pagamento */}
+
+              </div>{/* fim stats-middle-grid */}
             </>
           )}
+
+          <div className="stats-bottom-grid">
+            <DeliveryHistory />
+            <PendingPayments />
+          </div>
         </div>
       )}
+
+      {budgetDetailModal && (() => {
+        const b = budgetDetailModal;
+        const statusLabel = {
+          confirmed: 'Confirmado', delivered: 'Entregue',
+          cancelled: 'Cancelado', draft: 'Rascunho'
+        };
+        const psLabel = { pago: 'Pago', a_receber: 'A receber', parcial: 'Parcial' };
+        const psClass = { pago: 'ps-pago', a_receber: 'ps-a-receber', parcial: 'ps-parcial' };
+        return (
+          <div className="budget-detail-overlay" onClick={() => setBudgetDetailModal(null)}>
+            <div className="budget-detail-modal" onClick={e => e.stopPropagation()}>
+              <div className="budget-detail-modal-header">
+                <span className="budget-detail-modal-title">{b.customer_name}</span>
+                <button className="budget-detail-modal-close" onClick={() => setBudgetDetailModal(null)}>✕</button>
+              </div>
+
+              <div className="budget-detail-modal-badges">
+                <span className={`daily-order-status status-${b.status}`}>
+                  {statusLabel[b.status] || b.status}
+                </span>
+                {b.payment_status && psLabel[b.payment_status] && (
+                  <span className={`daily-order-ps ${psClass[b.payment_status]}`}>
+                    {psLabel[b.payment_status]}
+                  </span>
+                )}
+                <span className="daily-order-type">
+                  {b.sale_type === 'online' ? 'Online' : 'Presencial'}
+                </span>
+              </div>
+
+              <div className="budget-detail-modal-section">
+                <span className="budget-detail-modal-label">Data / Hora</span>
+                <span className="budget-detail-modal-value">
+                  {new Date(b.created_at).toLocaleString('pt-BR', { timeZone: 'America/Sao_Paulo', day: '2-digit', month: '2-digit', year: 'numeric', hour: '2-digit', minute: '2-digit' })}
+                </span>
+              </div>
+
+              {formatPaymentMethodSummary(b.payment_method) && (
+                <div className="budget-detail-modal-section">
+                  <span className="budget-detail-modal-label">Forma de Pagamento</span>
+                  <span className="budget-detail-modal-value">{formatPaymentMethodSummary(b.payment_method)}</span>
+                </div>
+              )}
+
+              {b.budget_items && b.budget_items.length > 0 && (
+                <div className="budget-detail-modal-section">
+                  <span className="budget-detail-modal-label">Itens</span>
+                  <div className="budget-detail-modal-items">
+                    {b.budget_items.map((item, idx) => (
+                      <div key={idx} className="budget-detail-modal-item">
+                        <span>{item.quantity}x {item.product_name}</span>
+                        <span>R$ {parseFloat(item.total_price || 0).toFixed(2)}</span>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              )}
+
+              <div className="budget-detail-modal-total">
+                <span>Total</span>
+                <span>R$ {parseFloat(b.total || 0).toFixed(2)}</span>
+              </div>
+
+              {(b.payment_status === 'a_receber' || b.payment_status === 'parcial' || (b.status !== 'cancelled' && b.status !== 'delivered')) && (
+                <div className="budget-detail-modal-actions">
+                  {(b.payment_status === 'a_receber' || b.payment_status === 'parcial') && (
+                    <button
+                      className="budget-detail-action-btn confirm-payment"
+                      onClick={() => handleBudgetConfirmPayment(b)}
+                      disabled={budgetDetailLoading}
+                    >
+                      Confirmar recebimento
+                    </button>
+                  )}
+                  {b.status !== 'delivered' && b.status !== 'cancelled' && (
+                    <button
+                      className="budget-detail-action-btn edit"
+                      onClick={() => handleBudgetEdit(b)}
+                      disabled={budgetDetailLoading}
+                    >
+                      Editar
+                    </button>
+                  )}
+                  {b.status !== 'cancelled' && b.status !== 'delivered' && (
+                    <button
+                      className="budget-detail-action-btn cancel"
+                      onClick={() => handleBudgetCancel(b)}
+                      disabled={budgetDetailLoading}
+                    >
+                      Cancelar orçamento
+                    </button>
+                  )}
+                </div>
+              )}
+            </div>
+          </div>
+        );
+      })()}
     </div>
   );
 }

@@ -76,6 +76,10 @@
   background: linear-gradient(135deg, #ffc299 0%, #ffd1b3 100%);
 }
 
+.deliveries-card {
+  background: linear-gradient(135deg, #ffd1b3 0%, #ffe8cc 100%);
+}
+
 .card-header {
   display: flex;
   justify-content: space-between;
@@ -223,6 +227,50 @@
   font-size: 16px;
   color: white;
   font-weight: 500;
+}
+
+.item-badge-online {
+  background: #16a34a;
+  color: white;
+  font-size: 10px;
+  padding: 2px 7px;
+  border-radius: 10px;
+  font-weight: 600;
+  white-space: nowrap;
+}
+
+.item-badge-presencial {
+  background: #7c3aed;
+  color: white;
+  font-size: 10px;
+  padding: 2px 7px;
+  border-radius: 10px;
+  font-weight: 600;
+  white-space: nowrap;
+}
+
+.item-total {
+  font-size: 12px;
+  color: rgba(255, 255, 255, 0.8);
+  white-space: nowrap;
+}
+
+.item-badge-areceber {
+  background: rgba(249, 115, 22, 0.8);
+  color: white;
+  font-size: 10px;
+  padding: 2px 6px;
+  border-radius: 8px;
+  white-space: nowrap;
+}
+
+.item-badge-parcial {
+  background: rgba(234, 179, 8, 0.8);
+  color: white;
+  font-size: 10px;
+  padding: 2px 6px;
+  border-radius: 8px;
+  white-space: nowrap;
 }
 
 .more-items {

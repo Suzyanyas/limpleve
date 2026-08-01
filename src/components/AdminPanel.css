@@ -146,7 +146,7 @@
 
 /* ===== ESTATÍSTICAS ===== */
 .stats-tab {
-  max-width: 860px;
+  max-width: 1400px;
 }
 
 .stats-loading {
@@ -163,9 +163,77 @@
   margin: 0 0 16px 0;
 }
 
+.stats-section-gap {
+  margin-top: 48px;
+}
+
+.stats-section-divider {
+  margin: 40px 0 20px;
+  padding: 0 20px;
+}
+.stats-section-title-main {
+  color: #fff;
+  font-size: 20px;
+  font-weight: 700;
+  border-left: 4px solid #f97316;
+  padding-left: 12px;
+}
+
 .stats-empty {
   color: #aaa;
   font-size: 0.9rem;
+}
+
+/* Grid 3 colunas: Métricas | Operacional | Produtos Mais Vendidos */
+.stats-top-grid {
+  display: grid;
+  grid-template-columns: 280px 1fr 1.5fr;
+  gap: 24px;
+  align-items: stretch;
+  margin-bottom: 40px;
+}
+@media (max-width: 1100px) {
+  .stats-top-grid {
+    grid-template-columns: 1fr 1fr;
+  }
+}
+@media (max-width: 700px) {
+  .stats-top-grid {
+    grid-template-columns: 1fr;
+  }
+}
+
+.stats-bottom-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 32px;
+  align-items: start;
+  margin-bottom: 40px;
+}
+@media (max-width: 900px) {
+  .stats-bottom-grid {
+    grid-template-columns: 1fr;
+  }
+}
+
+.stats-middle-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 32px;
+  align-items: start;
+  margin-bottom: 40px;
+}
+@media (max-width: 900px) {
+  .stats-middle-grid {
+    grid-template-columns: 1fr;
+  }
+}
+
+.overview-cards.overview-cards--col {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  height: 100%;
 }
 
 /* Cards de visão geral */
@@ -177,8 +245,9 @@
 
 .ov-card {
   border-radius: 14px;
-  padding: 20px 18px 14px;
+  padding: 12px;
   display: flex;
+  flex: 1;
   flex-direction: column;
   gap: 6px;
   box-shadow: 0 2px 10px rgba(0,0,0,0.07);
@@ -189,6 +258,27 @@
 .ov-card.purple { background: linear-gradient(135deg, #6d28d9, #8b5cf6); color: #fff; }
 .ov-card.orange { background: linear-gradient(135deg, #b45309, #d97706); color: #fff; }
 .ov-card.split  { background: #fff; border: 1px solid #e8edf5; flex-direction: row; align-items: center; padding: 16px; }
+
+.ov-combined-row {
+  display: flex;
+  flex-direction: row;
+  gap: 12px;
+  align-items: flex-start;
+  width: 100%;
+}
+
+.ov-combined-item {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  flex: 1;
+}
+
+.ov-combined-divider {
+  width: 1px;
+  background: rgba(255,255,255,0.3);
+  align-self: stretch;
+}
 
 .ov-icon {
   font-size: 1.5rem;
@@ -289,6 +379,9 @@
   font-size: 0.9rem;
   font-weight: 600;
   color: #2c3e50;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
 }
 
 .tp-qty {
@@ -1509,8 +1602,23 @@
   gap: 12px;
 }
 
+.stats-top-grid > div > .stats-section-title {
+  border-left: 4px solid #f97316;
+  padding-left: 12px;
+  color: #1e3c72;
+  font-size: 20px;
+  font-weight: 700;
+  margin-bottom: 16px;
+}
+
 .daily-history-header .stats-section-title {
   margin-top: 0;
+  border-left: 4px solid #f97316;
+  padding-left: 12px;
+  color: #1e3c72;
+  font-size: 20px;
+  font-weight: 700;
+  margin-bottom: 16px;
 }
 
 /* Vendas por Forma de Pagamento */
@@ -1524,14 +1632,24 @@
 }
 
 .payment-report-header .stats-section-title {
-  margin: 0;
+  margin: 0 0 16px 0;
+  border-left: 4px solid #f97316;
+  padding-left: 12px;
+  color: #1e3c72;
+  font-size: 20px;
+  font-weight: 700;
 }
 
 .payment-summary-cards {
   display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
-  gap: 14px;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 8px;
   margin: 20px 0;
+}
+@media (max-width: 600px) {
+  .payment-summary-cards {
+    grid-template-columns: repeat(2, 1fr);
+  }
 }
 
 .payment-card {
@@ -1570,7 +1688,7 @@
 }
 
 .payment-card-value {
-  font-size: 1.15rem;
+  font-size: 14px;
   font-weight: 700;
   line-height: 1.1;
 }
@@ -1955,6 +2073,210 @@
   color: #4a6080;
   padding: 2px 7px;
   border-radius: 6px;
+}
+
+.daily-day-a-receber {
+  font-size: 0.78rem;
+  color: #c05e00;
+  background: #fff3e0;
+  padding: 2px 7px;
+  border-radius: 10px;
+  font-weight: 600;
+}
+
+.daily-order-ps {
+  font-size: 0.72rem;
+  font-weight: 600;
+  padding: 2px 8px;
+  border-radius: 10px;
+}
+
+.daily-order-ps.ps-pago {
+  background: #d4edda;
+  color: #155724;
+}
+
+.daily-order-ps.ps-a-receber {
+  background: #fff3e0;
+  color: #c05e00;
+}
+
+.daily-order-ps.ps-parcial {
+  background: #fff8e1;
+  color: #856404;
+}
+
+/* Modal de detalhes do orçamento (aba stats) */
+.budget-detail-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.45);
+  z-index: 1200;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 16px;
+}
+
+.budget-detail-modal {
+  background: #fff;
+  border-radius: 14px;
+  padding: 24px;
+  width: 100%;
+  max-width: 480px;
+  max-height: 85vh;
+  overflow-y: auto;
+  box-shadow: 0 8px 32px rgba(0,0,0,0.18);
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+}
+
+.budget-detail-modal-header {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 8px;
+}
+
+.budget-detail-modal-title {
+  font-size: 1rem;
+  font-weight: 700;
+  color: #1e3c72;
+}
+
+.budget-detail-modal-close {
+  background: none;
+  border: none;
+  font-size: 1.2rem;
+  color: #8a9ab0;
+  cursor: pointer;
+  line-height: 1;
+  padding: 2px 4px;
+}
+
+.budget-detail-modal-close:hover {
+  color: #2d3748;
+}
+
+.budget-detail-modal-badges {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+}
+
+.budget-detail-modal-section {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.budget-detail-modal-label {
+  font-size: 0.72rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  color: #8a9ab0;
+  letter-spacing: 0.04em;
+}
+
+.budget-detail-modal-value {
+  font-size: 0.9rem;
+  color: #2d3748;
+  font-weight: 500;
+}
+
+.budget-detail-modal-items {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.budget-detail-modal-item {
+  display: flex;
+  justify-content: space-between;
+  font-size: 0.85rem;
+  color: #4a6080;
+  padding: 5px 8px;
+  background: #f4f7ff;
+  border-radius: 6px;
+}
+
+.budget-detail-modal-total {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding-top: 8px;
+  border-top: 1px solid #e8eef8;
+  font-weight: 700;
+  font-size: 1rem;
+  color: #1e3c72;
+}
+
+.budget-detail-modal-btn-view {
+  background: none;
+  border: none;
+  font-size: 0.75rem;
+  color: #3a6ae8;
+  cursor: pointer;
+  padding: 3px 0;
+  text-decoration: underline;
+  text-underline-offset: 2px;
+  align-self: flex-start;
+}
+
+.budget-detail-modal-btn-view:hover {
+  color: #1e3c72;
+}
+
+.budget-detail-modal-actions {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  margin-top: 16px;
+}
+
+.budget-detail-action-btn {
+  width: 100%;
+  padding: 10px 16px;
+  border: none;
+  border-radius: 8px;
+  font-size: 14px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: opacity 0.15s, background 0.15s;
+}
+
+.budget-detail-action-btn:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.budget-detail-action-btn.confirm-payment {
+  background: #16a34a;
+  color: #fff;
+}
+
+.budget-detail-action-btn.confirm-payment:hover:not(:disabled) {
+  background: #15803d;
+}
+
+.budget-detail-action-btn.edit {
+  background: #2563eb;
+  color: #fff;
+}
+
+.budget-detail-action-btn.edit:hover:not(:disabled) {
+  background: #1d4ed8;
+}
+
+.budget-detail-action-btn.cancel {
+  background: transparent;
+  color: #dc2626;
+  border: 1.5px solid #dc2626;
+}
+
+.budget-detail-action-btn.cancel:hover:not(:disabled) {
+  background: #fef2f2;
 }
 
 @media (max-width: 480px) {

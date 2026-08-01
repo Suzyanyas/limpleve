@@ -1,4 +1,5 @@
 import { useState, useEffect } from 'react';
+import { FaUsers, FaEdit, FaTrash, FaPlus } from 'react-icons/fa';
 import toast from 'react-hot-toast';
 import { getAllCustomers, createCustomer, updateCustomer, deleteCustomer } from '../services/managementService';
 import './CustomerManager.css';
@@ -64,8 +65,9 @@ export default function CustomerManager() {
       if (success) { toast.success('Cliente atualizado!'); await load(); closeForm(); }
       else toast.error('Erro ao atualizar cliente.');
     } else {
-      const { success } = await createCustomer(form);
-      if (success) { toast.success('Cliente criado!'); await load(); closeForm(); }
+      const result = await createCustomer(form);
+      if (result.success) { toast.success('Cliente criado!'); await load(); closeForm(); }
+      else if (result.error?.code === '23505') toast('Cliente já existe no cadastro.', { icon: 'ℹ️' });
       else toast.error('Erro ao criar cliente.');
     }
     setSaving(false);
@@ -89,7 +91,7 @@ export default function CustomerManager() {
       {/* Cabeçalho */}
       <div className="cm-header">
         <div className="cm-header-left">
-          <h2 className="cm-title">👥 Clientes</h2>
+          <h2 className="cm-title"><FaUsers /> Clientes</h2>
           <span className="cm-count">{customers.length} cadastrados</span>
         </div>
         <div className="cm-header-right">
@@ -100,7 +102,7 @@ export default function CustomerManager() {
             value={search}
             onChange={e => setSearch(e.target.value)}
           />
-          <button className="cm-btn-new" onClick={openNew}>+ Novo Cliente</button>
+          <button className="cm-btn-new" onClick={openNew}><FaPlus /> Novo Cliente</button>
         </div>
       </div>
 
@@ -177,8 +179,8 @@ export default function CustomerManager() {
                   <td className="cm-td-notes">{customer.notes || <span className="cm-empty-cell">—</span>}</td>
                   <td>
                     <div className="cm-actions">
-                      <button className="cm-btn-edit" onClick={() => openEdit(customer)} title="Editar">✏️</button>
-                      <button className="cm-btn-delete" onClick={() => setConfirmDelete(customer.id)} title="Excluir">🗑️</button>
+                      <button className="cm-btn-edit" onClick={() => openEdit(customer)} title="Editar"><FaEdit /></button>
+                      <button className="cm-btn-delete" onClick={() => setConfirmDelete(customer.id)} title="Excluir"><FaTrash /></button>
                     </div>
                   </td>
                 </tr>

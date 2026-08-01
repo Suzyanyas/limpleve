@@ -376,6 +376,45 @@ export const getAllDeliveryRoutes = async () => {
   }
 };
 
+export const getDeliveryRoutesByDate = async (date) => {
+  try {
+    const start = `${date}T00:00:00-03:00`;
+    const end   = `${date}T23:59:59.999-03:00`;
+
+    const { data, error } = await supabase
+      .from('delivery_routes')
+      .select(`
+        *,
+        budgets (
+          id,
+          total,
+          payment_method,
+          payment_status,
+          entrada_valor,
+          delivery_address,
+          budget_items (
+            product_name,
+            quantity,
+            unit_price,
+            total_price
+          ),
+          customers (
+            whatsapp
+          )
+        )
+      `)
+      .gte('created_at', start)
+      .lte('created_at', end)
+      .order('created_at', { ascending: true });
+
+    if (error) throw error;
+    return data || [];
+  } catch (error) {
+    console.error('Erro ao buscar rotas por data:', error);
+    return [];
+  }
+};
+
 export const createDeliveryRoute = async (routeData) => {
   try {
     const { data, error } = await supabase
@@ -546,7 +585,7 @@ export const getDailyHistory = async (days = 30) => {
     const { data, error } = await supabase
       .from('budgets')
       .select(`
-        id, customer_name, total, status, sale_type, payment_status, payment_method, created_at,
+        id, customer_name, total, status, sale_type, payment_status, payment_method, entrada_valor, created_at,
         budget_items(product_name, quantity, total_price)
       `)
       .gte('created_at', since.toISOString())
@@ -558,13 +597,16 @@ export const getDailyHistory = async (days = 30) => {
     const grouped = {};
     (data || []).forEach(b => {
       const key = spDateKey(new Date(b.created_at));
-      if (!grouped[key]) grouped[key] = { date: key, budgets: [], revenue: 0, count: 0, cancelled: 0 };
+      if (!grouped[key]) grouped[key] = { date: key, budgets: [], revenue: 0, count: 0, cancelled: 0, aReceber: 0, recebido: 0 };
       grouped[key].budgets.push(b);
       if (b.status === 'cancelled') {
         grouped[key].cancelled++;
-      } else {
+      } else if (b.status !== 'draft') {
         grouped[key].revenue += parseFloat(b.total || 0);
         grouped[key].count++;
+        if (b.payment_status === 'a_receber') {
+          grouped[key].aReceber += parseFloat(b.total || 0);
+        }
       }
     });
 
@@ -698,6 +740,39 @@ export const getTodayBudgets = async () => {
   );
 };
 
+export const getPendingPayments = async () => {
+  try {
+    const { data, error } = await supabase
+      .from('budgets')
+      .select(`
+        id,
+        customer_name,
+        total,
+        payment_method,
+        payment_status,
+        entrada_valor,
+        sale_type,
+        created_at,
+        status,
+        budget_items (
+          product_name,
+          quantity,
+          unit_price,
+          total_price
+        )
+      `)
+      .in('payment_status', ['a_receber', 'parcial'])
+      .not('status', 'in', '("cancelled","delivered")')
+      .order('created_at', { ascending: true });
+
+    if (error) throw error;
+    return data || [];
+  } catch (error) {
+    console.error('Erro ao buscar pagamentos pendentes:', error);
+    return [];
+  }
+};
+
 export const getTodayPickingOrders = async () => {
   const [allPicking, allRoutes] = await Promise.all([
     getAllPickingOrders(),
@@ -733,30 +808,41 @@ export const getTodayDeliveryRoutes = async () => {
 export const getOverviewStats = async () => {
   try {
     const now = new Date();
-    const startOfMonth = new Date(now.getFullYear(), now.getMonth(), 1).toISOString();
+    const year = now.getFullYear();
+    const month = String(now.getMonth() + 1).padStart(2, '0');
+    const startOfMonth = `${year}-${month}-01T00:00:00-03:00`;
     const startOfWeek = new Date(now - 7 * 24 * 60 * 60 * 1000).toISOString();
 
-    const [budgetsRes, routesRes] = await Promise.all([
+    const [budgetsRes, allBudgetsRes, routesRes] = await Promise.all([
       supabase
         .from('budgets')
-        .select('id, total, status, created_at, sale_type, payment_status, entrada_valor, budget_items(product_name, quantity, total_price)'),
+        .select('id, total, status, created_at, sale_type, payment_status, entrada_valor, budget_items(product_name, quantity, total_price)')
+        .order('created_at', { ascending: false })
+        .limit(2000),
+      supabase
+        .from('budgets')
+        .select('id, total, status'),
       supabase
         .from('delivery_routes')
         .select('id, status, budget_id')
     ]);
 
     if (budgetsRes.error) throw budgetsRes.error;
+    if (allBudgetsRes.error) throw allBudgetsRes.error;
 
     const budgets = budgetsRes.data || [];
+    const allBudgets = allBudgetsRes.data || [];
     const routes = routesRes.data || [];
 
     // Apenas vendas confirmadas (exclui rascunhos e cancelados)
     const sales = budgets.filter(b => b.status === 'confirmed' || b.status === 'delivered');
-    const monthSales = sales.filter(b => b.created_at >= startOfMonth);
+    const startOfMonthDate = new Date(`${year}-${month}-01T00:00:00Z`);
+    const monthSales = sales.filter(b => b.created_at.startsWith(`${year}-${month}`));
     const weekSales = sales.filter(b => b.created_at >= startOfWeek);
 
     // Faturamento (apenas vendas confirmadas)
-    const totalRevenue = sales.reduce((sum, b) => sum + parseFloat(b.total || 0), 0);
+    const allSales = allBudgets.filter(b => b.status === 'confirmed' || b.status === 'delivered');
+    const totalRevenue = allSales.reduce((sum, b) => sum + parseFloat(b.total || 0), 0);
     const monthRevenue = monthSales.reduce((sum, b) => sum + parseFloat(b.total || 0), 0);
 
     // Ticket médio
@@ -851,11 +937,11 @@ export const openCashSession = async (turno, saldo_inicial, saldo_inicial_detalh
   }
 };
 
-export const closeCashSession = async (sessionId, saldo_final) => {
+export const closeCashSession = async (sessionId, saldo_final, saldo_final_detalhes) => {
   try {
     const { error } = await supabase
       .from('cash_sessions')
-      .update({ status: 'fechado', saldo_final, closed_at: new Date().toISOString() })
+      .update({ status: 'fechado', saldo_final, saldo_final_detalhes, closed_at: new Date().toISOString() })
       .eq('id', sessionId);
     if (error) throw error;
     return { success: true };
@@ -876,6 +962,24 @@ export const updateFundoTarde = async (sessionId, fundo_proximo_turno, fundo_pro
   } catch (error) {
     console.error('Erro ao registrar fundo de troco:', error);
     return { success: false, error };
+  }
+};
+
+export const getUltimoSaldoFechado = async () => {
+  try {
+    const { data, error } = await supabase
+      .from('cash_sessions')
+      .select('saldo_final, saldo_final_detalhes')
+      .eq('status', 'fechado')
+      .not('saldo_final_detalhes', 'is', null)
+      .order('closed_at', { ascending: false })
+      .limit(1)
+      .maybeSingle();
+    if (error) throw error;
+    return data;
+  } catch (error) {
+    console.error('Erro ao buscar último saldo fechado:', error);
+    return null;
   }
 };
 
@@ -985,6 +1089,20 @@ export const deleteCashTransaction = async (id) => {
     return { success: true };
   } catch (error) {
     console.error('Erro ao excluir transação:', error);
+    return { success: false, error };
+  }
+};
+
+export const updateCashSessionSaldoFinal = async (id, saldo_final, saldo_final_detalhes) => {
+  try {
+    const { error } = await supabase
+      .from('cash_sessions')
+      .update({ saldo_final, saldo_final_detalhes })
+      .eq('id', id);
+    if (error) throw error;
+    return { success: true };
+  } catch (error) {
+    console.error('Erro ao atualizar saldo final:', error);
     return { success: false, error };
   }
 };

@@ -1,9 +1,10 @@
 import { useState, useEffect, useRef } from 'react';
 import html2canvas from 'html2canvas';
 import toast from 'react-hot-toast';
-import { FaThumbtack, FaReceipt, FaEdit, FaTrash, FaPrint, FaDownload, FaBoxOpen } from 'react-icons/fa';
+import { FaThumbtack, FaReceipt, FaEdit, FaTrash, FaPrint, FaDownload, FaBoxOpen, FaSearch, FaPen, FaStore, FaGlobe, FaMoneyBillWave, FaMobile, FaCreditCard, FaRandom, FaCheckCircle, FaClock, FaHourglassHalf } from 'react-icons/fa';
 import {
   getAllCustomers,
+  getCustomerByCode,
   getTodayBudgets,
   createCustomer,
   updateCustomer,
@@ -69,6 +70,7 @@ export default function BudgetManager({ onBack, initialBudget, openNew, onUpdate
   const [paymentConfirmModal, setPaymentConfirmModal] = useState(false);
   const [confirmPaymentForm, setConfirmPaymentForm] = useState('dinheiro');
   const [confirmingPayment, setConfirmingPayment] = useState(false);
+  const [approving, setApproving] = useState(false);
   const [generatingSale, setGeneratingSale] = useState(false);
   const [customerWhatsapp, setCustomerWhatsapp] = useState('');
   const [customerFilter, setCustomerFilter] = useState('');
@@ -85,6 +87,8 @@ export default function BudgetManager({ onBack, initialBudget, openNew, onUpdate
   const [quickExpenseValor, setQuickExpenseValor] = useState('');
   const [quickExpenseObs, setQuickExpenseObs] = useState('');
   const [quickExpenseSaving, setQuickExpenseSaving] = useState(false);
+  const [discount, setDiscount] = useState(0);
+  const [discountType, setDiscountType] = useState('valor');
   const finalizarBtnRef = useRef(null);
   const productNameInputRef = useRef(null);
 
@@ -217,6 +221,8 @@ export default function BudgetManager({ onBack, initialBudget, openNew, onUpdate
       setHasDelivery((budget.sale_type || 'presencial') === 'presencial' && !!(budget.delivery_address || '').trim());
       setNotes(budget.notes || '');
       setManterOrcamento(!!budget.manter_orcamento);
+      setDiscount(budget.discount || 0);
+      setDiscountType(budget.discount_type || 'valor');
       const local = customers.find(c => c.id === budget.customer_id);
       const joined = budget.customers;
       let customer = (local || joined) ? { ...(local || {}), ...(joined || {}) } : null;
@@ -331,8 +337,35 @@ export default function BudgetManager({ onBack, initialBudget, openNew, onUpdate
       setCustomerWhatsapp(creatingCustomer.whatsapp || '');
       toast.success('Cliente criado!');
     } else {
-      setSelectedCustomer({ name: creatingCustomer.name, code });
-      toast.error('Erro ao salvar cliente, usando localmente');
+      const errMsg = result.error?.message || '';
+      if (result.error?.code === '23505' && errMsg.includes('customers_code_key')) {
+        // Colisão no código aleatório — tenta de novo com outro código
+        const newCode = creatingCustomer.name.trim().split(' ')[0] + ' ' + Math.floor(1000 + Math.random() * 9000);
+        const retry = await createCustomer({ ...payload, code: newCode });
+        if (retry.success) {
+          setCustomers(prev => [...prev, retry.data]);
+          setSelectedCustomer(retry.data);
+          setCustomerWhatsapp(creatingCustomer.whatsapp || '');
+          toast.success('Cliente criado!');
+        } else {
+          toast.error('Erro ao criar cliente.');
+        }
+      } else if (result.error?.code === '23505' && errMsg.includes('customers_name_key')) {
+        const name = creatingCustomer.name.trim().toLowerCase();
+        const all = await getAllCustomers();
+        const found = all.find(c => c.name.trim().toLowerCase() === name);
+        if (found) {
+          setCustomers(prev => prev.some(c => c.id === found.id) ? prev : [...prev, found]);
+          setSelectedCustomer(found);
+          setCustomerWhatsapp(found.phone || found.whatsapp || creatingCustomer.whatsapp || '');
+          setDeliveryAddress(found.address || '');
+          toast.success('Cliente já cadastrado, selecionado automaticamente.');
+        } else {
+          toast.error('Cliente duplicado mas não encontrado. Tente buscar pelo nome.');
+        }
+      } else {
+        toast.error('Erro ao criar cliente.');
+      }
     }
     setCreatingCustomer(null);
     setCustomerFilter('');
@@ -506,8 +539,14 @@ export default function BudgetManager({ onBack, initialBudget, openNew, onUpdate
     setItems(updatedItems);
   };
 
+  const calculateSubtotal = () =>
+    items.reduce((sum, item) => sum + parseFloat(item.total_price), 0);
+
   const calculateTotal = () => {
-    return items.reduce((sum, item) => sum + parseFloat(item.total_price), 0);
+    const sub = calculateSubtotal();
+    const d = parseFloat(discount) || 0;
+    const deducao = discountType === 'percentual' ? sub * d / 100 : d;
+    return Math.max(0, sub - deducao);
   };
 
   const formatPaymentMethodPlain = () => {
@@ -579,7 +618,9 @@ export default function BudgetManager({ onBack, initialBudget, openNew, onUpdate
       entrada_valor: paymentStatus === 'parcial' ? parseFloat(entradaValue) || 0 : null,
       entrada_method: paymentStatus === 'parcial' ? entradaMethod : null,
       notes: notes,
-      manter_orcamento: manterOrcamento
+      manter_orcamento: manterOrcamento,
+      discount: parseFloat(discount) || 0,
+      discount_type: discountType
     };
 
     const itemsToSave = buildItemsToSave();
@@ -643,7 +684,9 @@ export default function BudgetManager({ onBack, initialBudget, openNew, onUpdate
       entrada_valor: paymentStatus === 'parcial' ? parseFloat(entradaValue) || 0 : null,
       entrada_method: paymentStatus === 'parcial' ? entradaMethod : null,
       notes: notes,
-      manter_orcamento: manterOrcamento
+      manter_orcamento: manterOrcamento,
+      discount: parseFloat(discount) || 0,
+      discount_type: discountType
     };
     const itemsToSave = buildItemsToSave();
     let savedBudget = budgetData;
@@ -729,6 +772,7 @@ export default function BudgetManager({ onBack, initialBudget, openNew, onUpdate
 
   const handleApprove = async () => {
     if (!budgetData) return;
+    if (approving) return;
 
     if ((saleType === 'online' || (saleType === 'presencial' && hasDelivery)) && !deliveryAddress.trim()) {
       toast.error('Preencha o endereço de entrega antes de aprovar');
@@ -736,41 +780,46 @@ export default function BudgetManager({ onBack, initialBudget, openNew, onUpdate
       return;
     }
 
-    // 1. Aprovar orçamento
-    const result = await updateBudgetStatus(budgetData.id, 'confirmed');
-    if (!result.success) {
-      toast.error('Erro ao aprovar orçamento');
-      return;
+    setApproving(true);
+    try {
+      // 1. Aprovar orçamento
+      const result = await updateBudgetStatus(budgetData.id, 'confirmed');
+      if (!result.success) {
+        toast.error('Erro ao aprovar orçamento');
+        return;
+      }
+      setBudgetData(prev => ({ ...prev, status: 'confirmed' }));
+      onUpdate && onUpdate();
+
+      // 2. Enviar para separação (silencioso se já existir)
+      const { data: existing } = await supabase
+        .from('picking')
+        .select('id')
+        .eq('budget_id', budgetData.id)
+        .limit(1);
+
+      if (!existing || existing.length === 0) {
+        await createPickingOrder({
+          budget_id: budgetData.id,
+          customer_name: budgetData.customer_name,
+          customer_code: budgetData.customer_code,
+          status: 'pending'
+        });
+      }
+
+      // 3. Ir para romaneio, imprimir e após impressão ir para Separação
+      setView('romaneio');
+      setTimeout(() => {
+        const afterPrint = () => {
+          window.removeEventListener('afterprint', afterPrint);
+          onApproved && onApproved();
+        };
+        window.addEventListener('afterprint', afterPrint);
+        window.print();
+      }, 400);
+    } finally {
+      setApproving(false);
     }
-    setBudgetData(prev => ({ ...prev, status: 'confirmed' }));
-    onUpdate && onUpdate();
-
-    // 2. Enviar para separação (silencioso se já existir)
-    const { data: existing } = await supabase
-      .from('picking')
-      .select('id')
-      .eq('budget_id', budgetData.id)
-      .limit(1);
-
-    if (!existing || existing.length === 0) {
-      await createPickingOrder({
-        budget_id: budgetData.id,
-        customer_name: budgetData.customer_name,
-        customer_code: budgetData.customer_code,
-        status: 'pending'
-      });
-    }
-
-    // 3. Ir para romaneio, imprimir e após impressão ir para Separação
-    setView('romaneio');
-    setTimeout(() => {
-      const afterPrint = () => {
-        window.removeEventListener('afterprint', afterPrint);
-        onApproved && onApproved();
-      };
-      window.addEventListener('afterprint', afterPrint);
-      window.print();
-    }, 400);
   };
 
   const handleDeleteBudget = async () => {
@@ -863,6 +912,17 @@ export default function BudgetManager({ onBack, initialBudget, openNew, onUpdate
         </div>
 
         {/* Total */}
+        {(parseFloat(discount) || 0) > 0 && (
+          <div className="rw-total-box" style={{ flexDirection: 'column', alignItems: 'stretch', gap: 2 }}>
+            <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '0.8rem', color: '#9ca3af' }}>
+              <span>SUBTOTAL</span><span>R$ {calculateSubtotal().toFixed(2)}</span>
+            </div>
+            <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '0.8rem', color: '#f87171' }}>
+              <span>DESCONTO</span>
+              <span>− R$ {(discountType === 'percentual' ? calculateSubtotal() * (parseFloat(discount) || 0) / 100 : parseFloat(discount) || 0).toFixed(2)}</span>
+            </div>
+          </div>
+        )}
         <div className="rw-total-box">
           <span className="rw-total-label">TOTAL</span>
           <span className="rw-total-value">R$ {calculateTotal().toFixed(2)}</span>
@@ -1201,6 +1261,18 @@ export default function BudgetManager({ onBack, initialBudget, openNew, onUpdate
             ))}
           </div>
 
+          {(parseFloat(budgetData?.discount) || 0) > 0 && (
+            <>
+              <div className="detail-total" style={{ color: '#9ca3af', fontWeight: 400, fontSize: '0.85rem' }}>
+                <span>Subtotal</span>
+                <span>R$ {calculateSubtotal().toFixed(2)}</span>
+              </div>
+              <div className="detail-total" style={{ color: '#f87171', fontWeight: 400, fontSize: '0.85rem' }}>
+                <span>Desconto{budgetData.discount_type === 'percentual' ? ` (${budgetData.discount}%)` : ''}</span>
+                <span>− R$ {(budgetData.discount_type === 'percentual' ? calculateSubtotal() * budgetData.discount / 100 : budgetData.discount).toFixed(2)}</span>
+              </div>
+            </>
+          )}
           <div className="detail-total">
             <span>Total</span>
             <span>R$ {total.toFixed(2)}</span>
@@ -1269,8 +1341,8 @@ export default function BudgetManager({ onBack, initialBudget, openNew, onUpdate
                 <span>Baixar Imagem</span>
               </button>
             </div>
-            <button className="detail-action-btn approve" onClick={handleApprove}>
-              <span>Cliente Aprovou</span>
+            <button className="detail-action-btn approve" onClick={handleApprove} disabled={approving}>
+              <span>{approving ? 'Aprovando...' : 'Cliente Aprovou'}</span>
             </button>
           </div>
         ) : (
@@ -1342,10 +1414,17 @@ export default function BudgetManager({ onBack, initialBudget, openNew, onUpdate
             )}
             {hasPicking && <span className="badge-already">📦 Em Separação</span>}
             {hasRoute && <span className="badge-already">📍 Rota criada</span>}
-            {(budgetData?.payment_status === 'a_receber' || budgetData?.payment_status === 'parcial') && !hasRoute && (
+            {(budgetData?.payment_status === 'a_receber' || budgetData?.payment_status === 'parcial') && budgetData?.status !== 'draft' && !hasRoute && (
               <button
                 className="detail-action-btn pay"
-                onClick={() => { setConfirmPaymentForm('dinheiro'); setPaymentConfirmModal(true); }}
+                onClick={() => {
+                  if (budgetData?.status === 'draft') {
+                    toast.error('Aprove o orçamento antes de confirmar o pagamento');
+                    return;
+                  }
+                  setConfirmPaymentForm('dinheiro');
+                  setPaymentConfirmModal(true);
+                }}
               >
                 <span className="action-icon">💰</span>
                 <span>Marcar como Pago</span>
@@ -1509,7 +1588,18 @@ export default function BudgetManager({ onBack, initialBudget, openNew, onUpdate
                 </>
               )}
               {paymentStatus === 'a_receber' && (
-                <div className="rf-value">Status: <span style={{ color: '#dc2626' }}>A RECEBER</span></div>
+                <>
+                  <div className="rf-value">Status: <span style={{ color: '#dc2626' }}>A RECEBER</span></div>
+                  {saleType === 'online' && paymentMethod === 'dinheiro' && parseFloat(trocoRecebido) > calculateTotal() && (() => {
+                    const troco = parseFloat(trocoRecebido) - calculateTotal();
+                    return (
+                      <>
+                        <div className="rf-value">Valor a receber: R$ {parseFloat(trocoRecebido).toFixed(2)}</div>
+                        <div className="rf-value" style={{ fontWeight: 700 }}>Troco a levar: R$ {troco.toFixed(2)}</div>
+                      </>
+                    );
+                  })()}
+                </>
               )}
             </div>
 
@@ -1595,7 +1685,7 @@ export default function BudgetManager({ onBack, initialBudget, openNew, onUpdate
                   className="search-icon-btn"
                   onClick={() => setShowCustomerDropdown(true)}
                   tabIndex={-1}
-                >🔍</button>
+                ><FaSearch /></button>
                 <input
                   type="text"
                   value={customerFilter}
@@ -1691,13 +1781,13 @@ export default function BudgetManager({ onBack, initialBudget, openNew, onUpdate
                 className={`toggle-btn ${!manualProductMode ? 'active' : ''}`}
                 onClick={() => setManualProductMode(false)}
               >
-                📦 Catálogo
+                <FaBoxOpen /> Catálogo
               </button>
               <button
                 className={`toggle-btn ${manualProductMode ? 'active' : ''}`}
                 onClick={() => setManualProductMode(true)}
               >
-                ✏️ Manual
+                <FaPen /> Manual
               </button>
             </div>
           </div>
@@ -1871,8 +1961,47 @@ export default function BudgetManager({ onBack, initialBudget, openNew, onUpdate
           </div>
         </div>
 
+        {/* Desconto */}
+        <div className="form-section">
+          <label className="section-label">Desconto</label>
+          <div style={{ display: 'flex', gap: 8, alignItems: 'center' }}>
+            <div style={{ display: 'flex', border: '1.5px solid #e0e6ef', borderRadius: 8, overflow: 'hidden' }}>
+              <button
+                type="button"
+                onClick={() => setDiscountType('valor')}
+                style={{ padding: '8px 14px', background: discountType === 'valor' ? '#2563eb' : '#f4f6fb', color: discountType === 'valor' ? '#fff' : '#666', border: 'none', cursor: 'pointer', fontWeight: 600, fontSize: '0.85rem' }}
+              >R$</button>
+              <button
+                type="button"
+                onClick={() => setDiscountType('percentual')}
+                style={{ padding: '8px 14px', background: discountType === 'percentual' ? '#2563eb' : '#f4f6fb', color: discountType === 'percentual' ? '#fff' : '#666', border: 'none', cursor: 'pointer', fontWeight: 600, fontSize: '0.85rem' }}>%</button>
+            </div>
+            <input
+              type="number"
+              min="0"
+              step="0.01"
+              value={discount || ''}
+              onChange={e => setDiscount(e.target.value)}
+              placeholder="0"
+              style={{ width: 120, padding: '8px 12px', background: '#fff', border: '1.5px solid #e0e6ef', borderRadius: 8, color: '#333', fontSize: '0.9rem' }}
+            />
+          </div>
+        </div>
+
         {/* Total */}
         <div className="form-section total-section">
+          {(parseFloat(discount) || 0) > 0 && (
+            <>
+              <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '0.85rem', color: '#9ca3af', marginBottom: 4 }}>
+                <span>Subtotal</span>
+                <span>R$ {calculateSubtotal().toFixed(2)}</span>
+              </div>
+              <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '0.85rem', color: '#f87171', marginBottom: 8 }}>
+                <span>Desconto</span>
+                <span>− R$ {(discountType === 'percentual' ? calculateSubtotal() * (parseFloat(discount) || 0) / 100 : parseFloat(discount) || 0).toFixed(2)}</span>
+              </div>
+            </>
+          )}
           <div className="total-label">Total</div>
           <div className="total-value">R$ {calculateTotal().toFixed(2)}</div>
         </div>
@@ -1886,14 +2015,14 @@ export default function BudgetManager({ onBack, initialBudget, openNew, onUpdate
               className={`sale-type-btn ${saleType === 'presencial' ? 'active' : ''}`}
               onClick={() => setSaleType('presencial')}
             >
-              🏪 Presencial
+              <FaStore /> Presencial
             </button>
             <button
               type="button"
               className={`sale-type-btn ${saleType === 'online' ? 'active' : ''}`}
               onClick={() => { setSaleType('online'); setHasDelivery(false); }}
             >
-              📱 Online
+              <FaGlobe /> Online
             </button>
           </div>
         </div>
@@ -1926,6 +2055,23 @@ export default function BudgetManager({ onBack, initialBudget, openNew, onUpdate
               rows={2}
               autoFocus={saleType === 'presencial'}
             />
+            {selectedCustomer?.id && deliveryAddress.trim() && deliveryAddress.trim() !== (selectedCustomer?.address || '').trim() && (
+              <button
+                type="button"
+                className="save-address-btn"
+                onClick={async () => {
+                  const { success } = await updateCustomer(selectedCustomer.id, { address: deliveryAddress.trim() });
+                  if (success) {
+                    setSelectedCustomer(prev => ({ ...prev, address: deliveryAddress.trim() }));
+                    toast.success('Endereço salvo no cadastro do cliente');
+                  } else {
+                    toast.error('Erro ao salvar endereço');
+                  }
+                }}
+              >
+                Salvar endereço no cadastro
+              </button>
+            )}
           </div>
         )}
 
@@ -1940,21 +2086,23 @@ export default function BudgetManager({ onBack, initialBudget, openNew, onUpdate
                 className={`payment-opt-btn ${paymentMethod === opt ? 'active' : ''}`}
                 onClick={() => setPaymentMethod(opt)}
               >
-                {opt === 'dinheiro' && '💵 Dinheiro'}
-                {opt === 'pix' && '📱 PIX'}
-                {opt === 'cartao_debito' && '💳 Débito'}
-                {opt === 'cartao_credito' && '💳 Crédito'}
+                {opt === 'dinheiro' && <><FaMoneyBillWave /> Dinheiro</>}
+                {opt === 'pix' && <><FaMobile /> PIX</>}
+                {opt === 'cartao_debito' && <><FaCreditCard /> Débito</>}
+                {opt === 'cartao_credito' && <><FaCreditCard /> Crédito</>}
                 {opt === 'boleto' && 'Boleto'}
-                {opt === 'misto' && '🔀 Misto'}
+                {opt === 'misto' && <><FaRandom /> Misto</>}
               </button>
             ))}
           </div>
 
           {/* Troco — pagamento total em dinheiro */}
-          {paymentMethod === 'dinheiro' && paymentStatus === 'pago' && (
+          {paymentMethod === 'dinheiro' && (paymentStatus === 'pago' || paymentStatus === 'a_receber') && (
             <div className="troco-box">
               <div className="troco-row">
-                <span className="troco-label">Valor recebido</span>
+                <span className="troco-label">
+                  {paymentStatus === 'a_receber' ? 'Valor a receber (troco)' : 'Valor recebido'}
+                </span>
                 <input
                   type="number"
                   className="misto-input"
@@ -1968,11 +2116,11 @@ export default function BudgetManager({ onBack, initialBudget, openNew, onUpdate
               {parseFloat(trocoRecebido) > 0 && (
                 <div className={`troco-result ${parseFloat(trocoRecebido) >= calculateTotal() ? 'troco-ok' : 'troco-warn'}`}>
                   {parseFloat(trocoRecebido) >= calculateTotal()
-                    ? `Troco: R$ ${(parseFloat(trocoRecebido) - calculateTotal()).toFixed(2)}`
+                    ? `${paymentStatus === 'a_receber' ? 'Troco a levar' : 'Troco'}: R$ ${(parseFloat(trocoRecebido) - calculateTotal()).toFixed(2)}`
                     : `Faltam R$ ${(calculateTotal() - parseFloat(trocoRecebido)).toFixed(2)}`}
                 </div>
               )}
-              {saleType === 'online' && parseFloat(trocoRecebido) >= calculateTotal() && (() => {
+              {paymentStatus === 'pago' && saleType === 'online' && parseFloat(trocoRecebido) >= calculateTotal() && (() => {
                 const trocoAtual = (parseFloat(trocoRecebido) - calculateTotal()).toFixed(2);
                 const jaLancado = trocoOnlineLancadoValor === trocoAtual;
                 return (
@@ -1993,9 +2141,9 @@ export default function BudgetManager({ onBack, initialBudget, openNew, onUpdate
           {paymentMethod === 'misto' && (
             <div className="misto-breakdown">
               {[
-                { key: 'dinheiro', label: '💵 Dinheiro' },
-                { key: 'pix', label: '📱 PIX' },
-                { key: 'cartao', label: '💳 Cartão' },
+                { key: 'dinheiro', label: <><FaMoneyBillWave /> Dinheiro</> },
+                { key: 'pix', label: <><FaMobile /> PIX</> },
+                { key: 'cartao', label: <><FaCreditCard /> Cartão</> },
               ].map(({ key, label }) => (
                 <div key={key} className="misto-row">
                   <span className="misto-label">{label}</span>
@@ -2063,13 +2211,13 @@ export default function BudgetManager({ onBack, initialBudget, openNew, onUpdate
           <label className="section-label">Status do pagamento</label>
           <div className="sale-type-toggle">
             <button type="button" className={`sale-type-btn ${paymentStatus === 'pago' ? 'active' : ''}`} onClick={() => setPaymentStatus('pago')}>
-              ✅ Pago
+              <FaCheckCircle /> Pago
             </button>
             <button type="button" className={`sale-type-btn ${paymentStatus === 'parcial' ? 'active' : ''}`} onClick={() => setPaymentStatus('parcial')}>
-              🔄 Pagamento parcial
+              <FaClock /> Pagamento parcial
             </button>
             <button type="button" className={`sale-type-btn ${paymentStatus === 'a_receber' ? 'active' : ''}`} onClick={() => setPaymentStatus('a_receber')}>
-              ⏳ A receber
+              <FaHourglassHalf /> A receber
             </button>
           </div>
 
@@ -2180,16 +2328,10 @@ export default function BudgetManager({ onBack, initialBudget, openNew, onUpdate
             onClick={handleGenerateSale}
             disabled={items.length === 0 || !paymentMethod || generatingSale}
           >
-            {generatingSale ? 'Gerando...' : '✅ Gerar Venda'}
+            {generatingSale ? 'Gerando...' : <><FaCheckCircle /> Gerar Venda</>}
           </button>
         </div>
 
-        {/* Footer Icons */}
-        <div className="form-footer-icons">
-          <button className="icon-btn">📤</button>
-          <button className="icon-btn">🔗</button>
-          <button className="icon-btn">💬</button>
-        </div>
       </div>
 
       {showPinGate && (

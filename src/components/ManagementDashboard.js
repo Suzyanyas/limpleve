@@ -1,10 +1,12 @@
 import { useState, useEffect, useRef } from 'react';
+import { FaClipboardList, FaPlus, FaBars, FaRegSquare, FaCheckSquare, FaBoxOpen, FaMapMarkerAlt, FaCircle, FaCheck } from 'react-icons/fa';
 import { useSearchParams } from 'react-router-dom';
 import toast from 'react-hot-toast';
 import {
   getTodayBudgets,
   getTodayPickingOrders,
-  getTodayDeliveryRoutes
+  getTodayDeliveryRoutes,
+  getBudgetById
 } from '../services/managementService';
 import BudgetManager from './BudgetManager';
 import PickingManager from './PickingManager';
@@ -50,7 +52,11 @@ export default function ManagementDashboard() {
   useEffect(() => {
     if (activeView === 'budgets' && budgetId) {
       const found = budgets.find(b => b.id === budgetId);
-      if (found) setSelectedBudget(found);
+      if (found) {
+        setSelectedBudget(found);
+      } else {
+        getBudgetById(budgetId).then(b => { if (b) setSelectedBudget(b); });
+      }
     } else if (activeView !== 'budgets') {
       setSelectedBudget(null);
     }
@@ -141,7 +147,7 @@ export default function ManagementDashboard() {
         <div className="dashboard-card budgets-card" onClick={() => handleCardClick('budgets', null, true)}>
           <div className="card-header">
             <h3>
-              <span className="icon">📋</span>
+              <FaClipboardList className="icon" />
               Orçamentos
             </h3>
             <div className="card-header-actions">
@@ -150,14 +156,14 @@ export default function ManagementDashboard() {
                 onClick={(e) => { e.stopPropagation(); handleCardClick('budgets', null, true); }}
                 title="Novo orçamento"
               >
-                <span className="plus-icon">+</span>
+                <FaPlus className="plus-icon" />
               </button>
               <button
                 className="btn-expand"
                 onClick={(e) => { e.stopPropagation(); handleCardClick('budgets', null, false); }}
                 title="Ver lista"
               >
-                ☰
+                <FaBars />
               </button>
             </div>
           </div>
@@ -174,8 +180,23 @@ export default function ManagementDashboard() {
                     className="item"
                     onClick={(e) => { e.stopPropagation(); handleCardClick('budgets', budget); }}
                   >
-                    <span className="checkbox">☐</span>
+                    <FaRegSquare className="checkbox" />
+                    {budget.sale_type === 'online'
+                      ? <span className="item-badge-online">Online</span>
+                      : <span className="item-badge-presencial">Presencial</span>
+                    }
                     <span className="item-name">{budget.customer_name}</span>
+                    {budget.total != null && (
+                      <span className="item-total">
+                        R$ {parseFloat(budget.total).toFixed(2).replace('.', ',')}
+                      </span>
+                    )}
+                    {budget.payment_status === 'a_receber' && (
+                      <span className="item-badge-areceber">A receber</span>
+                    )}
+                    {budget.payment_status === 'parcial' && (
+                      <span className="item-badge-parcial">Parcial</span>
+                    )}
                   </li>
                 ))}
               </ul>
@@ -187,7 +208,7 @@ export default function ManagementDashboard() {
         <div className="dashboard-card picking-card" onClick={() => handleCardClick('picking')}>
           <div className="card-header">
             <h3>
-              <span className="icon">📦</span>
+              <FaBoxOpen className="icon" />
               Separação
             </h3>
           </div>
@@ -204,7 +225,7 @@ export default function ManagementDashboard() {
                     className="item picked"
                     onClick={() => handleCardClick('picking')}
                   >
-                    <span className="checkbox checked">✓</span>
+                    <FaCheckSquare className="checkbox checked" />
                     <span className="item-name">{order.customer_name}</span>
                   </li>
                 ))}
@@ -214,7 +235,7 @@ export default function ManagementDashboard() {
                     className="item"
                     onClick={() => handleCardClick('picking')}
                   >
-                    <span className="checkbox">☐</span>
+                    <FaRegSquare className="checkbox" />
                     <span className="item-name">{order.customer_name}</span>
                   </li>
                 ))}
@@ -227,7 +248,7 @@ export default function ManagementDashboard() {
         <div className="dashboard-card routes-card" onClick={() => handleCardClick('routes')}>
           <div className="card-header">
             <h3>
-              <span className="icon">📍</span>
+              <FaMapMarkerAlt className="icon" />
               Rota
             </h3>
           </div>
@@ -241,7 +262,7 @@ export default function ManagementDashboard() {
                 {routesNext.length > 0 && (
                   <div className="route-section">
                     <h4 className="route-status next">
-                      <span className="status-icon">🔴</span>
+                      <FaCircle className="status-icon" style={{ color: '#e53e3e' }} />
                       Próxima rota
                     </h4>
                     <ul className="items-list">
@@ -261,7 +282,7 @@ export default function ManagementDashboard() {
                 {routesInProgress.length > 0 && (
                   <div className="route-section">
                     <h4 className="route-status in-progress">
-                      <span className="status-icon">🟢</span>
+                      <FaCircle className="status-icon" style={{ color: '#38a169' }} />
                       Em rota
                     </h4>
                     <ul className="items-list">
@@ -272,7 +293,7 @@ export default function ManagementDashboard() {
                           onClick={() => handleCardClick('routes')}
                         >
                           <span className="item-name">{route.customer_name}</span>
-                          <span className="status-badge success">✓</span>
+                          <FaCheck className="status-badge success" />
                         </li>
                       ))}
                     </ul>

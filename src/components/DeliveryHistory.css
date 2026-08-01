@@ -1,0 +1,371 @@
+/* ── Root ───────────────────────────────────────────────────────────────────── */
+.dh-root {
+  min-height: 100vh;
+  background: linear-gradient(135deg, #1e3c72 0%, #2a5298 100%);
+  padding: 20px 20px 48px;
+  box-sizing: border-box;
+}
+
+/* ── Topbar ─────────────────────────────────────────────────────────────────── */
+.dh-topbar {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  max-width: 900px;
+  margin: 0 auto 24px;
+  flex-wrap: wrap;
+}
+
+.dh-back-btn {
+  background: rgba(255, 255, 255, 0.15);
+  border: none;
+  color: #fff;
+  padding: 8px 16px;
+  border-radius: 10px;
+  cursor: pointer;
+  font-size: 14px;
+  font-weight: 600;
+  transition: background 0.2s;
+  white-space: nowrap;
+}
+.dh-back-btn:hover {
+  background: rgba(255, 255, 255, 0.25);
+}
+
+.dh-title {
+  color: #fff;
+  font-size: 20px;
+  font-weight: 700;
+  border-left: 4px solid #f97316;
+  padding-left: 12px;
+  margin-bottom: 20px;
+}
+
+.dh-date-wrap {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  background: rgba(255, 255, 255, 0.15);
+  border-radius: 10px;
+  padding: 8px 14px;
+}
+
+.dh-cal-icon {
+  color: rgba(255, 255, 255, 0.8);
+  font-size: 15px;
+  flex-shrink: 0;
+}
+
+.dh-date-input {
+  background: transparent;
+  border: none;
+  color: #fff;
+  font-size: 15px;
+  font-weight: 600;
+  cursor: pointer;
+  outline: none;
+  min-width: 130px;
+}
+.dh-date-input::-webkit-calendar-picker-indicator {
+  filter: invert(1);
+  cursor: pointer;
+}
+
+/* ── Summary cards ──────────────────────────────────────────────────────────── */
+.dh-summary {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 12px;
+  max-width: 900px;
+  margin: 0 auto 28px;
+}
+
+.dh-summary-card {
+  background: rgba(255, 255, 255, 0.13);
+  border-radius: 16px;
+  padding: 16px 14px;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  border-top: 3px solid transparent;
+  transition: background 0.2s;
+}
+.dh-summary-card:hover {
+  background: rgba(255, 255, 255, 0.2);
+}
+
+.dh-summary-card--total    { border-color: rgba(255, 255, 255, 0.6); }
+.dh-summary-card--delivered { border-color: #4caf50; }
+.dh-summary-card--active   { border-color: #ffa726; }
+.dh-summary-card--cancelled { border-color: rgba(255, 255, 255, 0.3); }
+
+.dh-summary-label {
+  color: rgba(255, 255, 255, 0.75);
+  font-size: 12px;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+}
+
+.dh-summary-value {
+  color: #fff;
+  font-size: 20px;
+  font-weight: 700;
+}
+
+.dh-summary-sub {
+  color: rgba(255, 255, 255, 0.55);
+  font-size: 12px;
+}
+
+/* ── Loading / empty ────────────────────────────────────────────────────────── */
+.dh-loading,
+.dh-empty {
+  text-align: center;
+  color: rgba(255, 255, 255, 0.7);
+  font-size: 16px;
+  padding: 60px 20px;
+  max-width: 900px;
+  margin: 0 auto;
+}
+
+/* ── Sections ───────────────────────────────────────────────────────────────── */
+.dh-sections {
+  max-width: 900px;
+  margin: 0 auto;
+  display: flex;
+  flex-direction: column;
+  gap: 28px;
+}
+
+.dh-section {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.dh-section-header {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 10px 14px;
+  border-radius: 12px;
+  background: rgba(255, 255, 255, 0.1);
+  border-left: 4px solid transparent;
+  margin-bottom: 2px;
+}
+
+.dh-section-header--delivered { border-color: #4caf50; }
+.dh-section-header--in-progress { border-color: #ffa726; }
+.dh-section-header--next { border-color: #90caf9; }
+.dh-section-header--cancelled { border-color: rgba(255, 255, 255, 0.3); }
+
+.dh-section-icon {
+  display: flex;
+  align-items: center;
+  font-size: 16px;
+  color: #fff;
+}
+.dh-section-header--delivered .dh-section-icon { color: #4caf50; }
+.dh-section-header--in-progress .dh-section-icon { color: #ffa726; }
+.dh-section-header--next .dh-section-icon { color: #90caf9; }
+.dh-section-header--cancelled .dh-section-icon { color: rgba(255, 255, 255, 0.4); }
+
+.dh-section-label {
+  flex: 1;
+  color: #fff;
+  font-size: 15px;
+  font-weight: 700;
+}
+
+.dh-section-count {
+  background: rgba(255, 255, 255, 0.18);
+  color: #fff;
+  font-size: 13px;
+  font-weight: 700;
+  padding: 2px 10px;
+  border-radius: 20px;
+}
+
+/* ── Delivery cards ─────────────────────────────────────────────────────────── */
+.dh-card {
+  background: rgba(255, 255, 255, 0.12);
+  border-radius: 14px;
+  overflow: hidden;
+  border-left: 3px solid transparent;
+  transition: background 0.2s;
+}
+.dh-card:hover {
+  background: rgba(255, 255, 255, 0.18);
+}
+
+.dh-card--delivered   { border-color: #4caf50; }
+.dh-card--in_progress { border-color: #ffa726; }
+.dh-card--next        { border-color: #90caf9; }
+.dh-card--cancelled   {
+  border-color: rgba(255, 255, 255, 0.2);
+  opacity: 0.65;
+}
+
+.dh-card-main {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 14px 16px;
+}
+
+.dh-card-info {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  flex: 1;
+  min-width: 0;
+}
+
+.dh-customer {
+  color: #fff;
+  font-size: 16px;
+  font-weight: 700;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.dh-meta {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  color: rgba(255, 255, 255, 0.7);
+  font-size: 13px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.dh-icon-inline {
+  font-size: 12px;
+  flex-shrink: 0;
+  color: rgba(255, 255, 255, 0.5);
+}
+
+.dh-card-right {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: 8px;
+  flex-shrink: 0;
+}
+
+.dh-total {
+  color: #fff;
+  font-size: 17px;
+  font-weight: 700;
+  white-space: nowrap;
+}
+
+.dh-total--muted {
+  color: rgba(255, 255, 255, 0.45);
+  text-decoration: line-through;
+}
+
+.dh-expand-btn {
+  background: rgba(255, 255, 255, 0.15);
+  border: none;
+  color: rgba(255, 255, 255, 0.8);
+  width: 30px;
+  height: 30px;
+  border-radius: 8px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  font-size: 13px;
+  transition: background 0.15s;
+  flex-shrink: 0;
+}
+.dh-expand-btn:hover {
+  background: rgba(255, 255, 255, 0.28);
+}
+
+/* ── Items table ────────────────────────────────────────────────────────────── */
+.dh-items {
+  padding: 0 16px 14px;
+  overflow-x: auto;
+}
+
+.dh-items-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 13px;
+  color: rgba(255, 255, 255, 0.85);
+}
+
+.dh-items-table thead tr {
+  border-bottom: 1px solid rgba(255, 255, 255, 0.2);
+}
+
+.dh-items-table th {
+  font-weight: 600;
+  font-size: 12px;
+  text-transform: uppercase;
+  letter-spacing: 0.03em;
+  color: rgba(255, 255, 255, 0.55);
+  padding: 6px 8px;
+  text-align: left;
+}
+
+.dh-items-table td {
+  padding: 6px 8px;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.07);
+}
+
+.dh-items-table tr:last-child td {
+  border-bottom: none;
+}
+
+.dh-center { text-align: center; }
+.dh-right  { text-align: right; }
+
+/* ── Responsive ─────────────────────────────────────────────────────────────── */
+@media (max-width: 640px) {
+  .dh-root {
+    padding: 16px 12px 48px;
+  }
+
+  .dh-topbar {
+    gap: 10px;
+  }
+
+  .dh-title {
+    font-size: 18px;
+    width: 100%;
+    order: -1;
+  }
+
+  .dh-summary {
+    grid-template-columns: repeat(2, 1fr);
+  }
+
+  .dh-summary-value {
+    font-size: 17px;
+  }
+
+  .dh-customer {
+    font-size: 15px;
+  }
+
+  .dh-total {
+    font-size: 15px;
+  }
+}
+
+@media (max-width: 380px) {
+  .dh-summary {
+    grid-template-columns: 1fr 1fr;
+    gap: 8px;
+  }
+  .dh-summary-value {
+    font-size: 15px;
+  }
+}

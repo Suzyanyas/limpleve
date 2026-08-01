@@ -605,6 +605,22 @@
   border-color: #304D73;
 }
 
+.save-address-btn {
+  margin-top: 6px;
+  padding: 4px 10px;
+  font-size: 0.78rem;
+  color: #304D73;
+  background: transparent;
+  border: 1px solid #304D73;
+  border-radius: 6px;
+  cursor: pointer;
+  opacity: 0.75;
+  transition: opacity 0.15s;
+}
+.save-address-btn:hover {
+  opacity: 1;
+}
+
 .btn-troco-online {
   width: 100%;
   margin-top: 10px;

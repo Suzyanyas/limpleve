@@ -1,6 +1,6 @@
 import { useState, useEffect, useCallback } from 'react';
 import toast from 'react-hot-toast';
-import { FaReceipt, FaEdit, FaChevronDown } from 'react-icons/fa';
+import { FaReceipt, FaEdit, FaChevronDown, FaMoneyBillWave, FaMobile, FaCreditCard, FaStore, FaGlobe, FaSun, FaMoon, FaHistory, FaCashRegister, FaChartBar, FaLock, FaArrowDown, FaCheck, FaExclamationTriangle, FaCircle } from 'react-icons/fa';
 import {
   getOpenSession,
   openCashSession,
@@ -13,6 +13,8 @@ import {
   updateCashSessionSaldoInicial,
   updateFundoTarde,
   getUltimoFundoTarde,
+  getUltimoSaldoFechado,
+  updateCashSessionSaldoFinal,
 } from '../services/managementService';
 import './CashManager.css';
 
@@ -95,7 +97,7 @@ export function CashStatusBar({ onOpen }) {
       <div className="cash-status-left">
         <div className="cash-status-dot" />
         <div>
-          <div className="cash-status-label">🟢 Caixa {session.turno === 'manha' ? 'Manhã' : 'Tarde'} aberto</div>
+          <div className="cash-status-label"><FaCircle style={{ color: '#38a169', fontSize: '0.6em', verticalAlign: 'middle' }} /> Caixa {session.turno === 'manha' ? 'Manhã' : 'Tarde'} aberto</div>
         </div>
       </div>
       <button className="cash-status-btn" onClick={onOpen}>Ver caixa</button>
@@ -123,6 +125,9 @@ export default function CashManager({ onBack }) {
   const [saldoAberto, setSaldoAberto] = useState(false);
   const [cedulasFundo, setCedulasFundo] = useState(EMPTY_CEDULAS);
   const [fundoSugerido, setFundoSugerido] = useState(null); // { fundo_proximo_turno, fundo_proximo_turno_detalhes }
+  const [ultimoSaldo, setUltimoSaldo] = useState(null); // { saldo_final, saldo_final_detalhes }
+  const [editingSaldoId, setEditingSaldoId] = useState(null);
+  const [editCedulas, setEditCedulas] = useState({});
 
   const loadSession = useCallback(async () => {
     const s = await getOpenSession();
@@ -213,7 +218,10 @@ export default function CashManager({ onBack }) {
   // ── Fechamento ──
   const handleClose = async () => {
     const saldo = calcSaldo(cedulas);
-    const result = await closeCashSession(session.id, saldo);
+    const detalhes = Object.fromEntries(
+      Object.entries(cedulas).map(([k, v]) => [k, parseFloat(v) || 0])
+    );
+    const result = await closeCashSession(session.id, saldo, detalhes);
     if (result.success) {
       toast.success('Caixa fechado!');
       setCedulas(EMPTY_CEDULAS);
@@ -261,10 +269,10 @@ export default function CashManager({ onBack }) {
     <div className="cash-manager">
       <div className="cash-header">
         <button className="cash-back-btn" onClick={onBack}>←</button>
-        <div className="cash-title">💰 Caixa</div>
+        <div className="cash-title">CAIXA</div>
         {view === 'sessao' && (
           <button className="cash-report-btn" onClick={loadReport}>
-            📊 Relatório
+            <FaChartBar /> Relatório
           </button>
         )}
       </div>
@@ -276,22 +284,27 @@ export default function CashManager({ onBack }) {
           <button className="btn-open-cash" onClick={async () => {
             setCedulas(EMPTY_CEDULAS);
             setFundoSugerido(null);
+            setUltimoSaldo(null);
             if (turno === 'manha') {
               const fundo = await getUltimoFundoTarde();
               if (fundo?.fundo_proximo_turno_detalhes) {
-                const preenchido = Object.fromEntries(
-                  Object.entries(fundo.fundo_proximo_turno_detalhes).map(([k, v]) => [k, v || ''])
-                );
-                setCedulas(preenchido);
+                setCedulas(Object.fromEntries(Object.entries(fundo.fundo_proximo_turno_detalhes).map(([k, v]) => [k, v || ''])));
                 setFundoSugerido(fundo);
+                setView('abertura');
+                return;
               }
+            }
+            const ultimo = await getUltimoSaldoFechado();
+            if (ultimo?.saldo_final_detalhes) {
+              setCedulas(Object.fromEntries(Object.entries(ultimo.saldo_final_detalhes).map(([k, v]) => [k, v || ''])));
+              setUltimoSaldo(ultimo);
             }
             setView('abertura');
           }}>
             Abrir Caixa
           </button>
           <button className="cash-modal-cancel" style={{ width: '100%', marginTop: 10 }} onClick={loadReport}>
-            📊 Ver relatório do dia
+            <FaChartBar /> Ver relatório do dia
           </button>
         </div>
       )}
@@ -305,18 +318,40 @@ export default function CashManager({ onBack }) {
               💡 Fundo de troco sugerido da sessão anterior: <strong>{formatCurrency(fundoSugerido.fundo_proximo_turno)}</strong>. Edite as quantidades se necessário.
             </div>
           )}
+          {ultimoSaldo && !fundoSugerido && (
+            <div style={{ background: 'rgba(52,211,153,0.12)', border: '1px solid #34d399', borderRadius: 8, padding: '8px 12px', marginBottom: 12, fontSize: '0.8rem', color: '#6ee7b7' }}>
+              <FaHistory size={12} style={{ marginRight: 6 }} /> Último saldo fechado: <strong>{formatCurrency(ultimoSaldo.saldo_final)}</strong>. Edite as quantidades se necessário.
+            </div>
+          )}
           <div className="turno-toggle">
             <button className={`turno-btn ${turno === 'manha' ? 'active' : ''}`} onClick={async () => {
               setTurno('manha');
               setCedulas(EMPTY_CEDULAS);
               setFundoSugerido(null);
+              setUltimoSaldo(null);
               const fundo = await getUltimoFundoTarde();
               if (fundo?.fundo_proximo_turno_detalhes) {
                 setCedulas(Object.fromEntries(Object.entries(fundo.fundo_proximo_turno_detalhes).map(([k, v]) => [k, v || ''])));
                 setFundoSugerido(fundo);
+                return;
               }
-            }}>🌅 Manhã</button>
-            <button className={`turno-btn ${turno === 'tarde' ? 'active' : ''}`} onClick={() => { setTurno('tarde'); setCedulas(EMPTY_CEDULAS); setFundoSugerido(null); }}>🌇 Tarde</button>
+              const ultimo = await getUltimoSaldoFechado();
+              if (ultimo?.saldo_final_detalhes) {
+                setCedulas(Object.fromEntries(Object.entries(ultimo.saldo_final_detalhes).map(([k, v]) => [k, v || ''])));
+                setUltimoSaldo(ultimo);
+              }
+            }}><FaSun size={13} style={{ marginRight: 5 }} />Manhã</button>
+            <button className={`turno-btn ${turno === 'tarde' ? 'active' : ''}`} onClick={async () => {
+              setTurno('tarde');
+              setCedulas(EMPTY_CEDULAS);
+              setFundoSugerido(null);
+              setUltimoSaldo(null);
+              const ultimo = await getUltimoSaldoFechado();
+              if (ultimo?.saldo_final_detalhes) {
+                setCedulas(Object.fromEntries(Object.entries(ultimo.saldo_final_detalhes).map(([k, v]) => [k, v || ''])));
+                setUltimoSaldo(ultimo);
+              }
+            }}><FaMoon size={13} style={{ marginRight: 5 }} />Tarde</button>
           </div>
           <table className="cedulas-table">
             <thead>
@@ -361,7 +396,7 @@ export default function CashManager({ onBack }) {
         <div className="cash-session-panel">
           <div className="cash-session-header">
             <div className="cash-session-title">
-              {session.turno === 'manha' ? '🌅 Caixa Manhã' : '🌇 Caixa Tarde'} • aberto às {new Date(session.opened_at).toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' })}
+              {session.turno === 'manha' ? <><FaSun size={13} style={{ marginRight: 5 }} />Caixa Manhã</> : <><FaMoon size={13} style={{ marginRight: 5 }} />Caixa Tarde</>} • aberto às {new Date(session.opened_at).toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' })}
             </div>
             <div className="cash-session-saldo-label">saldo esperado</div>
             <div className="cash-session-saldo">{formatCurrency(saldoEsperado)}</div>
@@ -407,10 +442,17 @@ export default function CashManager({ onBack }) {
           </div>
 
           <div className="cash-quick-actions">
-            <button className="cash-action-btn reforco" onClick={() => setModal('reforco')}>💵 Reforço</button>
-            <button className="cash-action-btn sangria" onClick={() => setModal('sangria')}>💸 Sangria</button>
+            <button className="cash-action-btn reforco" onClick={() => setModal('reforco')}><FaMoneyBillWave /> Reforço</button>
+            <button className="cash-action-btn sangria" onClick={() => setModal('sangria')}><FaArrowDown /> Sangria</button>
             <button className="cash-action-btn despesa" onClick={() => setModal('despesa')}><FaReceipt size={13} /> Despesa</button>
-            <button className="cash-action-btn fechar" onClick={() => { setCedulas(EMPTY_CEDULAS); setView('fechamento'); }}>🔒 Fechar</button>
+            <button className="cash-action-btn fechar" onClick={() => {
+  const detalhes = session?.saldo_inicial_detalhes;
+  setCedulas(detalhes
+    ? Object.fromEntries(Object.entries(detalhes).map(([k, v]) => [k, v || '']))
+    : EMPTY_CEDULAS
+  );
+  setView('fechamento');
+}}><FaLock /> Fechar</button>
           </div>
 
           <div className="cash-transactions-card">
@@ -459,7 +501,7 @@ export default function CashManager({ onBack }) {
       {/* ── FECHAMENTO ── */}
       {view === 'fechamento' && session && (
         <div className="cash-open-card">
-          <div className="cash-open-title">🔒 Fechar Caixa - Conte o dinheiro.</div>
+          <div className="cash-open-title"><FaLock /> Fechar Caixa - Conte o dinheiro.</div>
           <table className="cedulas-table">
             <thead>
               <tr><th>Cédula/Moeda</th><th>Qtd</th><th>Total</th></tr>
@@ -496,7 +538,7 @@ export default function CashManager({ onBack }) {
             <span style={{ fontSize: '0.85rem' }}>Diferença: </span>
             <span className={Math.abs(saldoContado - saldoEsperado) < 0.01 ? 'diff-ok' : 'diff-warn'}>
               {saldoContado >= saldoEsperado ? '+' : ''}{formatCurrency(saldoContado - saldoEsperado)}
-              {Math.abs(saldoContado - saldoEsperado) < 0.01 ? ' ✓' : ' ⚠️'}
+              {Math.abs(saldoContado - saldoEsperado) < 0.01 ? <FaCheck style={{ marginLeft: 4 }} /> : <FaExclamationTriangle style={{ marginLeft: 4 }} />}
             </span>
           </div>
           <button className="btn-close-cash" onClick={handleClose}>Confirmar Fechamento</button>
@@ -509,7 +551,7 @@ export default function CashManager({ onBack }) {
       {/* ── FUNDO DE TROCO (pós-fechamento tarde) ── */}
       {view === 'fundo' && (
         <div className="cash-open-card">
-          <div className="cash-open-title">💵 Fundo de Troco</div>
+          <div className="cash-open-title"><FaMoneyBillWave /> Fundo de Troco</div>
           <div style={{ fontSize: '0.82rem', color: '#888', marginBottom: 14, textAlign: 'center' }}>
             Conte o dinheiro que vai ficar para abertura de amanhã.
           </div>
@@ -557,20 +599,55 @@ export default function CashManager({ onBack }) {
           ) : (
             todaySessions.map(s => {
               const txs = todayTransactions.filter(t => t.session_id === s.id);
-              const v = txs.filter(t => t.tipo === 'venda').reduce((acc, t) => acc + parseFloat(t.valor), 0);
+              const vendaTxs = txs.filter(t => t.tipo === 'venda');
+              const v  = vendaTxs.reduce((acc, t) => acc + parseFloat(t.valor), 0);
               const sg = txs.filter(t => t.tipo === 'sangria').reduce((acc, t) => acc + parseFloat(t.valor), 0);
               const dp = txs.filter(t => t.tipo === 'despesa').reduce((acc, t) => acc + parseFloat(t.valor), 0);
               const rf = txs.filter(t => t.tipo === 'reforco').reduce((acc, t) => acc + parseFloat(t.valor), 0);
-              const dinheiro = txs.filter(t => t.tipo === 'venda' && t.forma_pagamento === 'dinheiro').reduce((acc, t) => acc + parseFloat(t.valor), 0);
-              const pix = txs.filter(t => t.tipo === 'venda' && t.forma_pagamento === 'pix').reduce((acc, t) => acc + parseFloat(t.valor), 0);
-              const cartao = txs.filter(t => t.tipo === 'venda' && (t.forma_pagamento === 'cartao_debito' || t.forma_pagamento === 'cartao_credito')).reduce((acc, t) => acc + parseFloat(t.valor), 0);
-              const presencial = txs.filter(t => t.tipo === 'venda' && t.sale_type === 'presencial').reduce((acc, t) => acc + parseFloat(t.valor), 0);
-              const online = txs.filter(t => t.tipo === 'venda' && t.sale_type === 'online').reduce((acc, t) => acc + parseFloat(t.valor), 0);
+
+              // distribui vendas mistas pelos buckets corretos
+              let bucketDinheiro = 0, bucketPix = 0, bucketCartao = 0;
+              vendaTxs.forEach(t => {
+                const fp = t.forma_pagamento || '';
+                const valor = parseFloat(t.valor);
+                if (fp.startsWith('misto|')) {
+                  fp.split('|').slice(1).forEach(part => {
+                    const [forma, raw] = part.split(':');
+                    const v2 = parseFloat(raw) || 0;
+                    if (forma === 'dinheiro') bucketDinheiro += v2;
+                    else if (forma === 'pix') bucketPix += v2;
+                    else if (forma === 'cartao_debito' || forma === 'cartao_credito') bucketCartao += v2;
+                  });
+                } else if (fp === 'dinheiro') {
+                  bucketDinheiro += valor;
+                } else if (fp === 'pix') {
+                  bucketPix += valor;
+                } else if (fp === 'cartao_debito' || fp === 'cartao_credito') {
+                  bucketCartao += valor;
+                }
+              });
+
+              const presencial = vendaTxs.filter(t => t.sale_type === 'presencial').reduce((acc, t) => acc + parseFloat(t.valor), 0);
+              const online     = vendaTxs.filter(t => t.sale_type === 'online').reduce((acc, t) => acc + parseFloat(t.valor), 0);
+
+              const saldoEsperadoRelatorio = parseFloat(s.saldo_inicial || 0) + v + rf - sg - dp;
+              const diff = s.saldo_final != null ? s.saldo_final - saldoEsperadoRelatorio : null;
+
+              const fmt = (ts) => ts ? new Date(ts).toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' }) : '--:--';
+
               return (
                 <div key={s.id} className="cash-report-card">
+
+                  {/* 1. Cabeçalho */}
                   <div className="cash-report-title">
-                    {s.turno === 'manha' ? '🌅 Manhã' : '🌇 Tarde'} {s.status === 'aberto' ? '🟢 Aberto' : '🔴 Fechado'} • {new Date(s.opened_at).toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' })}
+                    {s.turno === 'manha' ? 'Manhã' : 'Tarde'}
+                    {' '}
+                    <span style={{ fontWeight: 400, fontSize: '0.82rem', color: '#888' }}>
+                      {fmt(s.opened_at)}{s.closed_at ? ` – ${fmt(s.closed_at)}` : ' – aberto'}
+                    </span>
                   </div>
+
+                  {/* 2. Saldo inicial expansível */}
                   <div className="cash-report-row" style={{ flexDirection: 'column', alignItems: 'stretch' }}>
                     <details>
                       <summary style={{ display: 'flex', justifyContent: 'space-between', cursor: 'pointer', listStyle: 'none' }}>
@@ -583,23 +660,152 @@ export default function CashManager({ onBack }) {
                       </div>
                     </details>
                   </div>
+
+                  {/* 3. Movimentações */}
                   <div className="cash-report-row positivo"><span>Vendas</span><span>+{formatCurrency(v)}</span></div>
-                  {rf > 0 && <div className="cash-report-row positivo"><span>💵 Reforços</span><span>+{formatCurrency(rf)}</span></div>}
+                  {rf > 0 && <div className="cash-report-row positivo"><span>Reforços</span><span>+{formatCurrency(rf)}</span></div>}
                   {sg > 0 && <div className="cash-report-row negativo"><span>Sangrias</span><span>−{formatCurrency(sg)}</span></div>}
                   {dp > 0 && <div className="cash-report-row negativo"><span>Despesas</span><span>−{formatCurrency(dp)}</span></div>}
-                  {s.saldo_final != null && <div className="cash-report-row"><span>Saldo final contado</span><span>{formatCurrency(s.saldo_final)}</span></div>}
+
+                  {/* 4. Por forma de pagamento */}
                   <div className="cash-report-row" style={{ marginTop: 12, fontWeight: 700, fontSize: '0.82rem', color: '#888' }}>
                     <span>Por forma</span>
                   </div>
-                  {dinheiro > 0 && <div className="cash-report-row"><span>💵 Dinheiro</span><span>{formatCurrency(dinheiro)}</span></div>}
-                  {pix > 0 && <div className="cash-report-row"><span>📱 PIX</span><span>{formatCurrency(pix)}</span></div>}
-                  {cartao > 0 && <div className="cash-report-row"><span>💳 Cartão</span><span>{formatCurrency(cartao)}</span></div>}
+                  {bucketDinheiro > 0 && (
+                    <div className="cash-report-row">
+                      <span style={{ display: 'flex', alignItems: 'center', gap: 6 }}><FaMoneyBillWave size={13} /> Dinheiro</span>
+                      <span>{formatCurrency(bucketDinheiro)}</span>
+                    </div>
+                  )}
+                  {bucketPix > 0 && (
+                    <div className="cash-report-row">
+                      <span style={{ display: 'flex', alignItems: 'center', gap: 6 }}><FaMobile size={13} /> PIX</span>
+                      <span>{formatCurrency(bucketPix)}</span>
+                    </div>
+                  )}
+                  {bucketCartao > 0 && (
+                    <div className="cash-report-row">
+                      <span style={{ display: 'flex', alignItems: 'center', gap: 6 }}><FaCreditCard size={13} /> Cartão</span>
+                      <span>{formatCurrency(bucketCartao)}</span>
+                    </div>
+                  )}
+
+                  {/* 5. Por canal */}
                   <div className="cash-report-row" style={{ marginTop: 12, fontWeight: 700, fontSize: '0.82rem', color: '#888' }}>
                     <span>Por canal</span>
                   </div>
-                  {presencial > 0 && <div className="cash-report-row"><span>🏪 Presencial</span><span>{formatCurrency(presencial)}</span></div>}
-                  {online > 0 && <div className="cash-report-row"><span>📱 Online</span><span>{formatCurrency(online)}</span></div>}
-                  <div className="cash-report-row total"><span>Total vendas</span><span>{formatCurrency(v)}</span></div>
+                  {presencial > 0 && (
+                    <div className="cash-report-row">
+                      <span style={{ display: 'flex', alignItems: 'center', gap: 6 }}><FaStore size={13} /> Presencial</span>
+                      <span>{formatCurrency(presencial)}</span>
+                    </div>
+                  )}
+                  {online > 0 && (
+                    <div className="cash-report-row">
+                      <span style={{ display: 'flex', alignItems: 'center', gap: 6 }}><FaGlobe size={13} /> Online</span>
+                      <span>{formatCurrency(online)}</span>
+                    </div>
+                  )}
+
+                  {/* 6. Fechamento */}
+                  {s.status === 'fechado' && (
+                    <>
+                      <div className="cash-report-row" style={{ marginTop: 12, fontWeight: 700, fontSize: '0.82rem', color: '#888' }}>
+                        <span>Fechamento</span>
+                      </div>
+                      <div className="cash-report-row">
+                        <span>Saldo esperado</span><span>{formatCurrency(saldoEsperadoRelatorio)}</span>
+                      </div>
+                      {editingSaldoId === s.id ? (
+                        <div style={{ marginTop: 8 }}>
+                          <table className="cedulas-table">
+                            <thead>
+                              <tr><th>Cédula/Moeda</th><th>Qtd</th><th>Total</th></tr>
+                            </thead>
+                            <tbody>
+                              {CEDULAS.map(c => (
+                                <tr key={c.value}>
+                                  <td className="cedula-label">{c.label}</td>
+                                  <td>
+                                    <input
+                                      type="number" className="cedula-input" min="0"
+                                      value={editCedulas[c.value] ?? ''}
+                                      onChange={e => setEditCedulas(prev => ({ ...prev, [c.value]: e.target.value }))}
+                                    />
+                                  </td>
+                                  <td className="cedula-total">{formatCurrency((parseFloat(editCedulas[c.value]) || 0) * c.value)}</td>
+                                </tr>
+                              ))}
+                            </tbody>
+                          </table>
+                          <div className="cash-saldo-total" style={{ marginBottom: 8 }}>
+                            <span className="cash-saldo-label">Total contado</span>
+                            <span className="cash-saldo-value">{formatCurrency(calcSaldo(editCedulas))}</span>
+                          </div>
+                          <div style={{ display: 'flex', gap: 8 }}>
+                            <button className="btn-open-cash" style={{ flex: 1, padding: '8px 0', fontSize: '0.85rem' }} onClick={async () => {
+                              const novoTotal = calcSaldo(editCedulas);
+                              const detalhes = Object.fromEntries(Object.entries(editCedulas).map(([k, v]) => [k, parseFloat(v) || 0]));
+                              const r = await updateCashSessionSaldoFinal(s.id, novoTotal, detalhes);
+                              if (r.success) {
+                                toast.success('Saldo atualizado!');
+                                setEditingSaldoId(null);
+                                const [sessions, txs] = await Promise.all([getTodaySessions(), getTodayTransactions()]);
+                                setTodaySessions(sessions);
+                                setTodayTransactions(txs);
+                              } else {
+                                toast.error('Erro ao salvar');
+                              }
+                            }}>Salvar</button>
+                            <button className="cash-modal-cancel" style={{ flex: 1, padding: '8px 0', fontSize: '0.85rem' }} onClick={() => setEditingSaldoId(null)}>Cancelar</button>
+                          </div>
+                        </div>
+                      ) : (
+                        <div className="cash-report-row" style={{ flexDirection: 'column', alignItems: 'stretch' }}>
+                          <details>
+                            <summary style={{ display: 'flex', justifyContent: 'space-between', cursor: 'pointer', listStyle: 'none' }}>
+                              <span style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+                                Saldo contado ▸
+                                <button
+                                  style={{ background: 'none', border: 'none', cursor: 'pointer', color: '#60a5fa', padding: 0, display: 'flex', alignItems: 'center' }}
+                                  onClick={e => { e.preventDefault(); setEditingSaldoId(s.id); setEditCedulas(Object.fromEntries(Object.entries(s.saldo_final_detalhes || EMPTY_CEDULAS).map(([k, v]) => [k, v || '']))); }}
+                                ><FaEdit size={12} /></button>
+                              </span>
+                              <span>{formatCurrency(s.saldo_final)}</span>
+                            </summary>
+                            {s.saldo_final_detalhes && (
+                              <div style={{ fontSize: '0.72rem', color: '#aaa', marginTop: 4, lineHeight: 1.7 }}>
+                                {formatCedulasDetalhe(s.saldo_final_detalhes).map((item, i) => (
+                                  <div key={i}>{item.label} × {item.qtd} = {formatCurrency(item.total)}</div>
+                                ))}
+                              </div>
+                            )}
+                          </details>
+                        </div>
+                      )}
+                      {diff !== null && editingSaldoId !== s.id && (
+                        <div className="cash-report-row">
+                          <span>Diferença</span>
+                          <span style={{ color: diff >= 0 ? '#4ade80' : '#f87171', fontWeight: 700 }}>
+                            {diff >= 0 ? '+' : ''}{formatCurrency(diff)}
+                          </span>
+                        </div>
+                      )}
+                    </>
+                  )}
+
+                  {/* 7. Fundo de troco (só turno tarde) */}
+                  {s.turno === 'tarde' && s.fundo_proximo_turno > 0 && (
+                    <>
+                      <div className="cash-report-row" style={{ marginTop: 12, fontWeight: 700, fontSize: '0.82rem', color: '#888' }}>
+                        <span>Fundo de troco</span>
+                      </div>
+                      <div className="cash-report-row">
+                        <span>Para abertura de amanhã</span><span>{formatCurrency(s.fundo_proximo_turno)}</span>
+                      </div>
+                    </>
+                  )}
+
                 </div>
               );
             })
@@ -649,9 +855,9 @@ export default function CashManager({ onBack }) {
         <div className="cash-modal-overlay" onClick={() => { setModal(null); setModalCedulas(EMPTY_CEDULAS); }}>
           <div className="cash-modal" onClick={e => e.stopPropagation()}>
             <div className="cash-modal-title">
-              {modal === 'sangria' ? '💸 Registrar Sangria'
+              {modal === 'sangria' ? <><FaArrowDown /> Registrar Sangria</>
                 : modal === 'despesa' ? <><FaReceipt size={14} /> Registrar Despesa</>
-                : '💵 Reforço de Caixa'}
+                : <><FaMoneyBillWave /> Reforço de Caixa</>}
             </div>
             {modal === 'reforco' ? (
               <>
