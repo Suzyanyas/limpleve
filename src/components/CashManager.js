@@ -1,6 +1,6 @@
 import { useState, useEffect, useCallback } from 'react';
 import toast from 'react-hot-toast';
-import { FaReceipt, FaEdit, FaChevronDown, FaMoneyBillWave, FaMobile, FaCreditCard, FaStore, FaGlobe, FaSun, FaMoon, FaHistory, FaCashRegister, FaChartBar, FaLock, FaArrowDown, FaCheck, FaExclamationTriangle, FaCircle } from 'react-icons/fa';
+import { FaReceipt, FaEdit, FaChevronDown, FaMoneyBillWave, FaMobile, FaCreditCard, FaStore, FaGlobe, FaSun, FaMoon, FaHistory, FaChartBar, FaLock, FaArrowDown, FaCheck, FaExclamationTriangle, FaCircle } from 'react-icons/fa';
 import {
   getOpenSession,
   openCashSession,

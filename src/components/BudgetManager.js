@@ -4,7 +4,6 @@ import toast from 'react-hot-toast';
 import { FaThumbtack, FaReceipt, FaEdit, FaTrash, FaPrint, FaDownload, FaBoxOpen, FaSearch, FaPen, FaStore, FaGlobe, FaMoneyBillWave, FaMobile, FaCreditCard, FaRandom, FaCheckCircle, FaClock, FaHourglassHalf } from 'react-icons/fa';
 import {
   getAllCustomers,
-  getCustomerByCode,
   getTodayBudgets,
   createCustomer,
   updateCustomer,

@@ -810,7 +810,6 @@ export const getOverviewStats = async () => {
     const now = new Date();
     const year = now.getFullYear();
     const month = String(now.getMonth() + 1).padStart(2, '0');
-    const startOfMonth = `${year}-${month}-01T00:00:00-03:00`;
     const startOfWeek = new Date(now - 7 * 24 * 60 * 60 * 1000).toISOString();
 
     const [budgetsRes, allBudgetsRes, routesRes] = await Promise.all([
@@ -836,7 +835,6 @@ export const getOverviewStats = async () => {
 
     // Apenas vendas confirmadas (exclui rascunhos e cancelados)
     const sales = budgets.filter(b => b.status === 'confirmed' || b.status === 'delivered');
-    const startOfMonthDate = new Date(`${year}-${month}-01T00:00:00Z`);
     const monthSales = sales.filter(b => b.created_at.startsWith(`${year}-${month}`));
     const weekSales = sales.filter(b => b.created_at >= startOfWeek);
 
