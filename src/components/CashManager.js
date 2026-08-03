@@ -128,6 +128,7 @@ export default function CashManager({ onBack }) {
   const [ultimoSaldo, setUltimoSaldo] = useState(null); // { saldo_final, saldo_final_detalhes }
   const [editingSaldoId, setEditingSaldoId] = useState(null);
   const [editCedulas, setEditCedulas] = useState({});
+  const [expandedChannel, setExpandedChannel] = useState({});
 
   const loadSession = useCallback(async () => {
     const s = await getOpenSession();
@@ -605,35 +606,49 @@ export default function CashManager({ onBack }) {
               const dp = txs.filter(t => t.tipo === 'despesa').reduce((acc, t) => acc + parseFloat(t.valor), 0);
               const rf = txs.filter(t => t.tipo === 'reforco').reduce((acc, t) => acc + parseFloat(t.valor), 0);
 
-              // distribui vendas mistas pelos buckets corretos
-              let bucketDinheiro = 0, bucketPix = 0, bucketCartao = 0;
-              vendaTxs.forEach(t => {
-                const fp = t.forma_pagamento || '';
-                const valor = parseFloat(t.valor);
-                if (fp.startsWith('misto|')) {
-                  fp.split('|').slice(1).forEach(part => {
-                    const [forma, raw] = part.split(':');
-                    const v2 = parseFloat(raw) || 0;
-                    if (forma === 'dinheiro') bucketDinheiro += v2;
-                    else if (forma === 'pix') bucketPix += v2;
-                    else if (forma === 'cartao_debito' || forma === 'cartao_credito') bucketCartao += v2;
-                  });
-                } else if (fp === 'dinheiro') {
-                  bucketDinheiro += valor;
-                } else if (fp === 'pix') {
-                  bucketPix += valor;
-                } else if (fp === 'cartao_debito' || fp === 'cartao_credito') {
-                  bucketCartao += valor;
-                }
-              });
-
-              const presencial = vendaTxs.filter(t => t.sale_type === 'presencial').reduce((acc, t) => acc + parseFloat(t.valor), 0);
-              const online     = vendaTxs.filter(t => t.sale_type === 'online').reduce((acc, t) => acc + parseFloat(t.valor), 0);
+              const presencialTxs = vendaTxs.filter(t => t.sale_type === 'presencial' || !t.sale_type);
+              const onlineTxs     = vendaTxs.filter(t => t.sale_type === 'online');
+              const calcBuckets = txs => {
+                let dinheiro = 0, pix = 0, cartao_debito = 0, cartao_credito = 0, cartao_gen = 0, boleto = 0;
+                txs.forEach(t => {
+                  const fp = t.forma_pagamento || '';
+                  const valor = parseFloat(t.valor);
+                  if (fp.startsWith('misto|')) {
+                    fp.split('|').slice(1).forEach(part => {
+                      const [forma, raw] = part.split(':');
+                      const v2 = parseFloat(raw) || 0;
+                      if (forma === 'dinheiro') dinheiro += v2;
+                      else if (forma === 'pix') pix += v2;
+                      else if (forma === 'cartao_debito') cartao_debito += v2;
+                      else if (forma === 'cartao_credito') cartao_credito += v2;
+                      else if (forma === 'cartao') cartao_gen += v2; // misto salva sem _debito/_credito
+                    });
+                  } else if (fp === 'dinheiro') dinheiro += valor;
+                  else if (fp === 'pix') pix += valor;
+                  else if (fp === 'cartao_debito') cartao_debito += valor;
+                  else if (fp === 'cartao_credito') cartao_credito += valor;
+                  else if (fp === 'boleto') boleto += valor;
+                });
+                return { dinheiro, pix, cartao_debito, cartao_credito, cartao_gen, boleto };
+              };
+              const bPresencial = calcBuckets(presencialTxs);
+              const bOnline     = calcBuckets(onlineTxs);
 
               const saldoEsperadoRelatorio = parseFloat(s.saldo_inicial || 0) + v + rf - sg - dp;
               const diff = s.saldo_final != null ? s.saldo_final - saldoEsperadoRelatorio : null;
 
               const fmt = (ts) => ts ? new Date(ts).toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' }) : '--:--';
+              const fmtHora = (ts) => ts ? new Date(ts).toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit', timeZone: 'America/Fortaleza' }) : '--:--';
+              const fmtForma = (fp) => {
+                if (!fp) return '—';
+                if (fp === 'dinheiro') return 'Dinheiro';
+                if (fp === 'pix') return 'PIX';
+                if (fp === 'cartao_debito') return 'Cartão Débito';
+                if (fp === 'cartao_credito') return 'Cartão Crédito';
+                if (fp === 'boleto') return 'Boleto';
+                if (fp.startsWith('misto|')) return 'Misto';
+                return fp;
+              };
 
               return (
                 <div key={s.id} className="cash-report-card">
@@ -667,45 +682,74 @@ export default function CashManager({ onBack }) {
                   {sg > 0 && <div className="cash-report-row negativo"><span>Sangrias</span><span>−{formatCurrency(sg)}</span></div>}
                   {dp > 0 && <div className="cash-report-row negativo"><span>Despesas</span><span>−{formatCurrency(dp)}</span></div>}
 
-                  {/* 4. Por forma de pagamento */}
-                  <div className="cash-report-row" style={{ marginTop: 12, fontWeight: 700, fontSize: '0.82rem', color: '#888' }}>
-                    <span>Por forma</span>
-                  </div>
-                  {bucketDinheiro > 0 && (
-                    <div className="cash-report-row">
-                      <span style={{ display: 'flex', alignItems: 'center', gap: 6 }}><FaMoneyBillWave size={13} /> Dinheiro</span>
-                      <span>{formatCurrency(bucketDinheiro)}</span>
-                    </div>
-                  )}
-                  {bucketPix > 0 && (
-                    <div className="cash-report-row">
-                      <span style={{ display: 'flex', alignItems: 'center', gap: 6 }}><FaMobile size={13} /> PIX</span>
-                      <span>{formatCurrency(bucketPix)}</span>
-                    </div>
-                  )}
-                  {bucketCartao > 0 && (
-                    <div className="cash-report-row">
-                      <span style={{ display: 'flex', alignItems: 'center', gap: 6 }}><FaCreditCard size={13} /> Cartão</span>
-                      <span>{formatCurrency(bucketCartao)}</span>
-                    </div>
-                  )}
-
-                  {/* 5. Por canal */}
-                  <div className="cash-report-row" style={{ marginTop: 12, fontWeight: 700, fontSize: '0.82rem', color: '#888' }}>
-                    <span>Por canal</span>
-                  </div>
-                  {presencial > 0 && (
-                    <div className="cash-report-row">
-                      <span style={{ display: 'flex', alignItems: 'center', gap: 6 }}><FaStore size={13} /> Presencial</span>
-                      <span>{formatCurrency(presencial)}</span>
-                    </div>
-                  )}
-                  {online > 0 && (
-                    <div className="cash-report-row">
-                      <span style={{ display: 'flex', alignItems: 'center', gap: 6 }}><FaGlobe size={13} /> Online</span>
-                      <span>{formatCurrency(online)}</span>
-                    </div>
-                  )}
+                  {/* 4. Por canal — expansível */}
+                  {[
+                    { key: 'presencial', txs: presencialTxs, b: bPresencial, icon: <FaStore size={12} />, label: 'Presencial' },
+                    { key: 'online',     txs: onlineTxs,     b: bOnline,     icon: <FaGlobe size={12} />, label: 'Online' },
+                  ].filter(ch => ch.txs.length > 0).map(ch => {
+                    const expanded = expandedChannel[s.id] === ch.key;
+                    return (
+                      <div key={ch.key}>
+                        <div className="cash-report-row" style={{ marginTop: 12, fontWeight: 700, fontSize: '0.82rem', color: '#888' }}>
+                          <span style={{ display: 'flex', alignItems: 'center', gap: 5 }}>{ch.icon} {ch.label}</span>
+                        </div>
+                        <button
+                          onClick={() => setExpandedChannel(prev => ({ ...prev, [s.id]: expanded ? null : ch.key }))}
+                          style={{ background: 'none', border: 'none', cursor: 'pointer', fontSize: '0.72rem', color: '#888', padding: '2px 0 6px', display: 'block' }}
+                        >
+                          {expanded ? 'Ocultar ▲' : `Ver vendas ▼ (${ch.txs.length})`}
+                        </button>
+                        {expanded && (
+                          <div style={{ borderLeft: '2px solid #333', paddingLeft: 8, marginBottom: 4 }}>
+                            {ch.txs.map((t, i) => (
+                              <div key={t.id || i} style={{ display: 'flex', justifyContent: 'space-between', fontSize: '0.72rem', color: '#bbb', padding: '2px 0' }}>
+                                <span>{fmtHora(t.created_at)} · {t.budgets?.customer_name || t.observacao || '—'} · {fmtForma(t.forma_pagamento)}</span>
+                                <span style={{ whiteSpace: 'nowrap', marginLeft: 8 }}>{formatCurrency(parseFloat(t.valor))}</span>
+                              </div>
+                            ))}
+                            <div style={{ borderTop: '1px solid #333', marginTop: 6, paddingTop: 4 }}>
+                              {ch.b.dinheiro > 0 && (
+                                <div className="cash-report-row" style={{ fontSize: '0.75rem', fontWeight: 600 }}>
+                                  <span style={{ display: 'flex', alignItems: 'center', gap: 5 }}><FaMoneyBillWave size={11} /> Dinheiro</span>
+                                  <span>{formatCurrency(ch.b.dinheiro)}</span>
+                                </div>
+                              )}
+                              {ch.b.pix > 0 && (
+                                <div className="cash-report-row" style={{ fontSize: '0.75rem', fontWeight: 600 }}>
+                                  <span style={{ display: 'flex', alignItems: 'center', gap: 5 }}><FaMobile size={11} /> PIX</span>
+                                  <span>{formatCurrency(ch.b.pix)}</span>
+                                </div>
+                              )}
+                              {ch.b.cartao_debito > 0 && (
+                                <div className="cash-report-row" style={{ fontSize: '0.75rem', fontWeight: 600 }}>
+                                  <span style={{ display: 'flex', alignItems: 'center', gap: 5 }}><FaCreditCard size={11} /> Cartão Débito</span>
+                                  <span>{formatCurrency(ch.b.cartao_debito)}</span>
+                                </div>
+                              )}
+                              {ch.b.cartao_credito > 0 && (
+                                <div className="cash-report-row" style={{ fontSize: '0.75rem', fontWeight: 600 }}>
+                                  <span style={{ display: 'flex', alignItems: 'center', gap: 5 }}><FaCreditCard size={11} /> Cartão Crédito</span>
+                                  <span>{formatCurrency(ch.b.cartao_credito)}</span>
+                                </div>
+                              )}
+                              {ch.b.cartao_gen > 0 && (
+                                <div className="cash-report-row" style={{ fontSize: '0.75rem', fontWeight: 600 }}>
+                                  <span style={{ display: 'flex', alignItems: 'center', gap: 5 }}><FaCreditCard size={11} /> Cartão</span>
+                                  <span>{formatCurrency(ch.b.cartao_gen)}</span>
+                                </div>
+                              )}
+                              {ch.b.boleto > 0 && (
+                                <div className="cash-report-row" style={{ fontSize: '0.75rem', fontWeight: 600 }}>
+                                  <span>Boleto</span>
+                                  <span>{formatCurrency(ch.b.boleto)}</span>
+                                </div>
+                              )}
+                            </div>
+                          </div>
+                        )}
+                      </div>
+                    );
+                  })}
 
                   {/* 6. Fechamento */}
                   {s.status === 'fechado' && (

@@ -185,7 +185,7 @@ export default function ManagementDashboard() {
                       ? <span className="item-badge-online">Online</span>
                       : <span className="item-badge-presencial">Presencial</span>
                     }
-                    <span className="item-name">{budget.customer_name}</span>
+                    <span className="item-name" title={budget.customer_name}>{budget.customer_name}</span>
                     {budget.total != null && (
                       <span className="item-total">
                         R$ {parseFloat(budget.total).toFixed(2).replace('.', ',')}

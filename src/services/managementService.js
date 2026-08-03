@@ -1124,7 +1124,7 @@ export const getTodayTransactions = async () => {
     const today = ceFortaleza(new Date());
     const { data, error } = await supabase
       .from('cash_transactions')
-      .select('*, cash_sessions(data)')
+      .select('*, cash_sessions(data), budgets(customer_name)')
       .gte('created_at', today + 'T00:00:00')
       .lte('created_at', today + 'T23:59:59')
       .order('created_at', { ascending: false });
