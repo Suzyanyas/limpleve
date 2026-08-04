@@ -96,6 +96,40 @@
   font-weight: 700;
 }
 
+/* Sub-abas dentro de uma aba (ex: Caixa → Presencial / Online) */
+.admin-subtabs {
+  display: flex;
+  gap: 8px;
+  margin-bottom: 20px;
+  border-bottom: 2px solid #e5e7eb;
+  padding-bottom: 0;
+}
+
+.subtab-button {
+  display: flex;
+  align-items: center;
+  background: transparent;
+  border: none;
+  border-bottom: 3px solid transparent;
+  margin-bottom: -2px;
+  padding: 8px 18px;
+  font-size: 0.88rem;
+  font-weight: 600;
+  color: #6b7280;
+  cursor: pointer;
+  transition: color 0.15s, border-color 0.15s;
+  white-space: nowrap;
+}
+
+.subtab-button:hover {
+  color: #1e40af;
+}
+
+.subtab-button.active {
+  color: #1e40af;
+  border-bottom-color: #1e40af;
+}
+
 .tab-content {
   animation: fadeIn 0.3s ease-in;
   padding: 24px 28px;

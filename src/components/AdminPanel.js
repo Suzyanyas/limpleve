@@ -31,6 +31,8 @@ import {
 } from '../services/productService';
 import { getOverviewStats, getDailyHistory, getPaymentMethodReport, PAYMENT_CATEGORIES, updateBudgetStatus, confirmBudgetPayment } from '../services/managementService';
 import ManagementDashboard from './ManagementDashboard';
+import CashManager from './CashManager';
+import OnlineConference from './OnlineConference';
 import DeliveryHistory from './DeliveryHistory';
 import PendingPayments from './PendingPayments';
 import CustomerManager from './CustomerManager';
@@ -67,6 +69,7 @@ export default function AdminPanel() {
   const [searchTerm, setSearchTerm] = useState('');
   const [activeTab, setActiveTab] = useState('management');
   const [pinGateTarget, setPinGateTarget] = useState(null);
+  const [cashSubTab, setCashSubTab] = useState('presencial');
   const [currentPage, setCurrentPage] = useState(1);
   const [productsPerPage, setProductsPerPage] = useState(10);
   const [imagePreview, setImagePreview] = useState('');
@@ -586,6 +589,12 @@ export default function AdminPanel() {
             LimpLeve Online
           </button>
           <button
+            className={`tab-button ${activeTab === 'caixa' ? 'active' : ''}`}
+            onClick={() => setPinGateTarget('caixa')}
+          >
+            Caixa
+          </button>
+          <button
             className={`tab-button ${activeTab === 'products' ? 'active' : ''}`}
             onClick={() => setActiveTab('products')}
           >
@@ -623,6 +632,32 @@ export default function AdminPanel() {
       {activeTab === 'management' && (
         <div className="tab-content management-tab">
           <ManagementDashboard />
+        </div>
+      )}
+
+      {/* Aba Caixa */}
+      {activeTab === 'caixa' && (
+        <div className="tab-content">
+          <div className="admin-subtabs">
+            <button
+              className={`subtab-button ${cashSubTab === 'presencial' ? 'active' : ''}`}
+              onClick={() => setCashSubTab('presencial')}
+            >
+              <FaStore size={13} style={{ marginRight: 5 }} /> Presencial
+            </button>
+            <button
+              className={`subtab-button ${cashSubTab === 'online' ? 'active' : ''}`}
+              onClick={() => setCashSubTab('online')}
+            >
+              <FaGlobe size={13} style={{ marginRight: 5 }} /> Online
+            </button>
+          </div>
+          {cashSubTab === 'presencial' && (
+            <CashManager onBack={() => setActiveTab('management')} />
+          )}
+          {cashSubTab === 'online' && (
+            <OnlineConference onBack={() => setActiveTab('management')} />
+          )}
         </div>
       )}
 

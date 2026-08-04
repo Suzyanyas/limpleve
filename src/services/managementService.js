@@ -585,7 +585,7 @@ export const getDailyHistory = async (days = 30) => {
     const { data, error } = await supabase
       .from('budgets')
       .select(`
-        id, customer_name, total, status, sale_type, payment_status, payment_method, entrada_valor, created_at,
+        id, customer_name, total, status, sale_type, payment_status, payment_method, entrada_valor, created_at, updated_at,
         budget_items(product_name, quantity, total_price)
       `)
       .gte('created_at', since.toISOString())
@@ -596,15 +596,27 @@ export const getDailyHistory = async (days = 30) => {
     // Agrupa por data no calendário de São Paulo (independente do fuso do navegador)
     const grouped = {};
     (data || []).forEach(b => {
-      const key = spDateKey(new Date(b.created_at));
+      // Agrupa pelo dia em que o pagamento foi efectuado (updated_at para pago/parcial)
+      // ou pelo created_at para a_receber (aparece no dia da criação só no aReceber)
+      const isPaid = b.payment_status === 'pago' || b.payment_status === 'parcial';
+      const dateToUse = isPaid ? new Date(b.updated_at) : new Date(b.created_at);
+      const key = spDateKey(dateToUse);
+
       if (!grouped[key]) grouped[key] = { date: key, budgets: [], revenue: 0, count: 0, cancelled: 0, aReceber: 0, recebido: 0 };
       grouped[key].budgets.push(b);
+
       if (b.status === 'cancelled') {
         grouped[key].cancelled++;
       } else if (b.status !== 'draft') {
-        grouped[key].revenue += parseFloat(b.total || 0);
         grouped[key].count++;
-        if (b.payment_status === 'a_receber') {
+
+        if (b.payment_status === 'pago') {
+          grouped[key].revenue += parseFloat(b.total || 0);
+          grouped[key].recebido += parseFloat(b.total || 0);
+        } else if (b.payment_status === 'parcial') {
+          grouped[key].revenue += parseFloat(b.entrada_valor || 0);
+          grouped[key].recebido += parseFloat(b.entrada_valor || 0);
+        } else if (b.payment_status === 'a_receber') {
           grouped[key].aReceber += parseFloat(b.total || 0);
         }
       }
@@ -841,10 +853,21 @@ export const getOverviewStats = async () => {
     // Faturamento (apenas vendas confirmadas)
     const allSales = allBudgets.filter(b => b.status === 'confirmed' || b.status === 'delivered');
     const totalRevenue = allSales.reduce((sum, b) => sum + parseFloat(b.total || 0), 0);
-    const monthRevenue = monthSales.reduce((sum, b) => sum + parseFloat(b.total || 0), 0);
+    const monthRevenue = monthSales.reduce((sum, b) => {
+      if (b.payment_status === 'pago') {
+        return sum + parseFloat(b.total || 0);
+      }
+      if (b.payment_status === 'parcial') {
+        return sum + parseFloat(b.entrada_valor || 0);
+      }
+      return sum;
+    }, 0);
 
     // Ticket médio
-    const avgTicket = sales.length > 0 ? totalRevenue / sales.length : 0;
+    const paidSales = sales.filter(b => b.payment_status === 'pago');
+    const avgTicket = paidSales.length > 0
+      ? paidSales.reduce((sum, b) => sum + parseFloat(b.total || 0), 0) / paidSales.length
+      : 0;
 
     // Entregues = rotas com status delivered
     const delivered = routes.filter(r => r.status === 'delivered').length;
@@ -900,7 +923,7 @@ export const getOverviewStats = async () => {
 // CAIXA
 // ============================================
 
-export const getOpenSession = async () => {
+export const getOpenSession = async (tipo = 'presencial') => {
   try {
     const today = ceFortaleza(new Date());
     const { data, error } = await supabase
@@ -908,6 +931,7 @@ export const getOpenSession = async () => {
       .select('*')
       .eq('status', 'aberto')
       .eq('data', today)
+      .eq('tipo', tipo)
       .order('opened_at', { ascending: false })
       .limit(1)
       .maybeSingle();
@@ -919,12 +943,32 @@ export const getOpenSession = async () => {
   }
 };
 
-export const openCashSession = async (turno, saldo_inicial, saldo_inicial_detalhes) => {
+export const getOnlineSession = async () => {
   try {
     const today = ceFortaleza(new Date());
     const { data, error } = await supabase
       .from('cash_sessions')
-      .insert([{ turno, data: today, saldo_inicial, saldo_inicial_detalhes, status: 'aberto' }])
+      .select('*')
+      .eq('status', 'aberto')
+      .eq('data', today)
+      .eq('tipo', 'online')
+      .order('opened_at', { ascending: false })
+      .limit(1)
+      .maybeSingle();
+    if (error) throw error;
+    return data;
+  } catch (error) {
+    console.error('Erro ao buscar sessão online:', error);
+    return null;
+  }
+};
+
+export const openCashSession = async (turno, saldo_inicial, saldo_inicial_detalhes, tipo = 'presencial') => {
+  try {
+    const today = ceFortaleza(new Date());
+    const { data, error } = await supabase
+      .from('cash_sessions')
+      .insert([{ turno, data: today, saldo_inicial, saldo_inicial_detalhes, status: 'aberto', tipo }])
       .select()
       .single();
     if (error) throw error;
@@ -969,6 +1013,7 @@ export const getUltimoSaldoFechado = async () => {
       .from('cash_sessions')
       .select('saldo_final, saldo_final_detalhes')
       .eq('status', 'fechado')
+      .eq('tipo', 'presencial')
       .not('saldo_final_detalhes', 'is', null)
       .order('closed_at', { ascending: false })
       .limit(1)
@@ -988,6 +1033,7 @@ export const getUltimoFundoTarde = async () => {
       .select('fundo_proximo_turno, fundo_proximo_turno_detalhes')
       .eq('turno', 'tarde')
       .eq('status', 'fechado')
+      .eq('tipo', 'presencial')
       .not('fundo_proximo_turno', 'is', null)
       .order('closed_at', { ascending: false })
       .limit(1)
@@ -1061,13 +1107,14 @@ export const confirmBudgetPayment = async ({ budgetId, valor, formaPagamento, sa
   }
 };
 
-export const getTodaySessions = async () => {
+export const getTodaySessions = async (tipo = 'presencial') => {
   try {
     const today = ceFortaleza(new Date());
     const { data, error } = await supabase
       .from('cash_sessions')
       .select('*')
       .eq('data', today)
+      .eq('tipo', tipo)
       .order('opened_at', { ascending: true });
     if (error) throw error;
     return data || [];

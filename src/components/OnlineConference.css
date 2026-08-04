@@ -1,0 +1,123 @@
+/* OnlineConference.css
+   Reutiliza as classes globais do CashManager.css para layout e elementos
+   comuns (cash-open-card, cedulas-table, cash-report-card, etc.).
+   Este arquivo só define as classes específicas do caixa online. */
+
+.oc-manager {
+  background: #f5f7fa;
+  min-height: 100vh;
+  padding: 24px 16px 40px;
+}
+
+/* ── Header da sessão ── */
+.oc-session-header {
+  background: linear-gradient(135deg, #065f46 0%, #0f766e 100%);
+  border-radius: 16px;
+  padding: 20px;
+  color: white;
+}
+
+/* Reutiliza .cash-session-title, .cash-session-saldo-label, .cash-session-saldo do CashManager.css */
+
+/* ── Breakdown por forma de pagamento no header ── */
+.oc-buckets {
+  display: flex;
+  gap: 10px;
+  margin-top: 14px;
+  flex-wrap: wrap;
+}
+
+.oc-bucket-item {
+  background: rgba(255, 255, 255, 0.15);
+  border-radius: 10px;
+  padding: 10px 14px;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  flex: 1;
+  min-width: 80px;
+}
+
+.oc-bucket-label {
+  font-size: 0.7rem;
+  opacity: 0.8;
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+
+.oc-bucket-value {
+  font-size: 1rem;
+  font-weight: 800;
+}
+
+/* ── Botão abrir caixa online ── */
+.oc-btn-open {
+  width: 100%;
+  padding: 16px;
+  background: linear-gradient(135deg, #047857 0%, #065f46 100%);
+  color: white;
+  border: none;
+  border-radius: 12px;
+  font-size: 1rem;
+  font-weight: 800;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.oc-btn-open:hover { opacity: 0.9; transform: translateY(-1px); }
+.oc-btn-open:disabled { opacity: 0.6; cursor: not-allowed; transform: none; }
+
+/* ── Texto de ajuda ── */
+.oc-hint-text {
+  font-size: 0.85rem;
+  color: #666;
+  margin: 0 0 20px;
+  line-height: 1.5;
+}
+
+/* ── Aviso de dinheiro esperado no fechamento ── */
+.oc-dinheiro-esperado {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  background: #ecfdf5;
+  border: 1px solid #6ee7b7;
+  border-radius: 8px;
+  padding: 10px 14px;
+  font-size: 0.85rem;
+  color: #065f46;
+  margin-bottom: 16px;
+}
+
+/* ── Relatório: lista de vendas expansível ── */
+.oc-details-summary {
+  font-size: 0.8rem;
+  color: #888;
+  cursor: pointer;
+  list-style: none;
+  padding: 6px 0;
+}
+
+.oc-details-summary::-webkit-details-marker { display: none; }
+
+.oc-vendas-list {
+  border-left: 2px solid #eef2fb;
+  padding-left: 10px;
+  margin-top: 4px;
+}
+
+.oc-venda-row {
+  display: flex;
+  justify-content: space-between;
+  font-size: 0.75rem;
+  color: #666;
+  padding: 3px 0;
+}
+
+.oc-venda-valor {
+  white-space: nowrap;
+  margin-left: 8px;
+  font-weight: 700;
+  color: #16a34a;
+}

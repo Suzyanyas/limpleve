@@ -17,12 +17,13 @@ import {
   createPickingOrder,
   createDeliveryRoute,
   getOpenSession,
+  getOnlineSession,
   createCashTransaction,
   confirmBudgetPayment
 } from '../services/managementService';
 import { getAllProducts } from '../services/productService';
 import { supabase } from '../supabaseClient';
-import CashManager, { CashStatusBar } from './CashManager';
+import CashManager from './CashManager';
 import PinGate from './PinGate';
 import './BudgetManager.css';
 
@@ -112,9 +113,9 @@ export default function BudgetManager({ onBack, initialBudget, openNew, onUpdate
 
   const handleLancarTrocoOnline = async () => {
     setTrocoSaving(true);
-    const session = await getOpenSession();
+    const session = await getOnlineSession();
     if (!session) {
-      toast.error('Abra o caixa antes de lançar o troco do online');
+      toast.error('Abra o caixa online antes de lançar o troco do online');
       setTrocoSaving(false);
       return;
     }
@@ -721,7 +722,9 @@ export default function BudgetManager({ onBack, initialBudget, openNew, onUpdate
 
     // 3. Lança no caixa se payment_status === 'pago' ou 'parcial'
     if (paymentStatus !== 'a_receber') {
-      const session = await getOpenSession();
+      const session = saleType === 'online'
+        ? await getOnlineSession()
+        : await getOpenSession();
       const valorLancado = paymentStatus === 'parcial'
         ? parseFloat(entradaValue) || 0
         : calculateTotal();
@@ -1096,8 +1099,6 @@ export default function BudgetManager({ onBack, initialBudget, openNew, onUpdate
         </div>
 
         <div className="list-content">
-          <CashStatusBar onOpen={() => setShowPinGate(true)} />
-
         {budgetsLoading ? (
           <div className="list-loading">Carregando...</div>
         ) : budgets.length === 0 ? (
