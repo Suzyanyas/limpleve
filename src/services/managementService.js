@@ -1078,7 +1078,9 @@ export const createCashTransaction = async (transaction) => {
 
 export const confirmBudgetPayment = async ({ budgetId, valor, formaPagamento, saleType, observacao }) => {
   try {
-    const session = await getOpenSession();
+    const session = saleType === 'online'
+      ? await getOnlineSession()
+      : await getOpenSession();
 
     const txResult = await createCashTransaction({
       session_id: session?.id || null,
