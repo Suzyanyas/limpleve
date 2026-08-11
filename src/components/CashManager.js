@@ -843,16 +843,19 @@ export default function CashManager({ onBack, mode = 'presencial' }) {
                         <div style={{ display: 'flex', justifyContent: 'space-between' }}>
                           <span>Saldo esperado</span><span>{formatCurrency(saldoEsperadoRelatorio)}</span>
                         </div>
-                        <div style={{ paddingLeft: 14, borderTop: '1px solid #f0f0f0', borderBottom: '1px solid #f0f0f0', marginTop: 4, paddingTop: 4, paddingBottom: 4 }}>
+                        <div style={{ borderTop: '1px solid #f0f0f0', borderBottom: '1px solid #f0f0f0', marginTop: 4, paddingTop: 4, paddingBottom: 4 }}>
                           {[
-                            { label: 'Saldo inicial',        valor: parseFloat(s.saldo_inicial || 0), prefix: '' },
-                            { label: '+ Vendas (dinheiro)',  valor: vDinheiro,                        prefix: '+' },
-                            { label: '+ Reforços',           valor: rf,                               prefix: '+', hide: rf === 0 },
-                            { label: '− Sangrias',           valor: sg,                               prefix: '−', hide: sg === 0 },
-                            { label: '− Despesas',           valor: dp,                               prefix: '−', hide: dp === 0 },
+                            { label: 'Saldo inicial',       valor: parseFloat(s.saldo_inicial || 0), prefix: '',  prefixColor: null },
+                            { label: 'Vendas (dinheiro)',   valor: vDinheiro,                        prefix: '+', prefixColor: '#16a34a' },
+                            { label: 'Reforços',            valor: rf,                               prefix: '+', prefixColor: '#16a34a', hide: rf === 0 },
+                            { label: 'Sangrias',            valor: sg,                               prefix: '−', prefixColor: '#dc2626', hide: sg === 0 },
+                            { label: 'Despesas',            valor: dp,                               prefix: '−', prefixColor: '#dc2626', hide: dp === 0 },
                           ].filter(l => !l.hide).map(l => (
-                            <div key={l.label} style={{ display: 'flex', justifyContent: 'space-between', fontSize: '0.75rem', color: '#888', padding: '1px 0' }}>
-                              <span>{l.label}</span>
+                            <div key={l.label} style={{ display: 'flex', justifyContent: 'space-between', fontSize: '0.78rem', color: '#9ca3af', padding: '1px 0', paddingLeft: 16 }}>
+                              <span>
+                                {l.prefix && <span style={{ color: l.prefixColor, fontWeight: 700, marginRight: 4 }}>{l.prefix}</span>}
+                                {l.label}
+                              </span>
                               <span>{formatCurrency(l.valor)}</span>
                             </div>
                           ))}
