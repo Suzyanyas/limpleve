@@ -15,6 +15,8 @@ import {
   getUltimoFundoTarde,
   getUltimoSaldoFechado,
   updateCashSessionSaldoFinal,
+  getSessionsByDate,
+  getTransactionsByDate,
 } from '../services/managementService';
 import './CashManager.css';
 
@@ -108,11 +110,14 @@ export function CashStatusBar({ onOpen }) {
 // ─────────────────────────────────────────────
 // Componente principal
 // ─────────────────────────────────────────────
-export default function CashManager({ onBack }) {
-  const [view, setView] = useState('loading'); // loading, sem-caixa, abertura, sessao, fechamento, relatorio
+export default function CashManager({ onBack, mode = 'presencial' }) {
+  const [view, setView] = useState(mode === 'historico' ? 'relatorio' : 'loading');
   const [session, setSession] = useState(null);
   const [transactions, setTransactions] = useState([]);
-  const [turno, setTurno] = useState('manha');
+  const [turno, setTurno] = useState(() => {
+    const hora = new Date().getHours();
+    return hora < 12 ? 'manha' : 'tarde';
+  });
   const [cedulas, setCedulas] = useState(EMPTY_CEDULAS);
   const [modal, setModal] = useState(null); // null | 'sangria' | 'despesa' | 'reforco'
   const [modalForm, setModalForm] = useState({ valor: '', categoria: '', observacao: '' });
@@ -129,6 +134,15 @@ export default function CashManager({ onBack }) {
   const [editingSaldoId, setEditingSaldoId] = useState(null);
   const [editCedulas, setEditCedulas] = useState({});
   const [expandedChannel, setExpandedChannel] = useState({});
+  const [reportTab, setReportTab] = useState(mode === 'historico' ? 'historico' : 'presencial');
+  const [historicoDate, setHistoricoDate] = useState(() => {
+    const d = new Date();
+    d.setDate(d.getDate() - 1);
+    return d.toLocaleDateString('en-CA', { timeZone: 'America/Fortaleza' });
+  });
+  const [historicoSessions, setHistoricoSessions] = useState(null);
+  const [historicoTransactions, setHistoricoTransactions] = useState([]);
+  const [historicoLoading, setHistoricoLoading] = useState(false);
 
   const loadSession = useCallback(async () => {
     const s = await getOpenSession();
@@ -142,13 +156,21 @@ export default function CashManager({ onBack }) {
     }
   }, []);
 
-  useEffect(() => { loadSession(); }, [loadSession]);
+  useEffect(() => { if (mode !== 'historico') loadSession(); }, [loadSession, mode]);
 
   const loadReport = async () => {
     const [sessions, txs] = await Promise.all([getTodaySessions(), getTodayTransactions()]);
     setTodaySessions(sessions);
     setTodayTransactions(txs);
     setView('relatorio');
+  };
+
+  const loadHistorico = async (date) => {
+    setHistoricoLoading(true);
+    const [sessions, txs] = await Promise.all([getSessionsByDate(date), getTransactionsByDate(date)]);
+    setHistoricoSessions(sessions);
+    setHistoricoTransactions(txs);
+    setHistoricoLoading(false);
   };
 
   // ── Abertura ──
@@ -253,6 +275,15 @@ export default function CashManager({ onBack }) {
     setSaving(false);
     await loadReport();
   };
+
+  // ── Histórico helpers ──
+  const yesterdayStr = (() => {
+    const d = new Date();
+    d.setDate(d.getDate() - 1);
+    return d.toLocaleDateString('en-CA', { timeZone: 'America/Fortaleza' });
+  })();
+  const reportActiveSessions = reportTab === 'historico' ? (historicoSessions || []) : todaySessions;
+  const reportActiveTxs = reportTab === 'historico' ? historicoTransactions : todayTransactions;
 
   // ── Cálculos do turno ──
   const vendas = transactions.filter(t => t.tipo === 'venda').reduce((s, t) => s + parseFloat(t.valor), 0);
@@ -592,14 +623,42 @@ export default function CashManager({ onBack }) {
       {/* ── RELATÓRIO ── */}
       {view === 'relatorio' && (
         <div style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
-          <button className="cash-modal-cancel" onClick={() => session ? setView('sessao') : setView('sem-caixa')}>
-            ← Voltar
-          </button>
-          {todaySessions.length === 0 ? (
+          {mode !== 'historico' && (
+            <button className="cash-modal-cancel" onClick={() => session ? setView('sessao') : setView('sem-caixa')}>
+              ← Voltar
+            </button>
+          )}
+
+          {/* ── Seletor de data (só Histórico) ── */}
+          {reportTab === 'historico' && (
+            <div className="cash-historico-picker">
+              <input
+                type="date"
+                className="cash-historico-date"
+                value={historicoDate}
+                max={yesterdayStr}
+                onChange={e => setHistoricoDate(e.target.value)}
+              />
+              <button
+                className="btn-open-cash"
+                style={{ padding: '8px 20px', fontSize: '0.85rem' }}
+                onClick={() => loadHistorico(historicoDate)}
+                disabled={historicoLoading}
+              >
+                {historicoLoading ? 'Buscando...' : 'Buscar'}
+              </button>
+            </div>
+          )}
+
+          {reportTab !== 'historico' && todaySessions.length === 0 ? (
             <div className="cash-empty">Nenhum caixa aberto hoje.</div>
+          ) : reportTab === 'historico' && historicoSessions === null ? (
+            <div className="cash-empty" style={{ color: '#aaa' }}>Selecione uma data e clique em Buscar.</div>
+          ) : reportActiveSessions.length === 0 ? (
+            <div className="cash-empty">Nenhum caixa encontrado nesta data.</div>
           ) : (
-            todaySessions.map(s => {
-              const txs = todayTransactions.filter(t => t.session_id === s.id);
+            reportActiveSessions.map(s => {
+              const txs = reportActiveTxs.filter(t => t.session_id === s.id);
               const vendaTxs = txs.filter(t => t.tipo === 'venda');
               const v  = vendaTxs.reduce((acc, t) => acc + parseFloat(t.valor), 0);
               const sg = txs.filter(t => t.tipo === 'sangria').reduce((acc, t) => acc + parseFloat(t.valor), 0);
@@ -678,6 +737,28 @@ export default function CashManager({ onBack }) {
 
                   {/* 3. Movimentações */}
                   <div className="cash-report-row positivo"><span>Vendas</span><span>+{formatCurrency(v)}</span></div>
+                  {(() => {
+                    const bTotal = calcBuckets(vendaTxs);
+                    const linhas = [
+                      { label: 'Dinheiro',       valor: bTotal.dinheiro },
+                      { label: 'PIX',             valor: bTotal.pix },
+                      { label: 'Cartão Débito',   valor: bTotal.cartao_debito },
+                      { label: 'Cartão Crédito',  valor: bTotal.cartao_credito },
+                      { label: 'Cartão',          valor: bTotal.cartao_gen },
+                      { label: 'Boleto',          valor: bTotal.boleto },
+                    ].filter(l => l.valor > 0);
+                    if (linhas.length === 0) return null;
+                    return (
+                      <div style={{ paddingLeft: 14, borderTop: '1px solid #f0f0f0', borderBottom: '1px solid #f0f0f0', marginBottom: 2, paddingTop: 4, paddingBottom: 4 }}>
+                        {linhas.map(l => (
+                          <div key={l.label} style={{ display: 'flex', justifyContent: 'space-between', fontSize: '0.75rem', color: '#888', padding: '1px 0' }}>
+                            <span>{l.label}</span>
+                            <span>{formatCurrency(l.valor)}</span>
+                          </div>
+                        ))}
+                      </div>
+                    );
+                  })()}
                   {rf > 0 && <div className="cash-report-row positivo"><span>Reforços</span><span>+{formatCurrency(rf)}</span></div>}
                   {sg > 0 && <div className="cash-report-row negativo"><span>Sangrias</span><span>−{formatCurrency(sg)}</span></div>}
                   {dp > 0 && <div className="cash-report-row negativo"><span>Despesas</span><span>−{formatCurrency(dp)}</span></div>}

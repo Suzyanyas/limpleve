@@ -647,6 +647,74 @@
 .cash-report-row.negativo span:last-child { color: #dc2626; }
 .cash-report-row.positivo span:last-child { color: #16a34a; }
 
+/* ── Tabs do relatório ── */
+.cash-report-tabs {
+  display: flex;
+  gap: 6px;
+  background: #eef2fb;
+  border-radius: 10px;
+  padding: 4px;
+}
+
+.cash-report-tab {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 4px;
+  padding: 8px 6px;
+  border: none;
+  border-radius: 7px;
+  font-size: 0.8rem;
+  font-weight: 600;
+  cursor: pointer;
+  background: transparent;
+  color: #6b7280;
+  transition: background 0.15s, color 0.15s;
+  white-space: nowrap;
+}
+
+.cash-report-tab.active {
+  background: white;
+  color: #1e3c72;
+  box-shadow: 0 1px 4px rgba(0,0,0,0.1);
+}
+
+.cash-report-tab:hover:not(.active) {
+  background: rgba(255,255,255,0.6);
+  color: #374151;
+}
+
+/* ── Histórico: seletor de data ── */
+.cash-historico-picker {
+  display: flex;
+  gap: 10px;
+  align-items: center;
+}
+
+.cash-historico-date {
+  flex: 1;
+  border: 1.5px solid #d1d5db;
+  border-radius: 8px;
+  padding: 8px 12px;
+  font-size: 0.9rem;
+  font-family: inherit;
+  color: #1e3c72;
+  background: white;
+  outline: none;
+}
+
+.cash-historico-date:focus {
+  border-color: #2a5298;
+}
+
+.cash-historico-picker .btn-open-cash {
+  width: auto;
+  padding: 8px 24px;
+  font-size: 0.85rem;
+  flex-shrink: 0;
+}
+
 .cash-empty {
   text-align: center;
   padding: 40px 20px;
