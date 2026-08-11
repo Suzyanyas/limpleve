@@ -1185,6 +1185,37 @@ export const getTodayTransactions = async () => {
   }
 };
 
+export const getSessionsByDate = async (date) => {
+  try {
+    const { data, error } = await supabase
+      .from('cash_sessions')
+      .select('*')
+      .eq('data', date)
+      .order('opened_at', { ascending: true });
+    if (error) throw error;
+    return data || [];
+  } catch (error) {
+    console.error('Erro ao buscar sessões por data:', error);
+    return [];
+  }
+};
+
+export const getTransactionsByDate = async (date) => {
+  try {
+    const { data, error } = await supabase
+      .from('cash_transactions')
+      .select('*, budgets(customer_name)')
+      .gte('created_at', `${date}T00:00:00`)
+      .lte('created_at', `${date}T23:59:59`)
+      .order('created_at', { ascending: false });
+    if (error) throw error;
+    return data || [];
+  } catch (error) {
+    console.error('Erro ao buscar transações por data:', error);
+    return [];
+  }
+};
+
 // ============================================
 // CONFIGURAÇÕES (PIN)
 // ============================================

@@ -132,8 +132,15 @@ const BudgetCard = ({ budget, isOpen, toggleExpand, openModal }) => {
   );
 };
 
+const INITIAL_VISIBLE = 5;
+
 const Section = ({ title, icon, list, variant, expanded, toggleExpand, openModal }) => {
+  const [showAll, setShowAll] = useState(false);
   if (list.length === 0) return null;
+
+  const visible = showAll ? list : list.slice(0, INITIAL_VISIBLE);
+  const hidden = list.length - INITIAL_VISIBLE;
+
   return (
     <section className="pp-section">
       <div className={`pp-section-header pp-section-header--${variant}`}>
@@ -141,7 +148,7 @@ const Section = ({ title, icon, list, variant, expanded, toggleExpand, openModal
         <span className="pp-section-label">{title}</span>
         <span className="pp-section-count">{list.length}</span>
       </div>
-      {list.map((b) => (
+      {visible.map((b) => (
         <BudgetCard
           key={b.id}
           budget={b}
@@ -150,6 +157,18 @@ const Section = ({ title, icon, list, variant, expanded, toggleExpand, openModal
           openModal={openModal}
         />
       ))}
+      {list.length > INITIAL_VISIBLE && (
+        <button
+          className="pp-show-more-btn"
+          onClick={() => setShowAll((s) => !s)}
+        >
+          {showAll ? (
+            <><FaChevronUp className="pp-btn-icon" /> Ver menos</>
+          ) : (
+            <><FaChevronDown className="pp-btn-icon" /> Ver mais ({hidden} ocultos)</>
+          )}
+        </button>
+      )}
     </section>
   );
 };

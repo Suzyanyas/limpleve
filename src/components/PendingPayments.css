@@ -264,6 +264,27 @@
   font-size: 12px;
 }
 
+.pp-show-more-btn {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  margin: 8px auto 4px;
+  padding: 7px 20px;
+  background: transparent;
+  border: 1px solid rgba(255, 255, 255, 0.15);
+  border-radius: 20px;
+  color: rgba(255, 255, 255, 0.6);
+  font-size: 13px;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.pp-show-more-btn:hover {
+  border-color: rgba(255, 255, 255, 0.35);
+  color: rgba(255, 255, 255, 0.9);
+  background: rgba(255, 255, 255, 0.05);
+}
+
 /* ── Items table ────────────────────────────────────────────────────────────── */
 .pp-items {
   padding: 0 16px 14px;

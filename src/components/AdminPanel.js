@@ -20,6 +20,7 @@ import {
   FaBullseye,
   FaStore,
   FaGlobe,
+  FaHistory,
   FaClock
 } from 'react-icons/fa';
 import {
@@ -651,12 +652,21 @@ export default function AdminPanel() {
             >
               <FaGlobe size={13} style={{ marginRight: 5 }} /> Online
             </button>
+            <button
+              className={`subtab-button ${cashSubTab === 'historico' ? 'active' : ''}`}
+              onClick={() => setCashSubTab('historico')}
+            >
+              <FaHistory size={13} style={{ marginRight: 5 }} /> Histórico
+            </button>
           </div>
           {cashSubTab === 'presencial' && (
             <CashManager onBack={() => setActiveTab('management')} />
           )}
           {cashSubTab === 'online' && (
             <OnlineConference onBack={() => setActiveTab('management')} />
+          )}
+          {cashSubTab === 'historico' && (
+            <CashManager mode="historico" onBack={() => setActiveTab('management')} />
           )}
         </div>
       )}
