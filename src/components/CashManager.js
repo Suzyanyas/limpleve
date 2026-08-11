@@ -692,8 +692,9 @@ export default function CashManager({ onBack, mode = 'presencial' }) {
               };
               const bPresencial = calcBuckets(presencialTxs);
               const bOnline     = calcBuckets(onlineTxs);
+              const vDinheiro   = calcBuckets(vendaTxs).dinheiro;
 
-              const saldoEsperadoRelatorio = parseFloat(s.saldo_inicial || 0) + v + rf - sg - dp;
+              const saldoEsperadoRelatorio = parseFloat(s.saldo_inicial || 0) + vDinheiro + rf - sg - dp;
               const diff = s.saldo_final != null ? s.saldo_final - saldoEsperadoRelatorio : null;
 
               const fmt = (ts) => ts ? new Date(ts).toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' }) : '--:--';
@@ -838,8 +839,13 @@ export default function CashManager({ onBack, mode = 'presencial' }) {
                       <div className="cash-report-row" style={{ marginTop: 12, fontWeight: 700, fontSize: '0.82rem', color: '#888' }}>
                         <span>Fechamento</span>
                       </div>
-                      <div className="cash-report-row">
-                        <span>Saldo esperado</span><span>{formatCurrency(saldoEsperadoRelatorio)}</span>
+                      <div className="cash-report-row" style={{ flexDirection: 'column', alignItems: 'stretch', gap: 2 }}>
+                        <div style={{ display: 'flex', justifyContent: 'space-between' }}>
+                          <span>Saldo esperado</span><span>{formatCurrency(saldoEsperadoRelatorio)}</span>
+                        </div>
+                        <div style={{ fontSize: '0.7rem', color: '#aaa', fontStyle: 'italic' }}>
+                          (saldo inicial + vendas em dinheiro + reforços − sangrias − despesas)
+                        </div>
                       </div>
                       {editingSaldoId === s.id ? (
                         <div style={{ marginTop: 8 }}>
