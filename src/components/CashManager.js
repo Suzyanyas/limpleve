@@ -134,7 +134,7 @@ export default function CashManager({ onBack, mode = 'presencial' }) {
   const [editingSaldoId, setEditingSaldoId] = useState(null);
   const [editCedulas, setEditCedulas] = useState({});
   const [expandedChannel, setExpandedChannel] = useState({});
-  const [reportTab, setReportTab] = useState(mode === 'historico' ? 'historico' : 'presencial');
+  const reportTab = mode === 'historico' ? 'historico' : 'presencial';
   const [historicoDate, setHistoricoDate] = useState(() => {
     const d = new Date();
     d.setDate(d.getDate() - 1);
