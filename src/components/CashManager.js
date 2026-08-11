@@ -843,8 +843,19 @@ export default function CashManager({ onBack, mode = 'presencial' }) {
                         <div style={{ display: 'flex', justifyContent: 'space-between' }}>
                           <span>Saldo esperado</span><span>{formatCurrency(saldoEsperadoRelatorio)}</span>
                         </div>
-                        <div style={{ fontSize: '0.7rem', color: '#aaa', fontStyle: 'italic' }}>
-                          (saldo inicial + vendas em dinheiro + reforços − sangrias − despesas)
+                        <div style={{ paddingLeft: 14, borderTop: '1px solid #f0f0f0', borderBottom: '1px solid #f0f0f0', marginTop: 4, paddingTop: 4, paddingBottom: 4 }}>
+                          {[
+                            { label: 'Saldo inicial',        valor: parseFloat(s.saldo_inicial || 0), prefix: '' },
+                            { label: '+ Vendas (dinheiro)',  valor: vDinheiro,                        prefix: '+' },
+                            { label: '+ Reforços',           valor: rf,                               prefix: '+', hide: rf === 0 },
+                            { label: '− Sangrias',           valor: sg,                               prefix: '−', hide: sg === 0 },
+                            { label: '− Despesas',           valor: dp,                               prefix: '−', hide: dp === 0 },
+                          ].filter(l => !l.hide).map(l => (
+                            <div key={l.label} style={{ display: 'flex', justifyContent: 'space-between', fontSize: '0.75rem', color: '#888', padding: '1px 0' }}>
+                              <span>{l.label}</span>
+                              <span>{formatCurrency(l.valor)}</span>
+                            </div>
+                          ))}
                         </div>
                       </div>
                       {editingSaldoId === s.id ? (
