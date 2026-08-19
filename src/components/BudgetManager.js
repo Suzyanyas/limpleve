@@ -91,6 +91,7 @@ export default function BudgetManager({ onBack, initialBudget, openNew, onUpdate
   const [discountType, setDiscountType] = useState('valor');
   const finalizarBtnRef = useRef(null);
   const productNameInputRef = useRef(null);
+  const initialBudgetHandledRef = useRef(false);
 
   useEffect(() => {
     if (postSaleModal) {
@@ -295,7 +296,8 @@ export default function BudgetManager({ onBack, initialBudget, openNew, onUpdate
   }, []);
 
   useEffect(() => {
-    if (initialBudget) {
+    if (initialBudget && !initialBudgetHandledRef.current) {
+      initialBudgetHandledRef.current = true;
       loadBudgetDetail(initialBudget.id);
     }
   }, [initialBudget]); // eslint-disable-line react-hooks/exhaustive-deps

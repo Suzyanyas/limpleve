@@ -14,6 +14,7 @@ export default function AdminLogin({ onLogin }) {
     setLoading(true);
     const { error } = await supabase.auth.signInWithPassword({ email, password });
     if (error) {
+      console.error('SUPABASE AUTH ERROR:', error.name, error.status, error.message);
       setError('Email ou senha incorretos.');
     } else {
       onLogin();
