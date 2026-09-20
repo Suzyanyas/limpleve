@@ -134,14 +134,6 @@ export default function ManagementDashboard() {
 
   return (
     <div className="management-dashboard">
-      <div className="dashboard-header">
-        <div className="header-title">
-          <div className="logo-container">
-            <img src="/images/ONLINE.png" alt="LimpLeve Online" className="logo-img" />
-          </div>
-        </div>
-      </div>
-
       <div className="dashboard-cards">
         {/* Card de Orçamentos */}
         <div className="dashboard-card budgets-card" onClick={() => handleCardClick('budgets', null, true)}>

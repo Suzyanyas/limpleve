@@ -578,7 +578,10 @@ export default function AdminPanel() {
     <div className="admin-panel">
       <div className="admin-header">
         <div className="admin-header-left" />
-        <h1 className="admin-title">Painel de Gestão</h1>
+        <div style={{ textAlign: 'center' }}>
+          <img src="/images/ONLINE.png" alt="LimpLeve Online" style={{ height: '80px', display: 'block', margin: '0 auto 6px' }} />
+          <h1 className="admin-title">Painel de Gestão</h1>
+        </div>
         <button className="btn-logout" onClick={handleLogout}>↩ Sair</button>
 
         {/* Abas dentro do header */}
