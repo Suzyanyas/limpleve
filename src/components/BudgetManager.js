@@ -89,6 +89,8 @@ export default function BudgetManager({ onBack, initialBudget, openNew, onUpdate
   const [quickExpenseSaving, setQuickExpenseSaving] = useState(false);
   const [discount, setDiscount] = useState(0);
   const [discountType, setDiscountType] = useState('valor');
+  const [listSearch, setListSearch] = useState('');
+  const [listSaleFilter, setListSaleFilter] = useState('todos');
   const finalizarBtnRef = useRef(null);
   const productNameInputRef = useRef(null);
   const initialBudgetHandledRef = useRef(false);
@@ -1085,6 +1087,12 @@ export default function BudgetManager({ onBack, initialBudget, openNew, onUpdate
     const todayStart = new Date();
     todayStart.setHours(0, 0, 0, 0);
 
+    const filteredBudgets = budgets.filter(b => {
+      const matchesSearch = !listSearch || (b.customer_name || '').toLowerCase().includes(listSearch.toLowerCase());
+      const matchesSaleType = listSaleFilter === 'todos' || (b.sale_type || 'presencial') === listSaleFilter;
+      return matchesSearch && matchesSaleType;
+    });
+
     return (
       <div className="budget-manager">
         <div className="form-breadcrumb">
@@ -1100,6 +1108,38 @@ export default function BudgetManager({ onBack, initialBudget, openNew, onUpdate
           </button>
         </div>
 
+        <div className="list-filters">
+          <div className="customer-search-wrapper" style={{ flex: 1 }}>
+            <div className="customer-search-box">
+              <button className="search-icon-btn" tabIndex={-1}><FaSearch /></button>
+              <input
+                type="text"
+                className="customer-search-input"
+                placeholder="Buscar por cliente..."
+                value={listSearch}
+                onChange={e => setListSearch(e.target.value)}
+              />
+              {listSearch && (
+                <button className="search-clear-btn" onClick={() => setListSearch('')}>✕</button>
+              )}
+            </div>
+          </div>
+          <div className="sale-type-toggle" style={{ flexShrink: 0 }}>
+            {['todos', 'presencial', 'online'].map(opt => (
+              <button
+                key={opt}
+                type="button"
+                className={`sale-type-btn ${opt === 'online' ? 'online' : ''} ${listSaleFilter === opt ? 'active' : ''}`}
+                onClick={() => setListSaleFilter(opt)}
+              >
+                {opt === 'todos' && 'Todos'}
+                {opt === 'presencial' && <><FaStore /> Presencial</>}
+                {opt === 'online' && <><FaGlobe /> Online</>}
+              </button>
+            ))}
+          </div>
+        </div>
+
         <div className="list-content">
         {budgetsLoading ? (
           <div className="list-loading">Carregando...</div>
@@ -1109,9 +1149,14 @@ export default function BudgetManager({ onBack, initialBudget, openNew, onUpdate
             <p>Nenhum orçamento ainda</p>
             <button className="btn-primary" onClick={() => { resetForm(); setView('form'); }}>Criar primeiro orçamento</button>
           </div>
+        ) : filteredBudgets.length === 0 ? (
+          <div className="list-empty">
+            <div className="list-empty-icon">🔍</div>
+            <p>Nenhum orçamento encontrado</p>
+          </div>
         ) : (
           <div className="budgets-list">
-            {budgets.map(b => (
+            {filteredBudgets.map(b => (
               <div key={b.id} className="budget-list-item" onClick={() => handleOpenBudget(b)}>
                 <div className="bli-left">
                   <span className="bli-customer">{b.customer_name}</span>
@@ -1774,6 +1819,27 @@ export default function BudgetManager({ onBack, initialBudget, openNew, onUpdate
           )}
         </div>
 
+        {/* Tipo de venda */}
+        <div className="form-section">
+          <label className="section-label">Tipo de venda</label>
+          <div className="sale-type-toggle">
+            <button
+              type="button"
+              className={`sale-type-btn ${saleType === 'presencial' ? 'active' : ''}`}
+              onClick={() => setSaleType('presencial')}
+            >
+              <FaStore /> Presencial
+            </button>
+            <button
+              type="button"
+              className={`sale-type-btn online ${saleType === 'online' ? 'active' : ''}`}
+              onClick={() => { setSaleType('online'); setHasDelivery(false); }}
+            >
+              <FaGlobe /> Online
+            </button>
+          </div>
+        </div>
+
         {/* Tabela de Produtos */}
         <div className="form-section">
           <div className="products-header">
@@ -2006,27 +2072,6 @@ export default function BudgetManager({ onBack, initialBudget, openNew, onUpdate
           )}
           <div className="total-label">Total</div>
           <div className="total-value">R$ {calculateTotal().toFixed(2)}</div>
-        </div>
-
-        {/* Tipo de venda */}
-        <div className="form-section">
-          <label className="section-label">Tipo de venda</label>
-          <div className="sale-type-toggle">
-            <button
-              type="button"
-              className={`sale-type-btn ${saleType === 'presencial' ? 'active' : ''}`}
-              onClick={() => setSaleType('presencial')}
-            >
-              <FaStore /> Presencial
-            </button>
-            <button
-              type="button"
-              className={`sale-type-btn ${saleType === 'online' ? 'active' : ''}`}
-              onClick={() => { setSaleType('online'); setHasDelivery(false); }}
-            >
-              <FaGlobe /> Online
-            </button>
-          </div>
         </div>
 
         {/* Entrega — presencial é opcional, online é sempre entrega */}

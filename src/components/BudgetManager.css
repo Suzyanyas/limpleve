@@ -355,6 +355,14 @@
   font-size: 0.95rem;
 }
 
+.list-filters {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 10px 20px 0;
+  flex-wrap: wrap;
+}
+
 .list-content {
   padding: 16px 20px 30px;
   display: flex;
@@ -1325,6 +1333,12 @@
   border-color: #1e3c72;
   background: #eef2fb;
   color: #1e3c72;
+}
+
+.sale-type-btn.online.active {
+  border-color: #15803d;
+  background: #16a34a;
+  color: #fff;
 }
 
 /* Opções de pagamento */
