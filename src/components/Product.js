@@ -3,6 +3,13 @@ import { motion, AnimatePresence } from "framer-motion";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faCartShopping } from "@fortawesome/free-solid-svg-icons";
 
+const getOptimizedImageUrl = (url, width) => {
+  if (url && url.includes('supabase.co/storage')) {
+    return `${url}?width=${width}&quality=80`;
+  }
+  return url;
+};
+
 export default function Product({
   id,
   image,
@@ -58,10 +65,13 @@ export default function Product({
           transition={{ duration: 0.3 }}
         >
           <img
-            src={currentImage}
+            src={getOptimizedImageUrl(currentImage, 400)}
             alt={name}
             onClick={openPopup}
             className={!isAvailable ? "unavailable" : ""}
+            loading="lazy"
+            width={300}
+            height={300}
           />
         </motion.div>
 
@@ -132,17 +142,20 @@ export default function Product({
               <button className="close-button" onClick={closePopup}>
                 &times;
               </button>
-              <img src={currentImage} alt={name} className="expanded-image" />
+              <img src={getOptimizedImageUrl(currentImage, 800)} alt={name} className="expanded-image" loading="lazy" width={300} height={300} />
               <div className="additional-images">
                 {additional_images.map((img, index) => (
                   <motion.img
                     key={index}
-                    src={img}
+                    src={getOptimizedImageUrl(img, 400)}
                     alt={`${name} ${index + 1}`}
                     onClick={() => setCurrentImage(img)}
                     className="thumbnail"
                     whileHover={{ scale: 1.1 }}
                     whileTap={{ scale: 0.95 }}
+                    loading="lazy"
+                    width={300}
+                    height={300}
                   />
                 ))}
               </div>

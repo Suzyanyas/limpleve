@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState, lazy, Suspense } from 'react';
 import { BrowserRouter as Router, Routes, Route, useParams, useNavigate } from 'react-router-dom';
 import { Toaster } from 'react-hot-toast';
 import Navbar from './components/Navbar';
@@ -7,9 +7,10 @@ import ProductsPage from './components/pages/ProductsPage';
 import SidebarCart from './components/SidebarCart';
 import Footer from './components/Footer';
 import ScrollToTopButton from './components/ScrollToTopButton';
-import AdminPanel from './components/AdminPanel';
-import SetPassword from './components/SetPassword';
 import { getAllProducts, getProductsByCategory } from './services/productService';
+
+const AdminPanel = lazy(() => import('./components/AdminPanel'));
+const SetPassword = lazy(() => import('./components/SetPassword'));
 
 // Detecta token de convite no hash e redireciona para /set-password
 const AuthRedirect = () => {
@@ -178,40 +179,42 @@ function App() {
         />
 
         <main>
-          <Routes>
-            <Route
-              path='/'
-              element={
-                <HomePage
-                  addProductToCart={addProductToCart}
-                  products={filteredProducts}
-                  setShowSidebarCart={setShowSidebarCart}
-                />
-              }
-            />
-            <Route
-              path='/products'
-              element={
-                <ProductsPage
-                  products={filteredProducts}
-                  addProductToCart={addProductToCart}
-                  searchQuery={searchQuery}
-                />
-              }
-            />
-            <Route
-              path='/products/:category'
-              element={<CategoryProductsPage addProductToCart={addProductToCart} />}
-            />
-            <Route
-              path='/admin'
-              element={<AdminPanel />}
-            />
-            <Route
-              path='/set-password'
-              element={<SetPassword />}
-            />
-          </Routes>
+          <Suspense fallback={<div style={{ textAlign: 'center', padding: '50px' }}>A carregar...</div>}>
+            <Routes>
+              <Route
+                path='/'
+                element={
+                  <HomePage
+                    addProductToCart={addProductToCart}
+                    products={filteredProducts}
+                    setShowSidebarCart={setShowSidebarCart}
+                  />
+                }
+              />
+              <Route
+                path='/products'
+                element={
+                  <ProductsPage
+                    products={filteredProducts}
+                    addProductToCart={addProductToCart}
+                    searchQuery={searchQuery}
+                  />
+                }
+              />
+              <Route
+                path='/products/:category'
+                element={<CategoryProductsPage addProductToCart={addProductToCart} />}
+              />
+              <Route
+                path='/admin'
+                element={<AdminPanel />}
+              />
+              <Route
+                path='/set-password'
+                element={<SetPassword />}
+              />
+            </Routes>
+          </Suspense>
         </main>
         <Footer />
         <ScrollToTopButton />
