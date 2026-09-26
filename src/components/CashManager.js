@@ -17,6 +17,7 @@ import {
   updateCashSessionSaldoFinal,
   getSessionsByDate,
   getTransactionsByDate,
+  getTodayPendingPaymentsCount,
 } from '../services/managementService';
 import './CashManager.css';
 
@@ -110,10 +111,11 @@ export function CashStatusBar({ onOpen }) {
 // ─────────────────────────────────────────────
 // Componente principal
 // ─────────────────────────────────────────────
-export default function CashManager({ onBack, mode = 'presencial' }) {
+export default function CashManager({ onBack, onNavigateToPending, mode = 'presencial' }) {
   const [view, setView] = useState(mode === 'historico' ? 'relatorio' : 'loading');
   const [session, setSession] = useState(null);
   const [transactions, setTransactions] = useState([]);
+  const [pendingNotice, setPendingNotice] = useState(null);
   const [turno, setTurno] = useState(() => {
     const hora = new Date().getHours();
     return hora < 12 ? 'manha' : 'tarde';
@@ -134,6 +136,7 @@ export default function CashManager({ onBack, mode = 'presencial' }) {
   const [editingSaldoId, setEditingSaldoId] = useState(null);
   const [editCedulas, setEditCedulas] = useState({});
   const [expandedChannel, setExpandedChannel] = useState({});
+  const [expandedMov, setExpandedMov] = useState({});
   const reportTab = mode === 'historico' ? 'historico' : 'presencial';
   const [historicoDate, setHistoricoDate] = useState(() => {
     const d = new Date();
@@ -252,6 +255,8 @@ export default function CashManager({ onBack, mode = 'presencial' }) {
         setCedulasFundo(EMPTY_CEDULAS);
         setView('fundo');
       } else {
+        const count = await getTodayPendingPaymentsCount();
+        if (count > 0) setPendingNotice(count);
         await loadReport();
       }
     } else {
@@ -273,6 +278,8 @@ export default function CashManager({ onBack, mode = 'presencial' }) {
       toast.error('Erro ao registrar fundo');
     }
     setSaving(false);
+    const count = await getTodayPendingPaymentsCount();
+    if (count > 0) setPendingNotice(count);
     await loadReport();
   };
 
@@ -659,11 +666,14 @@ export default function CashManager({ onBack, mode = 'presencial' }) {
           ) : (
             reportActiveSessions.map(s => {
               const txs = reportActiveTxs.filter(t => t.session_id === s.id);
-              const vendaTxs = txs.filter(t => t.tipo === 'venda');
+              const vendaTxs   = txs.filter(t => t.tipo === 'venda');
+              const reforcoTxs = txs.filter(t => t.tipo === 'reforco');
+              const sangriaTxs = txs.filter(t => t.tipo === 'sangria');
+              const despesaTxs = txs.filter(t => t.tipo === 'despesa');
               const v  = vendaTxs.reduce((acc, t) => acc + parseFloat(t.valor), 0);
-              const sg = txs.filter(t => t.tipo === 'sangria').reduce((acc, t) => acc + parseFloat(t.valor), 0);
-              const dp = txs.filter(t => t.tipo === 'despesa').reduce((acc, t) => acc + parseFloat(t.valor), 0);
-              const rf = txs.filter(t => t.tipo === 'reforco').reduce((acc, t) => acc + parseFloat(t.valor), 0);
+              const rf = reforcoTxs.reduce((acc, t) => acc + parseFloat(t.valor), 0);
+              const sg = sangriaTxs.reduce((acc, t) => acc + parseFloat(t.valor), 0);
+              const dp = despesaTxs.reduce((acc, t) => acc + parseFloat(t.valor), 0);
 
               const presencialTxs = vendaTxs.filter(t => t.sale_type === 'presencial' || !t.sale_type);
               const onlineTxs     = vendaTxs.filter(t => t.sale_type === 'online');
@@ -760,9 +770,69 @@ export default function CashManager({ onBack, mode = 'presencial' }) {
                       </div>
                     );
                   })()}
-                  {rf > 0 && <div className="cash-report-row positivo"><span>Reforços</span><span>+{formatCurrency(rf)}</span></div>}
-                  {sg > 0 && <div className="cash-report-row negativo"><span>Sangrias</span><span>−{formatCurrency(sg)}</span></div>}
-                  {dp > 0 && <div className="cash-report-row negativo"><span>Despesas</span><span>−{formatCurrency(dp)}</span></div>}
+                  {rf > 0 && (
+                    <div>
+                      <div className="cash-report-row positivo"><span>Reforços</span><span>+{formatCurrency(rf)}</span></div>
+                      <button
+                        onClick={() => setExpandedMov(prev => ({ ...prev, [`${s.id}_reforco`]: !prev[`${s.id}_reforco`] }))}
+                        style={{ background: 'none', border: 'none', cursor: 'pointer', fontSize: '0.72rem', color: '#888', padding: '2px 0 6px', display: 'block' }}
+                      >
+                        {expandedMov[`${s.id}_reforco`] ? 'Ocultar ▲' : `Ver reforços ▼ (${reforcoTxs.length})`}
+                      </button>
+                      {expandedMov[`${s.id}_reforco`] && (
+                        <div style={{ borderLeft: '2px solid #333', paddingLeft: 8, marginBottom: 4 }}>
+                          {reforcoTxs.map((t, i) => (
+                            <div key={t.id || i} style={{ display: 'flex', justifyContent: 'space-between', fontSize: '0.72rem', color: '#bbb', padding: '2px 0' }}>
+                              <span>{fmtHora(t.created_at)} · {t.observacao || 'Reforço de caixa'}</span>
+                              <span style={{ whiteSpace: 'nowrap', marginLeft: 8 }}>+{formatCurrency(parseFloat(t.valor))}</span>
+                            </div>
+                          ))}
+                        </div>
+                      )}
+                    </div>
+                  )}
+                  {sg > 0 && (
+                    <div>
+                      <div className="cash-report-row negativo"><span>Sangrias</span><span>−{formatCurrency(sg)}</span></div>
+                      <button
+                        onClick={() => setExpandedMov(prev => ({ ...prev, [`${s.id}_sangria`]: !prev[`${s.id}_sangria`] }))}
+                        style={{ background: 'none', border: 'none', cursor: 'pointer', fontSize: '0.72rem', color: '#888', padding: '2px 0 6px', display: 'block' }}
+                      >
+                        {expandedMov[`${s.id}_sangria`] ? 'Ocultar ▲' : `Ver sangrias ▼ (${sangriaTxs.length})`}
+                      </button>
+                      {expandedMov[`${s.id}_sangria`] && (
+                        <div style={{ borderLeft: '2px solid #333', paddingLeft: 8, marginBottom: 4 }}>
+                          {sangriaTxs.map((t, i) => (
+                            <div key={t.id || i} style={{ display: 'flex', justifyContent: 'space-between', fontSize: '0.72rem', color: '#bbb', padding: '2px 0' }}>
+                              <span>{fmtHora(t.created_at)} · {t.observacao || 'Sangria'}</span>
+                              <span style={{ whiteSpace: 'nowrap', marginLeft: 8 }}>−{formatCurrency(parseFloat(t.valor))}</span>
+                            </div>
+                          ))}
+                        </div>
+                      )}
+                    </div>
+                  )}
+                  {dp > 0 && (
+                    <div>
+                      <div className="cash-report-row negativo"><span>Despesas</span><span>−{formatCurrency(dp)}</span></div>
+                      <button
+                        onClick={() => setExpandedMov(prev => ({ ...prev, [`${s.id}_despesa`]: !prev[`${s.id}_despesa`] }))}
+                        style={{ background: 'none', border: 'none', cursor: 'pointer', fontSize: '0.72rem', color: '#888', padding: '2px 0 6px', display: 'block' }}
+                      >
+                        {expandedMov[`${s.id}_despesa`] ? 'Ocultar ▲' : `Ver despesas ▼ (${despesaTxs.length})`}
+                      </button>
+                      {expandedMov[`${s.id}_despesa`] && (
+                        <div style={{ borderLeft: '2px solid #333', paddingLeft: 8, marginBottom: 4 }}>
+                          {despesaTxs.map((t, i) => (
+                            <div key={t.id || i} style={{ display: 'flex', justifyContent: 'space-between', fontSize: '0.72rem', color: '#bbb', padding: '2px 0' }}>
+                              <span>{fmtHora(t.created_at)} · {t.categoria_despesa || t.observacao || 'Despesa'}</span>
+                              <span style={{ whiteSpace: 'nowrap', marginLeft: 8 }}>−{formatCurrency(parseFloat(t.valor))}</span>
+                            </div>
+                          ))}
+                        </div>
+                      )}
+                    </div>
+                  )}
 
                   {/* 4. Por canal — expansível */}
                   {[
@@ -1086,6 +1156,31 @@ export default function CashManager({ onBack, mode = 'presencial' }) {
                 disabled={saving}
               >
                 {saving ? 'Salvando...' : 'Confirmar'}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {pendingNotice !== null && (
+        <div className="pp-notice-overlay">
+          <div className="pp-notice-card">
+            <div className="pp-notice-icon"><FaExclamationTriangle /></div>
+            <div className="pp-notice-text">
+              Tens {pendingNotice} pagamento(s) pendente(s) de hoje.
+            </div>
+            <div className="pp-notice-actions">
+              <button
+                className="pp-notice-btn pp-notice-btn--primary"
+                onClick={() => { setPendingNotice(null); onNavigateToPending && onNavigateToPending(); }}
+              >
+                Ver pagamentos pendentes
+              </button>
+              <button
+                className="pp-notice-btn pp-notice-btn--secondary"
+                onClick={() => setPendingNotice(null)}
+              >
+                Fechar
               </button>
             </div>
           </div>

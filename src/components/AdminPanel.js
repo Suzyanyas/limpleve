@@ -663,7 +663,7 @@ export default function AdminPanel() {
             </button>
           </div>
           {cashSubTab === 'presencial' && (
-            <CashManager onBack={() => setActiveTab('management')} />
+            <CashManager onBack={() => setActiveTab('management')} onNavigateToPending={() => setActiveTab('stats')} />
           )}
           {cashSubTab === 'online' && (
             <OnlineConference onBack={() => setActiveTab('management')} />

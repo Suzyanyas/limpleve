@@ -1,9 +1,10 @@
 import { useState, useEffect } from 'react';
 import {
   FaMoneyBillWave, FaClock, FaChevronDown, FaChevronUp,
-  FaCreditCard, FaCalendarAlt, FaStore, FaTruck,
+  FaCreditCard, FaCalendarAlt, FaStore, FaTruck, FaCheck,
 } from 'react-icons/fa';
-import { getPendingPayments, confirmBudgetPayment } from '../services/managementService';
+import toast from 'react-hot-toast';
+import { getPendingPayments, confirmBudgetPayment, confirmBudgetPaymentBatchMarkOnly, ceFortaleza } from '../services/managementService';
 import './PendingPayments.css';
 
 const PAYMENT_LABELS = {
@@ -65,14 +66,21 @@ const ItemsTable = ({ budgetItems }) => (
   </div>
 );
 
-const BudgetCard = ({ budget, isOpen, toggleExpand, openModal }) => {
+const BudgetCard = ({ budget, isOpen, toggleExpand, openModal, isSelected, onToggleSelect }) => {
   const hasItems = budget.budget_items?.length > 0;
   const vPendente = pendingValue(budget);
   const isOnline = budget.sale_type === 'online';
 
   return (
-    <div className="pp-card">
+    <div className={`pp-card${isSelected ? ' pp-card--selected' : ''}`}>
       <div className="pp-card-main">
+        <div
+          className={`pp-checkbox${isSelected ? ' pp-checkbox--checked' : ''}`}
+          onClick={() => onToggleSelect(budget.id)}
+        >
+          {isSelected && <FaCheck />}
+        </div>
+
         <div className="pp-card-info">
           <span className="pp-customer">{budget.customer_name}</span>
 
@@ -134,12 +142,13 @@ const BudgetCard = ({ budget, isOpen, toggleExpand, openModal }) => {
 
 const INITIAL_VISIBLE = 5;
 
-const Section = ({ title, icon, list, variant, expanded, toggleExpand, openModal }) => {
+const Section = ({ title, icon, list, variant, expanded, toggleExpand, openModal, selectedIds, onToggleSelect, onSelectAllSection }) => {
   const [showAll, setShowAll] = useState(false);
   if (list.length === 0) return null;
 
   const visible = showAll ? list : list.slice(0, INITIAL_VISIBLE);
   const hidden = list.length - INITIAL_VISIBLE;
+  const allSelected = list.length > 0 && list.every((b) => selectedIds.has(b.id));
 
   return (
     <section className="pp-section">
@@ -147,6 +156,12 @@ const Section = ({ title, icon, list, variant, expanded, toggleExpand, openModal
         <span className="pp-section-icon">{icon}</span>
         <span className="pp-section-label">{title}</span>
         <span className="pp-section-count">{list.length}</span>
+        <button
+          className={`pp-select-all-btn${allSelected ? ' pp-select-all-btn--active' : ''}`}
+          onClick={() => onSelectAllSection(list, !allSelected)}
+        >
+          {allSelected ? 'Desmarcar todos' : 'Selecionar todos'}
+        </button>
       </div>
       {visible.map((b) => (
         <BudgetCard
@@ -155,6 +170,8 @@ const Section = ({ title, icon, list, variant, expanded, toggleExpand, openModal
           isOpen={expanded.has(b.id)}
           toggleExpand={toggleExpand}
           openModal={openModal}
+          isSelected={selectedIds.has(b.id)}
+          onToggleSelect={onToggleSelect}
         />
       ))}
       {list.length > INITIAL_VISIBLE && (
@@ -173,25 +190,57 @@ const Section = ({ title, icon, list, variant, expanded, toggleExpand, openModal
   );
 };
 
+const SALE_TYPE_OPTIONS = [
+  { value: 'todos', label: 'Todos' },
+  { value: 'presencial', label: 'Presencial' },
+  { value: 'online', label: 'Online' },
+];
+
+const DATE_OPTIONS = [
+  { value: 'todos', label: 'Todos' },
+  { value: 'hoje', label: 'Hoje' },
+  { value: '7dias', label: '7 dias' },
+  { value: '30dias', label: '30 dias' },
+];
+
 export default function PendingPayments() {
   const [items, setItems] = useState([]);
   const [loading, setLoading] = useState(true);
   const [expanded, setExpanded] = useState(new Set());
-  const [modal, setModal] = useState(null); // { budget }
+  const [modal, setModal] = useState(null);
   const [paymentForm, setPaymentForm] = useState('dinheiro');
   const [saving, setSaving] = useState(false);
+  const [selectedIds, setSelectedIds] = useState(new Set());
+  const [batchConfirming, setBatchConfirming] = useState(false);
+  const [filterSaleType, setFilterSaleType] = useState('todos');
+  const [filterDate, setFilterDate] = useState('todos');
 
-  useEffect(() => {
-    getPendingPayments().then((data) => {
-      setItems(data);
-      setLoading(false);
-    });
-  }, []);
+  const fetchItems = async () => {
+    const data = await getPendingPayments();
+    setItems(data);
+    setLoading(false);
+  };
+
+  useEffect(() => { fetchItems(); }, []);
 
   const toggleExpand = (id) =>
     setExpanded((prev) => {
       const next = new Set(prev);
       next.has(id) ? next.delete(id) : next.add(id);
+      return next;
+    });
+
+  const onToggleSelect = (id) =>
+    setSelectedIds((prev) => {
+      const next = new Set(prev);
+      next.has(id) ? next.delete(id) : next.add(id);
+      return next;
+    });
+
+  const onSelectAllSection = (sectionList, select) =>
+    setSelectedIds((prev) => {
+      const next = new Set(prev);
+      sectionList.forEach((b) => select ? next.add(b.id) : next.delete(b.id));
       return next;
     });
 
@@ -216,17 +265,49 @@ export default function PendingPayments() {
 
     if (result.success) {
       setItems((prev) => prev.filter((b) => b.id !== budget.id));
+      setSelectedIds((prev) => { const n = new Set(prev); n.delete(budget.id); return n; });
       setModal(null);
+      toast.success('Pagamento confirmado!');
     } else {
-      alert('Erro ao confirmar pagamento. Tente novamente.');
+      toast.error('Erro ao confirmar pagamento.');
     }
     setSaving(false);
   };
 
-  const aReceber = items.filter((b) => b.payment_status === 'a_receber');
-  const parcial  = items.filter((b) => b.payment_status === 'parcial');
+  const handleBatchConfirm = async () => {
+    setBatchConfirming(true);
+    const ids = Array.from(selectedIds);
+    const result = await confirmBudgetPaymentBatchMarkOnly(ids);
+    if (result.success) {
+      toast.success(`${result.count} pagamento(s) confirmado(s)`);
+      setSelectedIds(new Set());
+      await fetchItems();
+    } else {
+      toast.error('Erro ao confirmar pagamentos: ' + (result.error || ''));
+    }
+    setBatchConfirming(false);
+  };
 
-  const totalPendente = items.reduce((acc, b) => acc + pendingValue(b), 0);
+  const todayStr = ceFortaleza(new Date());
+  const d7 = new Date(); d7.setDate(d7.getDate() - 7);
+  const d7Str = ceFortaleza(d7);
+  const d30 = new Date(); d30.setDate(d30.getDate() - 30);
+  const d30Str = ceFortaleza(d30);
+
+  const filtered = items.filter((b) => {
+    if (filterSaleType !== 'todos' && b.sale_type !== filterSaleType) return false;
+    if (filterDate !== 'todos') {
+      const bDate = ceFortaleza(new Date(b.created_at));
+      if (filterDate === 'hoje' && bDate !== todayStr) return false;
+      if (filterDate === '7dias' && bDate < d7Str) return false;
+      if (filterDate === '30dias' && bDate < d30Str) return false;
+    }
+    return true;
+  });
+
+  const aReceber = filtered.filter((b) => b.payment_status === 'a_receber');
+  const parcial  = filtered.filter((b) => b.payment_status === 'parcial');
+  const totalPendente = filtered.reduce((acc, b) => acc + pendingValue(b), 0);
 
   return (
     <div className="pp-root">
@@ -234,10 +315,61 @@ export default function PendingPayments() {
         <h2 className="pp-title">Pagamentos Pendentes</h2>
       </div>
 
+      {items.length > 0 && (
+        <div className="pp-notice-banner">
+          Você tem pagamentos pendentes a confirmar
+        </div>
+      )}
+
+      {selectedIds.size > 0 && (
+        <div className="pp-batch-bar">
+          <span className="pp-batch-count">{selectedIds.size} selecionado(s)</span>
+          <button
+            className="pp-batch-btn"
+            onClick={handleBatchConfirm}
+            disabled={batchConfirming}
+          >
+            <FaCheck className="pp-btn-icon" />
+            {batchConfirming ? 'Confirmando...' : 'Confirmar recebimento'}
+          </button>
+        </div>
+      )}
+
+      <div className="pp-filters">
+        <div className="pp-filter-group">
+          <span className="pp-filter-label">Tipo</span>
+          <div className="pp-filter-options">
+            {SALE_TYPE_OPTIONS.map((opt) => (
+              <button
+                key={opt.value}
+                className={`pp-filter-btn${filterSaleType === opt.value ? ' active' : ''}`}
+                onClick={() => setFilterSaleType(opt.value)}
+              >
+                {opt.label}
+              </button>
+            ))}
+          </div>
+        </div>
+        <div className="pp-filter-group">
+          <span className="pp-filter-label">Período</span>
+          <div className="pp-filter-options">
+            {DATE_OPTIONS.map((opt) => (
+              <button
+                key={opt.value}
+                className={`pp-filter-btn${filterDate === opt.value ? ' active' : ''}`}
+                onClick={() => setFilterDate(opt.value)}
+              >
+                {opt.label}
+              </button>
+            ))}
+          </div>
+        </div>
+      </div>
+
       <div className="pp-summary">
         <div className="pp-summary-card pp-summary-card--count">
           <span className="pp-summary-label">Pendências</span>
-          <span className="pp-summary-value">{items.length}</span>
+          <span className="pp-summary-value">{filtered.length}</span>
           <span className="pp-summary-sub">
             {aReceber.length} a receber · {parcial.length} parcial
           </span>
@@ -251,8 +383,12 @@ export default function PendingPayments() {
 
       {loading ? (
         <div className="pp-loading">Carregando...</div>
-      ) : items.length === 0 ? (
-        <div className="pp-empty">Nenhum pagamento pendente.</div>
+      ) : filtered.length === 0 ? (
+        <div className="pp-empty">
+          {items.length === 0
+            ? 'Nenhum pagamento pendente.'
+            : 'Nenhum resultado com os filtros atuais.'}
+        </div>
       ) : (
         <div className="pp-sections">
           <Section
@@ -263,6 +399,9 @@ export default function PendingPayments() {
             expanded={expanded}
             toggleExpand={toggleExpand}
             openModal={openModal}
+            selectedIds={selectedIds}
+            onToggleSelect={onToggleSelect}
+            onSelectAllSection={onSelectAllSection}
           />
           <Section
             title="Pagamento parcial"
@@ -272,6 +411,9 @@ export default function PendingPayments() {
             expanded={expanded}
             toggleExpand={toggleExpand}
             openModal={openModal}
+            selectedIds={selectedIds}
+            onToggleSelect={onToggleSelect}
+            onSelectAllSection={onSelectAllSection}
           />
         </div>
       )}

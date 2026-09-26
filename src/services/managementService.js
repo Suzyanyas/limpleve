@@ -571,7 +571,7 @@ const spDateKey = (date) => new Intl.DateTimeFormat('en-CA', {
   day: '2-digit'
 }).format(date);
 
-const ceFortaleza = (date) => new Intl.DateTimeFormat('en-CA', {
+export const ceFortaleza = (date) => new Intl.DateTimeFormat('en-CA', {
   timeZone: 'America/Fortaleza',
   year: 'numeric', month: '2-digit', day: '2-digit',
 }).format(date);
@@ -1106,6 +1106,45 @@ export const confirmBudgetPayment = async ({ budgetId, valor, formaPagamento, sa
   } catch (error) {
     console.error('Erro ao confirmar pagamento do orçamento:', error);
     return { success: false, error: error.message || 'erro desconhecido' };
+  }
+};
+
+export const confirmBudgetPaymentBatchMarkOnly = async (budgetIds) => {
+  try {
+    let count = 0;
+    for (const id of budgetIds) {
+      const { error } = await supabase
+        .from('budgets')
+        .update({ payment_status: 'pago' })
+        .eq('id', id);
+      if (error) throw error;
+      count++;
+    }
+    return { success: true, count };
+  } catch (error) {
+    console.error('Erro ao confirmar pagamentos em lote:', error);
+    return { success: false, error: error.message || 'erro desconhecido' };
+  }
+};
+
+export const getTodayPendingPaymentsCount = async () => {
+  try {
+    const today = ceFortaleza(new Date());
+    const tomorrow = new Date();
+    tomorrow.setDate(tomorrow.getDate() + 1);
+    const tomorrowStr = ceFortaleza(tomorrow);
+    const { count, error } = await supabase
+      .from('budgets')
+      .select('id', { count: 'exact', head: true })
+      .in('payment_status', ['a_receber', 'parcial'])
+      .not('status', 'in', '("cancelled","delivered")')
+      .gte('created_at', today + 'T00:00:00-03:00')
+      .lt('created_at', tomorrowStr + 'T00:00:00-03:00');
+    if (error) throw error;
+    return count || 0;
+  } catch (error) {
+    console.error('Erro ao contar pagamentos pendentes de hoje:', error);
+    return 0;
   }
 };
 
