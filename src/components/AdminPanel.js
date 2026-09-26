@@ -1223,14 +1223,25 @@ export default function AdminPanel() {
                     </div>
                   </div>
 
-                  {overviewStats.pendingTotal > 0 && (
-                    <div className="ov-card orange">
+                  {(overviewStats.pendingTotal > 0 || overviewStats.pendingHistoricalCount > 0) && (
+                    <div
+                      className="ov-card orange ov-card--clickable"
+                      onClick={() => document.getElementById('pending-payments')?.scrollIntoView({ behavior: 'smooth' })}
+                    >
                       <div className="ov-icon"><FaClock /></div>
                       <div className="ov-info">
                         <span className="ov-value">R$ {overviewStats.pendingTotal.toFixed(2)}</span>
-                        <span className="ov-label">A receber</span>
+                        <span className="ov-label">A receber · Mês atual</span>
                       </div>
-                      <div className="ov-sub">Valores pendentes de cobrança</div>
+                      {overviewStats.pendingHistoricalCount > 0 && (
+                        <span
+                          className="ov-sub-historical"
+                          onClick={(e) => { e.stopPropagation(); document.getElementById('pending-payments')?.scrollIntoView({ behavior: 'smooth' }); }}
+                        >
+                          + {overviewStats.pendingHistoricalCount} pendentes de meses anteriores
+                        </span>
+                      )}
+                      <div className="ov-sub-hint">Clique para revisar e confirmar</div>
                     </div>
                   )}
                 </div>
@@ -1488,7 +1499,7 @@ export default function AdminPanel() {
             </>
           )}
 
-          <div className="stats-bottom-grid">
+          <div id="pending-payments" className="stats-bottom-grid">
             <DeliveryHistory />
             <PendingPayments />
           </div>

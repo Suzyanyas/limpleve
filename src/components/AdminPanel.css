@@ -342,6 +342,29 @@
   margin-top: 4px;
 }
 
+.ov-card--clickable {
+  cursor: pointer;
+  transition: filter 0.15s, transform 0.15s;
+}
+.ov-card--clickable:hover {
+  filter: brightness(1.12);
+  transform: translateY(-1px);
+}
+
+.ov-sub-historical {
+  font-size: 0.68rem;
+  opacity: 0.85;
+  text-decoration: underline;
+  cursor: pointer;
+  margin-top: 2px;
+}
+
+.ov-sub-hint {
+  font-size: 0.7rem;
+  opacity: 0.75;
+  margin-top: 2px;
+}
+
 /* Split card (entregues / cancelados) */
 .ov-split-item {
   flex: 1;

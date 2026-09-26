@@ -877,14 +877,34 @@ export const getOverviewStats = async () => {
     const presencial = sales.filter(b => b.sale_type === 'presencial' || !b.sale_type).length;
     const online = sales.filter(b => b.sale_type === 'online').length;
 
-    // A receber: soma dos valores pendentes
-    const aReceberTotal = sales
-      .filter(b => b.payment_status === 'a_receber')
-      .reduce((sum, b) => sum + parseFloat(b.total || 0), 0);
-    const parcialTotal = sales
-      .filter(b => b.payment_status === 'parcial')
-      .reduce((sum, b) => sum + Math.max(0, parseFloat(b.total || 0) - parseFloat(b.entrada_valor || 0)), 0);
-    const pendingTotal = aReceberTotal + parcialTotal;
+    // A receber: queries direcionadas (mês atual + histórico)
+    const startOfMonth = `${year}-${month}-01`;
+    const nextMonthDate = new Date(now.getFullYear(), now.getMonth() + 1, 1);
+    const startOfNextMonth = `${nextMonthDate.getFullYear()}-${String(nextMonthDate.getMonth() + 1).padStart(2, '0')}-01`;
+
+    const [pendingCurrentRes, pendingHistoricalRes] = await Promise.all([
+      supabase
+        .from('budgets')
+        .select('id, total, payment_status, entrada_valor')
+        .in('payment_status', ['a_receber', 'parcial'])
+        .not('status', 'in', '("cancelled","delivered")')
+        .gte('created_at', startOfMonth)
+        .lt('created_at', startOfNextMonth),
+      supabase
+        .from('budgets')
+        .select('id')
+        .in('payment_status', ['a_receber', 'parcial'])
+        .not('status', 'in', '("cancelled","delivered")')
+        .lt('created_at', startOfMonth)
+    ]);
+
+    const pendingCurrentData = pendingCurrentRes.data || [];
+    const pendingTotal = pendingCurrentData.reduce((sum, b) => {
+      if (b.payment_status === 'a_receber') return sum + parseFloat(b.total || 0);
+      if (b.payment_status === 'parcial') return sum + Math.max(0, parseFloat(b.total || 0) - parseFloat(b.entrada_valor || 0));
+      return sum;
+    }, 0);
+    const pendingHistoricalCount = (pendingHistoricalRes.data || []).length;
 
     // Produtos mais vendidos (de vendas confirmadas, itens já vêm junto com o budget)
     const productMap = {};
@@ -911,6 +931,7 @@ export const getOverviewStats = async () => {
       presencial,
       online,
       pendingTotal,
+      pendingHistoricalCount,
       topProducts
     };
   } catch (error) {
