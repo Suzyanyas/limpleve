@@ -14,7 +14,6 @@ import {
   updateBudgetManterOrcamento,
   deleteBudget,
   getBudgetById,
-  createPickingOrder,
   createDeliveryRoute,
   getOpenSession,
   getOnlineSession,
@@ -35,7 +34,7 @@ const CONFIRM_PAYMENT_LABELS = {
   boleto: 'Boleto',
 };
 
-export default function BudgetManager({ onBack, initialBudget, openNew, onUpdate, onApproved }) {
+export default function BudgetManager({ onBack, initialBudget, openNew, onUpdate, onApproved, initialSaleType }) {
   const [view, setView] = useState((initialBudget || openNew) ? 'form' : 'list'); // list, form, detail, romaneio, caixa
   const [showPinGate, setShowPinGate] = useState(false);
   const [showDeletePinGate, setShowDeletePinGate] = useState(false);
@@ -61,7 +60,7 @@ export default function BudgetManager({ onBack, initialBudget, openNew, onUpdate
   const [paymentStatus, setPaymentStatus] = useState('pago');
   const [entradaValue, setEntradaValue] = useState('');
   const [entradaMethod, setEntradaMethod] = useState('dinheiro');
-  const [saleType, setSaleType] = useState('presencial');
+  const [saleType, setSaleType] = useState(initialSaleType || 'presencial');
   const [hasDelivery, setHasDelivery] = useState(false);
   const [mistoValues, setMistoValues] = useState({ dinheiro: '', pix: '', cartao: '' });
   const [trocoRecebido, setTrocoRecebido] = useState('');
@@ -79,7 +78,6 @@ export default function BudgetManager({ onBack, initialBudget, openNew, onUpdate
   const [customerHighlight, setCustomerHighlight] = useState(-1);
   const [showProductDropdown, setShowProductDropdown] = useState(false);
   const [creatingCustomer, setCreatingCustomer] = useState(null); // null | { name, whatsapp }
-  const [hasPicking, setHasPicking] = useState(false);
   const [hasRoute, setHasRoute] = useState(false);
   const [trocoSaving, setTrocoSaving] = useState(false);
   const [trocoOnlineLancadoValor, setTrocoOnlineLancadoValor] = useState(null);
@@ -265,13 +263,14 @@ export default function BudgetManager({ onBack, initialBudget, openNew, onUpdate
         })));
       }
 
-      // Verifica se já tem separação e/ou rota para este orçamento
-      const [pickingRes, routeRes] = await Promise.all([
-        supabase.from('picking').select('id').eq('budget_id', budgetId).limit(1),
-        supabase.from('delivery_routes').select('id').eq('budget_id', budgetId).neq('status', 'cancelled').limit(1)
-      ]);
-      setHasPicking((pickingRes.data?.length ?? 0) > 0);
-      setHasRoute((routeRes.data?.length ?? 0) > 0);
+      // Verifica se já tem rota para este orçamento
+      const { data: routeData } = await supabase
+        .from('delivery_routes')
+        .select('id')
+        .eq('budget_id', budgetId)
+        .neq('status', 'cancelled')
+        .limit(1);
+      setHasRoute((routeData?.length ?? 0) > 0);
 
       setView('detail');
     } else {
@@ -707,23 +706,6 @@ export default function BudgetManager({ onBack, initialBudget, openNew, onUpdate
       setBudgetData(prev => ({ ...prev, ...budgetPayload }));
     }
 
-    // 2. Cria ordem de separação (apenas para vendas online; presencial cria no modal pós-venda se solicitado)
-    if (saleType !== 'presencial') {
-      const { data: existing } = await supabase
-        .from('picking')
-        .select('id')
-        .eq('budget_id', savedBudget.id)
-        .limit(1);
-      if (!existing || existing.length === 0) {
-        await createPickingOrder({
-          budget_id: savedBudget.id,
-          customer_name: savedBudget.customer_name || customerForSale.name,
-          customer_code: savedBudget.customer_code || customerForSale.code,
-          status: 'pending'
-        });
-      }
-    }
-
     // 3. Lança no caixa se payment_status === 'pago' ou 'parcial'
     if (paymentStatus !== 'a_receber') {
       const session = saleType === 'online'
@@ -753,6 +735,40 @@ export default function BudgetManager({ onBack, initialBudget, openNew, onUpdate
         toast.error('Venda salva, mas houve erro ao lançar no caixa. Pagamento marcado como pendente — confirme manualmente depois.');
       } else {
         toast.success(session ? 'Venda registrada no caixa!' : 'Venda registrada (sem turno aberto)');
+      }
+    }
+
+    // 4. Cria rota de entrega automaticamente, se houver endereço de entrega
+    const isDeliverySale = (saleType === 'online' || (saleType === 'presencial' && hasDelivery)) && deliveryAddress.trim();
+    if (isDeliverySale) {
+      let routeExists = false;
+      if (savedBudget?.id) {
+        const { data: existing } = await supabase
+          .from('delivery_routes')
+          .select('id')
+          .eq('budget_id', savedBudget.id)
+          .limit(1);
+        routeExists = existing && existing.length > 0;
+      }
+
+      if (!routeExists) {
+        const customerName = budgetData?.customer_name || selectedCustomer?.name;
+        const customerCode = budgetData?.customer_code || selectedCustomer?.code;
+        const routeResult = await createDeliveryRoute({
+          budget_id: savedBudget.id,
+          customer_name: customerName,
+          customer_code: customerCode,
+          address: deliveryAddress,
+          status: 'next',
+          delivery_date: new Date().toISOString().split('T')[0]
+        });
+
+        if (routeResult.success) {
+          setHasRoute(true);
+          onUpdate && onUpdate();
+        } else {
+          toast.error('Venda confirmada, mas houve erro ao criar a rota de entrega. Crie manualmente se necessário.');
+        }
       }
     }
 
@@ -796,22 +812,6 @@ export default function BudgetManager({ onBack, initialBudget, openNew, onUpdate
       }
       setBudgetData(prev => ({ ...prev, status: 'confirmed' }));
       onUpdate && onUpdate();
-
-      // 2. Enviar para separação (silencioso se já existir)
-      const { data: existing } = await supabase
-        .from('picking')
-        .select('id')
-        .eq('budget_id', budgetData.id)
-        .limit(1);
-
-      if (!existing || existing.length === 0) {
-        await createPickingOrder({
-          budget_id: budgetData.id,
-          customer_name: budgetData.customer_name,
-          customer_code: budgetData.customer_code,
-          status: 'pending'
-        });
-      }
 
       // 3. Ir para romaneio, imprimir e após impressão ir para Separação
       setView('romaneio');
@@ -1018,38 +1018,6 @@ export default function BudgetManager({ onBack, initialBudget, openNew, onUpdate
   const filteredProducts = products.filter(p =>
     p.name.toLowerCase().includes(productFilter.toLowerCase())
   );
-
-  const handleSendToPicking = async () => {
-    if (!budgetData) return;
-
-    // Verificar se já existe separação para este orçamento
-    const { data: existing } = await supabase
-      .from('picking')
-      .select('id, status')
-      .eq('budget_id', budgetData.id)
-      .limit(1);
-
-    if (existing && existing.length > 0) {
-      const status = existing[0].status === 'pending' ? 'pendente' : 'separado';
-      toast.error(`Este orçamento já está na separação (${status})`);
-      return;
-    }
-
-    const result = await createPickingOrder({
-      budget_id: budgetData.id,
-      customer_name: budgetData.customer_name,
-      customer_code: budgetData.customer_code,
-      status: 'pending'
-    });
-
-    if (result.success) {
-      toast.success('Enviado para separação!');
-      setHasPicking(true);
-      onUpdate && onUpdate();
-    } else {
-      toast.error('Erro ao enviar para separação');
-    }
-  };
 
   const handleConfirmBudgetPayment = async () => {
     if (!budgetData) return;
@@ -1429,22 +1397,7 @@ export default function BudgetManager({ onBack, initialBudget, openNew, onUpdate
                 <span>Baixar Imagem</span>
               </button>
             </div>
-            {!hasPicking && (
-              <button
-                className="detail-action-btn picking"
-                onClick={() => {
-                  if (!budgetData?.payment_method || !budgetData?.payment_status) {
-                    toast.error('Preencha a forma e o status de pagamento antes de enviar para separação');
-                    return;
-                  }
-                  handleSendToPicking();
-                }}
-              >
-                <FaBoxOpen className="action-icon" size={18} />
-                <span>Enviar para Separação</span>
-              </button>
-            )}
-            {hasPicking && !hasRoute && (
+            {!hasRoute && (
               <button
                 className="detail-action-btn route"
                 onClick={() => {
@@ -1459,7 +1412,6 @@ export default function BudgetManager({ onBack, initialBudget, openNew, onUpdate
                 <span>Criar Rota</span>
               </button>
             )}
-            {hasPicking && <span className="badge-already">📦 Em Separação</span>}
             {hasRoute && <span className="badge-already">📍 Rota criada</span>}
             {(budgetData?.payment_status === 'a_receber' || budgetData?.payment_status === 'parcial') && budgetData?.status !== 'draft' && !hasRoute && (
               <button
@@ -2411,31 +2363,6 @@ export default function BudgetManager({ onBack, initialBudget, openNew, onUpdate
                 }}
               >
                 🖨️ Imprimir Romaneio
-              </button>
-              <button
-                className="post-sale-btn picking"
-                onClick={async () => {
-                  setPostSaleModal(null);
-                  const { data: existing } = await supabase
-                    .from('picking')
-                    .select('id')
-                    .eq('budget_id', postSaleModal.budget.id)
-                    .limit(1);
-                  if (!existing || existing.length === 0) {
-                    await createPickingOrder({
-                      budget_id: postSaleModal.budget.id,
-                      customer_name: postSaleModal.budget.customer_name,
-                      customer_code: postSaleModal.budget.customer_code,
-                      status: 'pending'
-                    });
-                    toast.success('Enviado para separação!');
-                  } else {
-                    toast('Já está em separação');
-                  }
-                  onApproved && onApproved();
-                }}
-              >
-                📦 Enviar para Separação
               </button>
               <button
                 ref={finalizarBtnRef}

@@ -1,25 +1,23 @@
 import { useState, useEffect, useRef } from 'react';
-import { FaClipboardList, FaPlus, FaBars, FaRegSquare, FaCheckSquare, FaBoxOpen, FaMapMarkerAlt, FaCircle, FaCheck } from 'react-icons/fa';
+import { FaClipboardList, FaPlus, FaBars, FaRegSquare, FaMapMarkerAlt, FaCircle, FaCheck, FaGlobe, FaStore } from 'react-icons/fa';
 import { useSearchParams } from 'react-router-dom';
 import toast from 'react-hot-toast';
 import {
   getTodayBudgets,
-  getTodayPickingOrders,
   getTodayDeliveryRoutes,
   getBudgetById
 } from '../services/managementService';
 import BudgetManager from './BudgetManager';
-import PickingManager from './PickingManager';
 import RouteManager from './RouteManager';
 import './ManagementDashboard.css';
 
 export default function ManagementDashboard() {
   const [searchParams, setSearchParams] = useSearchParams();
   const [budgets, setBudgets] = useState([]);
-  const [pickingOrders, setPickingOrders] = useState([]);
   const [routes, setRoutes] = useState([]);
   const [loading, setLoading] = useState(true);
   const [selectedBudget, setSelectedBudget] = useState(null);
+  const [newBudgetSaleType, setNewBudgetSaleType] = useState(null);
   const sectionRef = useRef(null);
 
   // Lê estado da URL
@@ -65,14 +63,12 @@ export default function ManagementDashboard() {
   const loadData = async () => {
     setLoading(true);
     try {
-      const [budgetsData, pickingData, routesData] = await Promise.all([
+      const [budgetsData, routesData] = await Promise.all([
         getTodayBudgets(),
-        getTodayPickingOrders(),
         getTodayDeliveryRoutes()
       ]);
 
       setBudgets(budgetsData);
-      setPickingOrders(pickingData);
       setRoutes(routesData);
     } catch (error) {
       console.error('Erro ao carregar dados:', error);
@@ -101,11 +97,12 @@ export default function ManagementDashboard() {
     requestAnimationFrame(step);
   };
 
-  const handleCardClick = (view, budget = null, isNew = false) => {
+  const handleCardClick = (view, budget = null, isNew = false, saleType = null) => {
     const params = { view };
     if (isNew) params.new = 'true';
     if (budget?.id) params.budgetId = budget.id;
     setSelectedBudget(budget);
+    setNewBudgetSaleType(saleType);
     setSearchParams(params, { replace: false });
     setTimeout(() => {
       if (sectionRef.current) {
@@ -124,8 +121,8 @@ export default function ManagementDashboard() {
 
   // Filtrar orçamentos por status
   const draftBudgets = budgets.filter(b => b.status === 'draft' || b.status === 'confirmed');
-  const pickingPending = pickingOrders.filter(p => p.status === 'pending');
-  const pickingPicked = pickingOrders.filter(p => p.status === 'picked');
+  const onlineBudgets = draftBudgets.filter(b => (b.sale_type || 'presencial') === 'online');
+  const presencialBudgets = draftBudgets.filter(b => (b.sale_type || 'presencial') === 'presencial');
   const routesNext = routes.filter(r => r.status === 'next');
   const routesInProgress = routes.filter(r => r.status === 'in_progress');
 
@@ -135,18 +132,24 @@ export default function ManagementDashboard() {
   return (
     <div className="management-dashboard">
       <div className="dashboard-cards">
-        {/* Card de Orçamentos */}
-        <div className="dashboard-card budgets-card" onClick={() => handleCardClick('budgets', null, true)}>
+        {/* Card de Orçamentos Online */}
+        <div className="dashboard-card budgets-online-card" onClick={() => handleCardClick('budgets', null, true, 'online')}>
           <div className="card-header">
             <h3>
-              <FaClipboardList className="icon" />
-              Orçamentos
+              <span className="card-title-text">
+                <FaClipboardList className="icon" />
+                Orçamentos
+              </span>
+              <span className="card-type-badge">
+                Online
+                <FaGlobe />
+              </span>
             </h3>
             <div className="card-header-actions">
               <button
                 className="btn-new"
-                onClick={(e) => { e.stopPropagation(); handleCardClick('budgets', null, true); }}
-                title="Novo orçamento"
+                onClick={(e) => { e.stopPropagation(); handleCardClick('budgets', null, true, 'online'); }}
+                title="Novo orçamento online"
               >
                 <FaPlus className="plus-icon" />
               </button>
@@ -162,21 +165,17 @@ export default function ManagementDashboard() {
           <div className="card-content">
             {loading ? (
               <div className="loading">Carregando...</div>
-            ) : draftBudgets.length === 0 ? (
+            ) : onlineBudgets.length === 0 ? (
               <div className="empty-state">Nenhum orçamento</div>
             ) : (
               <ul className="items-list">
-                {draftBudgets.map(budget => (
+                {onlineBudgets.map(budget => (
                   <li
                     key={budget.id}
                     className="item"
                     onClick={(e) => { e.stopPropagation(); handleCardClick('budgets', budget); }}
                   >
                     <FaRegSquare className="checkbox" />
-                    {budget.sale_type === 'online'
-                      ? <span className="item-badge-online">Online</span>
-                      : <span className="item-badge-presencial">Presencial</span>
-                    }
                     <span className="item-name" title={budget.customer_name}>{budget.customer_name}</span>
                     {budget.total != null && (
                       <span className="item-total">
@@ -196,39 +195,62 @@ export default function ManagementDashboard() {
           </div>
         </div>
 
-        {/* Card de Separação */}
-        <div className="dashboard-card picking-card" onClick={() => handleCardClick('picking')}>
+        {/* Card de Orçamentos Presencial */}
+        <div className="dashboard-card budgets-presencial-card" onClick={() => handleCardClick('budgets', null, true, 'presencial')}>
           <div className="card-header">
             <h3>
-              <FaBoxOpen className="icon" />
-              Separação
+              <span className="card-title-text">
+                <FaClipboardList className="icon" />
+                Orçamentos
+              </span>
+              <span className="card-type-badge">
+                Presencial
+                <FaStore />
+              </span>
             </h3>
+            <div className="card-header-actions">
+              <button
+                className="btn-new"
+                onClick={(e) => { e.stopPropagation(); handleCardClick('budgets', null, true, 'presencial'); }}
+                title="Novo orçamento presencial"
+              >
+                <FaPlus className="plus-icon" />
+              </button>
+              <button
+                className="btn-expand"
+                onClick={(e) => { e.stopPropagation(); handleCardClick('budgets', null, false); }}
+                title="Ver lista"
+              >
+                <FaBars />
+              </button>
+            </div>
           </div>
           <div className="card-content">
             {loading ? (
               <div className="loading">Carregando...</div>
-            ) : pickingOrders.length === 0 ? (
-              <div className="empty-state">Nenhuma separação</div>
+            ) : presencialBudgets.length === 0 ? (
+              <div className="empty-state">Nenhum orçamento</div>
             ) : (
               <ul className="items-list">
-                {pickingPicked.map(order => (
+                {presencialBudgets.map(budget => (
                   <li
-                    key={order.id}
-                    className="item picked"
-                    onClick={() => handleCardClick('picking')}
-                  >
-                    <FaCheckSquare className="checkbox checked" />
-                    <span className="item-name">{order.customer_name}</span>
-                  </li>
-                ))}
-                {pickingPending.map(order => (
-                  <li
-                    key={order.id}
+                    key={budget.id}
                     className="item"
-                    onClick={() => handleCardClick('picking')}
+                    onClick={(e) => { e.stopPropagation(); handleCardClick('budgets', budget); }}
                   >
                     <FaRegSquare className="checkbox" />
-                    <span className="item-name">{order.customer_name}</span>
+                    <span className="item-name" title={budget.customer_name}>{budget.customer_name}</span>
+                    {budget.total != null && (
+                      <span className="item-total">
+                        R$ {parseFloat(budget.total).toFixed(2).replace('.', ',')}
+                      </span>
+                    )}
+                    {budget.payment_status === 'a_receber' && (
+                      <span className="item-badge-areceber">A receber</span>
+                    )}
+                    {budget.payment_status === 'parcial' && (
+                      <span className="item-badge-parcial">Parcial</span>
+                    )}
                   </li>
                 ))}
               </ul>
@@ -264,7 +286,15 @@ export default function ManagementDashboard() {
                           className="item"
                           onClick={() => handleCardClick('routes')}
                         >
-                          <span className="item-name">{route.customer_name}</span>
+                          <span className="item-name">
+                            {route.customer_name}
+                            {route.budgets?.sale_type === 'online' && (
+                              <span style={{ marginLeft: '6px', background: 'rgba(30,90,180,0.5)', borderRadius: '20px', padding: '2px 7px', fontSize: '11px' }}>Online</span>
+                            )}
+                            {route.budgets?.sale_type === 'presencial' && (
+                              <span style={{ marginLeft: '6px', background: 'rgba(76,175,80,0.4)', borderRadius: '20px', padding: '2px 7px', fontSize: '11px' }}>Presencial</span>
+                            )}
+                          </span>
                           <span className="status-badge next">⏱️</span>
                         </li>
                       ))}
@@ -284,7 +314,15 @@ export default function ManagementDashboard() {
                           className="item"
                           onClick={() => handleCardClick('routes')}
                         >
-                          <span className="item-name">{route.customer_name}</span>
+                          <span className="item-name">
+                            {route.customer_name}
+                            {route.budgets?.sale_type === 'online' && (
+                              <span style={{ marginLeft: '6px', background: 'rgba(30,90,180,0.5)', borderRadius: '20px', padding: '2px 7px', fontSize: '11px' }}>Online</span>
+                            )}
+                            {route.budgets?.sale_type === 'presencial' && (
+                              <span style={{ marginLeft: '6px', background: 'rgba(76,175,80,0.4)', borderRadius: '20px', padding: '2px 7px', fontSize: '11px' }}>Presencial</span>
+                            )}
+                          </span>
                           <FaCheck className="status-badge success" />
                         </li>
                       ))}
@@ -302,19 +340,13 @@ export default function ManagementDashboard() {
         <div ref={sectionRef} className="inline-section">
           {activeView === 'budgets' && (
             <BudgetManager
-              key={`budgets-${openNewBudget}-${budgetId ?? 'new'}`}
+              key={`budgets-${openNewBudget}-${budgetId ?? 'new'}-${newBudgetSaleType ?? 'none'}`}
               onBack={handleBack}
               initialBudget={initialBudget}
               openNew={openNewBudget}
+              initialSaleType={newBudgetSaleType}
               onUpdate={loadData}
-              onApproved={() => handleCardClick('picking')}
-            />
-          )}
-          {activeView === 'picking' && (
-            <PickingManager
-              onBack={handleBack}
-              onUpdate={loadData}
-              onOpenBudget={(budgetId) => handleCardClick('budgets', { id: budgetId })}
+              onApproved={handleBack}
             />
           )}
           {activeView === 'routes' && (

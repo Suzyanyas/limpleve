@@ -825,7 +825,7 @@ export default function CashManager({ onBack, onNavigateToPending, mode = 'prese
                         <div style={{ borderLeft: '2px solid #333', paddingLeft: 8, marginBottom: 4 }}>
                           {despesaTxs.map((t, i) => (
                             <div key={t.id || i} style={{ display: 'flex', justifyContent: 'space-between', fontSize: '0.72rem', color: '#bbb', padding: '2px 0' }}>
-                              <span>{fmtHora(t.created_at)} · {t.categoria_despesa || t.observacao || 'Despesa'}</span>
+                              <span>{fmtHora(t.created_at)} · {t.observacao || t.categoria_despesa || 'Despesa'}</span>
                               <span style={{ whiteSpace: 'nowrap', marginLeft: 8 }}>−{formatCurrency(parseFloat(t.valor))}</span>
                             </div>
                           ))}

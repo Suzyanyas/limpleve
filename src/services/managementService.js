@@ -241,104 +241,6 @@ export const deleteBudgetItem = async (id) => {
 };
 
 // ============================================
-// SEPARAÇÃO
-// ============================================
-
-export const getAllPickingOrders = async () => {
-  try {
-    const { data, error } = await supabase
-      .from('picking')
-      .select('*')
-      .order('created_at', { ascending: false });
-    
-    if (error) throw error;
-    return data || [];
-  } catch (error) {
-    console.error('Erro ao buscar ordens de separação:', error);
-    return [];
-  }
-};
-
-export const createPickingOrder = async (pickingData) => {
-  try {
-    const { data, error } = await supabase
-      .from('picking')
-      .insert([pickingData])
-      .select();
-    
-    if (error) throw error;
-    return { success: true, data: data[0] };
-  } catch (error) {
-    console.error('Erro ao criar ordem de separação:', error);
-    return { success: false, error };
-  }
-};
-
-export const updatePickingStatus = async (id, status, pickedBy = null) => {
-  try {
-    const updateData = { status };
-    if (status === 'picked') {
-      updateData.picked_at = new Date().toISOString();
-      if (pickedBy) updateData.picked_by = pickedBy;
-    }
-
-    const { data, error } = await supabase
-      .from('picking')
-      .update(updateData)
-      .eq('id', id)
-      .select();
-    
-    if (error) throw error;
-    return { success: true, data: data[0] };
-  } catch (error) {
-    console.error('Erro ao atualizar status de separação:', error);
-    return { success: false, error };
-  }
-};
-
-export const deletePickingOrder = async (id) => {
-  try {
-    const { error } = await supabase
-      .from('picking')
-      .delete()
-      .eq('id', id);
-    if (error) throw error;
-    return { success: true };
-  } catch (error) {
-    console.error('Erro ao excluir separação:', error);
-    return { success: false, error };
-  }
-};
-
-export const updatePickingOrder = async (id, fields) => {
-  try {
-    const { data, error } = await supabase
-      .from('picking')
-      .update(fields)
-      .eq('id', id)
-      .select();
-    if (error) throw error;
-    return { success: true, data };
-  } catch (error) {
-    console.error('Erro ao atualizar separação:', error);
-    return { success: false, error };
-  }
-};
-
-export const createPickingAudit = async (auditData) => {
-  try {
-    const { error } = await supabase
-      .from('picking_audit')
-      .insert([auditData]);
-    if (error) throw error;
-    return { success: true };
-  } catch (error) {
-    console.error('Erro ao gravar auditoria:', error);
-    return { success: false, error };
-  }
-};
-
-// ============================================
 // ROTAS DE ENTREGA
 // ============================================
 
@@ -355,6 +257,7 @@ export const getAllDeliveryRoutes = async () => {
           payment_status,
           entrada_valor,
           delivery_address,
+          sale_type,
           budget_items (
             product_name,
             quantity,
@@ -783,24 +686,6 @@ export const getPendingPayments = async () => {
     console.error('Erro ao buscar pagamentos pendentes:', error);
     return [];
   }
-};
-
-export const getTodayPickingOrders = async () => {
-  const [allPicking, allRoutes] = await Promise.all([
-    getAllPickingOrders(),
-    getAllDeliveryRoutes()
-  ]);
-  const todayStart = getTodayStart();
-  // Remove separações cujo orçamento já foi entregue
-  const deliveredBudgetIds = new Set(
-    allRoutes
-      .filter(r => r.status === 'delivered')
-      .map(r => r.budget_id)
-      .filter(Boolean)
-  );
-  return allPicking
-    .filter(p => new Date(p.created_at) >= todayStart)
-    .filter(p => !p.budget_id || !deliveredBudgetIds.has(p.budget_id));
 };
 
 export const getTodayDeliveryRoutes = async () => {
