@@ -18,6 +18,7 @@ export default function ManagementDashboard() {
   const [loading, setLoading] = useState(true);
   const [selectedBudget, setSelectedBudget] = useState(null);
   const [newBudgetSaleType, setNewBudgetSaleType] = useState(null);
+  const [budgetNavCount, setBudgetNavCount] = useState(0);
   const sectionRef = useRef(null);
 
   // Lê estado da URL
@@ -103,6 +104,7 @@ export default function ManagementDashboard() {
     if (budget?.id) params.budgetId = budget.id;
     setSelectedBudget(budget);
     setNewBudgetSaleType(saleType);
+    if (view === 'budgets') setBudgetNavCount(c => c + 1);
     setSearchParams(params, { replace: false });
     setTimeout(() => {
       if (sectionRef.current) {
@@ -340,7 +342,7 @@ export default function ManagementDashboard() {
         <div ref={sectionRef} className="inline-section">
           {activeView === 'budgets' && (
             <BudgetManager
-              key={`budgets-${openNewBudget}-${budgetId ?? 'new'}-${newBudgetSaleType ?? 'none'}`}
+              key={`budgets-${openNewBudget}-${budgetId ?? 'new'}-${newBudgetSaleType ?? 'none'}-${budgetNavCount}`}
               onBack={handleBack}
               initialBudget={initialBudget}
               openNew={openNewBudget}
